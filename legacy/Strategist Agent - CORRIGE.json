@@ -1,0 +1,627 @@
+{
+  "name": "Strategist Agent - CORRIGE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "transcribeagent",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        592
+      ],
+      "id": "4d19cdec-270a-45a7-babb-ea0172aab3f7",
+      "name": "Webhook",
+      "webhookId": "a23646fb-019d-4b99-a82b-116a377a8adf"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\n\nconst now = new Date();\nconst parisDate = now.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' });\nconst parisTime = now.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris' });\n\nreturn [\n  {\n    json: {\n      id: `scribe_${Date.now()}`,\n      date: parisDate,\n      heure: parisTime,\n      timestamp_iso: body.timestamp_iso || now.toISOString(),\n      auteur: body.author || body.auteur || '',\n      projet: body.project || body.projet || '',\n      type_entree: body.entry_type || '',\n      source: body.source || '',\n      sujet: body.subject || '',\n      note_manuelle: body.note || '',\n      duration_seconds: body.duration_seconds || '',\n      timezone: body.timezone || 'Europe/Paris',\n      app_version: body.app_version || '',\n      secret_token: body.secret_token || '',\n      has_audio: !!$binary?.audio\n    },\n    binary: $binary\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        592
+      ],
+      "id": "efd4463e-32ae-4ab5-9657-90c7e76b189d",
+      "name": "Code : Normaliser payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "88def179-ca9b-4fb0-a58a-b72ea29c547a",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        592
+      ],
+      "id": "a2c052d1-2da0-4117-ab77-cfa628e5dfd9",
+      "name": "IF : vocal ou note écrite"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "audio",
+        "options": {
+          "language": "fr"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        464
+      ],
+      "id": "9a572cd0-fd59-4ce3-9306-0ee30521c1ed",
+      "name": "HTTP Request OpenAI Transcription",
+      "credentials": {
+        "openAiApi": {
+          "id": "81jBnNjS5ha59kO7",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      ...$json,\n      transcription_brute: $json.note_manuelle || $json.note || ''\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        736
+      ],
+      "id": "6bbf1733-2481-498d-8f75-bfd7f447d3e1",
+      "name": "Code — Préparer sortie note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Auteur : {{$json.auteur}}\nProjet sélectionné : {{$json.projet}}\nType d'entrée : {{$json.type_entree}}\nSujet manuel : {{$json.sujet}}\nSource : {{$json.source}}\n\nTranscription / note :\n{{$json.transcription_brute}}\n\nRéponds uniquement avec ce JSON :\n\n{\n  \"resume_ia\": \"\",\n  \"discussion_du_jour\": [],\n  \"points_evolution\": [\n    {\n      \"idee\": \"\",\n      \"auteur\": \"\",\n      \"impact\": \"\"\n    }\n  ],\n  \"decisions\": [],\n  \"actions\": [\n    {\n      \"tache\": \"\",\n      \"responsable\": \"\",\n      \"priorite\": \"\",\n      \"echeance\": \"\"\n    }\n  ],\n  \"points_non_clotures\": [],\n  \"concordance_idees\": \"\",\n  \"priorite\": \"basse|moyenne|haute\",\n  \"tags\": []\n}",
+        "options": {
+          "systemMessage": "Tu es le Scribe Direction d'une agence IA.\n\nTu reçois une transcription ou une note interne entre Allan et Alphim.\n\nTu dois transformer cette entrée en donnée exploitable pour l'avancement de l'entreprise.\n\nContexte utilisateurs :\n- Allan\n- Alphim\n\nProjets possibles :\n- SAAS Site Web\n- SAAS Voiture\n- Discussion mindset diverse\n\nTu dois extraire :\n1. Les sujets abordés.\n2. Les points d'évolution notés.\n3. Les décisions.\n4. Les actions à faire.\n5. Les points non clôturés.\n6. La concordance ou divergence d'idées si visible.\n7. La priorité.\n8. Les tags.\n\nNe rajoute pas d'information inventée.\nSi une information est floue, mets-la dans points_non_clotures.\nRéponds uniquement en JSON valide, sans markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        560
+      ],
+      "id": "d46dd34b-50de-4c8c-aa66-2858eaf1adc2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        768
+      ],
+      "id": "100db15a-c4e0-44bf-96f4-27d17803d9be",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "81jBnNjS5ha59kO7",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('Code — Préparer entrée agent').first().json;\n\nlet raw =\n  $json.output ||\n  $json.text ||\n  $json.message?.content ||\n  $json.choices?.[0]?.message?.content ||\n  '';\n\nraw = String(raw)\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(raw);\n} catch (error) {\n  parsed = {\n    resume_ia: raw || 'Analyse IA non parsée.',\n    discussion_du_jour: [],\n    points_evolution: [],\n    decisions: [],\n    actions: [],\n    points_non_clotures: ['La sortie IA n’était pas un JSON valide.'],\n    concordance_idees: '',\n    priorite: 'moyenne',\n    tags: ['parse_error']\n  };\n}\n\nfunction stringify(value) {\n  if (value === undefined || value === null) return '';\n  if (Array.isArray(value) || typeof value === 'object') {\n    return JSON.stringify(value, null, 2);\n  }\n  return String(value);\n}\n\nreturn [\n  {\n    json: {\n      id: base.id,\n      date: base.date,\n      heure: base.heure,\n      timestamp_iso: base.timestamp_iso,\n      auteur: base.auteur,\n      projet: base.projet,\n      type_entree: base.type_entree,\n      source: base.source,\n      sujet: base.sujet,\n      note_manuelle: base.note_manuelle,\n      transcription_brute: base.transcription_brute,\n      resume_ia: parsed.resume_ia || '',\n      discussion_du_jour: stringify(parsed.discussion_du_jour),\n      points_evolution: stringify(parsed.points_evolution),\n      decisions: stringify(parsed.decisions),\n      actions: stringify(parsed.actions),\n      points_non_clotures: stringify(parsed.points_non_clotures),\n      concordance_idees: parsed.concordance_idees || '',\n      priorite: parsed.priorite || 'moyenne',\n      tags: stringify(parsed.tags),\n      statut: 'À traiter',\n      app_version: base.app_version\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        560
+      ],
+      "id": "f1d214d9-3d99-450b-8b64-d4b640424d00",
+      "name": "Code : parser la réponse IA proprement"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Scribe_Entrees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "date": "={{ $json.date }}",
+            "heure": "={{ $json.heure }}",
+            "timestamp_iso": "={{ $json.timestamp_iso }}",
+            "auteur": "={{ $json.auteur }}",
+            "projet": "={{ $json.projet }}",
+            "type_entree": "={{ $json.type_entree }}",
+            "source": "={{ $json.source }}",
+            "sujet": "={{ $json.sujet }}",
+            "note_manuelle": "={{ $json.note_manuelle }}",
+            "transcription_brute": "={{ $json.transcription_brute }}",
+            "resume_ia": "={{ $json.resume_ia }}",
+            "discussion_du_jour": "={{ $json.discussion_du_jour }}",
+            "points_evolution": "={{ $json.points_evolution }}",
+            "decisions": "={{ $json.decisions }}",
+            "actions": "={{ $json.actions }}",
+            "points_non_clotures": "={{ $json.points_non_clotures }}",
+            "concordance_idees": "={{ $json.concordance_idees }}",
+            "priorite": "={{ $json.priorite }}",
+            "tags": "={{ $json.tags }}",
+            "statut": "={{ $json.statut }}",
+            "app_version": "={{ $json.app_version }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "heure",
+              "displayName": "heure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp_iso",
+              "displayName": "timestamp_iso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "auteur",
+              "displayName": "auteur",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "projet",
+              "displayName": "projet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type_entree",
+              "displayName": "type_entree",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sujet",
+              "displayName": "sujet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note_manuelle",
+              "displayName": "note_manuelle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcription_brute",
+              "displayName": "transcription_brute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_ia",
+              "displayName": "resume_ia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discussion_du_jour",
+              "displayName": "discussion_du_jour",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "points_evolution",
+              "displayName": "points_evolution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decisions",
+              "displayName": "decisions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "actions",
+              "displayName": "actions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "points_non_clotures",
+              "displayName": "points_non_clotures",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "concordance_idees",
+              "displayName": "concordance_idees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priorite",
+              "displayName": "priorite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "statut",
+              "displayName": "statut",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "app_version",
+              "displayName": "app_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1232,
+        560
+      ],
+      "id": "8955a063-8865-4670-a5a6-b63f3a94bcb8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('Code : Normaliser payload').first().json;\n\nconst transcription =\n  $json.text ||\n  $json.transcription ||\n  $json.transcription_brute ||\n  base.note_manuelle ||\n  '';\n\nreturn [\n  {\n    json: {\n      ...base,\n      source: base.source || $json.source || '',\n      transcription_brute: transcription\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        576
+      ],
+      "id": "12c53714-d0ce-4763-ae24-217e61109a90",
+      "name": "Code — Préparer entrée agent"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv852345.hstgr.cloud",
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            "content-length": "733926",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "fr-FR,fr;q=0.9,en-FR;q=0.8,en;q=0.7,en-US;q=0.6",
+            "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryWBxgpaBzSBmdXdiO",
+            "origin": "https://plionsunclassique.netlify.app",
+            "priority": "u=1, i",
+            "referer": "https://plionsunclassique.netlify.app/",
+            "sec-ch-ua": "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?1",
+            "sec-ch-ua-platform": "\"Android\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n.srv852345.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "61859be148eb",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "author": "Allan",
+            "project": "SAAS Voiture",
+            "entry_type": "Action à faire",
+            "subject": "Finalisation du rapport html pour rdv zinnedine",
+            "source": "audio",
+            "timestamp_iso": "2026-05-29T19:14:58.770Z",
+            "timezone": "Europe/Paris",
+            "app_version": "scribe-ia-v1.6-memory-cockpit",
+            "secret_token": "",
+            "note": "",
+            "duration_seconds": "49"
+          },
+          "webhookUrl": "https://n8n.srv852345.hstgr.cloud/webhook/transcribeagent",
+          "executionMode": "production"
+        },
+        "binary": {
+          "audio": {
+            "mimeType": "audio/webm;codecs=opus",
+            "fileType": "audio",
+            "fileExtension": "weba",
+            "data": "filesystem-v2",
+            "fileName": "scribe-1780082098771.webm",
+            "id": "filesystem-v2:workflows/tqKOr3Lew2VeUx6I/executions/temp/binary_data/9469bb51-2ab1-43bd-802e-151133543a28",
+            "fileSize": "733 kB",
+            "bytes": 732506
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code : Normaliser payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code : Normaliser payload": {
+      "main": [
+        [
+          {
+            "node": "IF : vocal ou note écrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF : vocal ou note écrite": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request OpenAI Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code — Préparer sortie note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request OpenAI Transcription": {
+      "main": [
+        [
+          {
+            "node": "Code — Préparer entrée agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code : parser la réponse IA proprement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code : parser la réponse IA proprement": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Préparer sortie note": {
+      "main": [
+        [
+          {
+            "node": "Code — Préparer entrée agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Préparer entrée agent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "96789c66-f9b2-4fdb-9bed-f62d2e882464",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fdf93ea59647b283a678642b32ef977bddb84e357b4f9b414526e54000966a4"
+  },
+  "id": "tqKOr3Lew2VeUx6I",
+  "tags": []
+}

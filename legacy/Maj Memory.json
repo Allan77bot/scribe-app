@@ -1,0 +1,861 @@
+{
+  "name": "Maj Memory",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "memory-decision",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "73fa8c41-6277-458c-8e5c-0e08ffc9ed62",
+      "name": "Webhook",
+      "webhookId": "2198652c-d240-4103-b770-4782c73f12f9"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Suggestion mémoire refusée.\",\n  \"proposal_id\": \"={{ $('Code — Retrouver proposition mémoire').item.json.id }}\",\n  \"decision\": \"rejected\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1104,
+        128
+      ],
+      "id": "6d99f5ee-7b2f-4be9-b5bd-7dc8f94d36d2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\n\nreturn [\n  {\n    json: {\n      proposal_id: body.proposal_id || body.id || '',\n      decision: String(body.decision || '').toLowerCase(),\n      validated_by: body.validated_by || body.author || '',\n      secret_token: body.secret_token || '',\n      received_at: new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2c6b770c-7dee-4797-a9f0-bf6cfd2b372c",
+      "name": "Code — Normaliser décision mémoire"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 243045417,
+          "mode": "list",
+          "cachedResultName": "Memoire_MAJ_Proposees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=243045417"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $json.proposal_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6be28a76-e3ae-4122-a5a9-5a63bfec2199",
+      "name": "Code — Retrouver proposition mémoire",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2829bc26-7e7f-4bed-927f-81a8421657f0",
+              "leftValue": "={{ $('Code — Normaliser décision mémoire').item.json.decision }}",
+              "rightValue": "approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2a2d8a13-b7a7-4fbd-a9ed-7e2a9c65905b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 243045417,
+          "mode": "list",
+          "cachedResultName": "Memoire_MAJ_Proposees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=243045417"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "decision": "approved",
+            "validated_by": "={{ $('Code — Normaliser décision mémoire').item.json.validated_by }}",
+            "applique_le": "={{ $('Code — Normaliser décision mémoire').item.json.received_at }}",
+            "statut": "Approuvé"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "projet",
+              "displayName": "projet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "champ_a_modifier",
+              "displayName": "champ_a_modifier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ancienne_valeur_resume",
+              "displayName": "ancienne_valeur_resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nouvelle_valeur_proposee",
+              "displayName": "nouvelle_valeur_proposee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "raison",
+              "displayName": "raison",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "niveau_confiance",
+              "displayName": "niveau_confiance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "validation_humaine_recommandee",
+              "displayName": "validation_humaine_recommandee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "statut",
+              "displayName": "statut",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_by",
+              "displayName": "validated_by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_recap_date",
+              "displayName": "source_recap_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "applique_le",
+              "displayName": "applique_le",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        -128
+      ],
+      "id": "9db83c75-ba68-493e-8c62-f196039f91be",
+      "name": "Update Validé",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 243045417,
+          "mode": "list",
+          "cachedResultName": "Memoire_MAJ_Proposees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=243045417"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "decision": "rejected",
+            "validated_by": "={{ $('Code — Normaliser décision mémoire').item.json.validated_by }}",
+            "applique_le": "={{ $('Code — Normaliser décision mémoire').item.json.received_at }}",
+            "statut": "Refusé"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "projet",
+              "displayName": "projet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "champ_a_modifier",
+              "displayName": "champ_a_modifier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ancienne_valeur_resume",
+              "displayName": "ancienne_valeur_resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nouvelle_valeur_proposee",
+              "displayName": "nouvelle_valeur_proposee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "raison",
+              "displayName": "raison",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "niveau_confiance",
+              "displayName": "niveau_confiance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "validation_humaine_recommandee",
+              "displayName": "validation_humaine_recommandee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "statut",
+              "displayName": "statut",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_by",
+              "displayName": "validated_by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_recap_date",
+              "displayName": "source_recap_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "applique_le",
+              "displayName": "applique_le",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        128
+      ],
+      "id": "317814cb-f708-4557-b597-712e3c43f356",
+      "name": "Update Refusé",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1940925434,
+          "mode": "list",
+          "cachedResultName": "Projets_Memoire",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=1940925434"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        -128
+      ],
+      "id": "6ac14e10-beb0-4b73-93a9-85cbb4bc2bfc",
+      "name": "Google Sheets — Lire Projets_Memoire",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const proposal = $('Code — Retrouver proposition mémoire').first().json;\nconst projetRow = $input.first()?.json || {};\n\nfunction clean(value) {\n  return String(value ?? '').trim();\n}\n\nconst now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });\n\nconst champsAutorises = [\n  'objectif_actuel',\n  'stade_actuel',\n  'strategie_actuelle',\n  'decisions_cles',\n  'blocages_connus',\n  'prochaines_priorites',\n  'dernier_resume'\n];\n\nconst champ = clean(proposal.champ_a_modifier);\nconst nouvelleValeur = clean(proposal.nouvelle_valeur_proposee);\n\nif (!projetRow.projet) {\n  return [\n    {\n      json: {\n        error: true,\n        error_type: 'project_not_found',\n        message: `Projet introuvable dans Projets_Memoire : ${proposal.projet}`,\n        proposal_id: proposal.proposal_id\n      }\n    }\n  ];\n}\n\nif (!champsAutorises.includes(champ)) {\n  return [\n    {\n      json: {\n        error: true,\n        error_type: 'unauthorized_field',\n        message: `Champ non autorisé : ${champ}`,\n        proposal_id: proposal.proposal_id\n      }\n    }\n  ];\n}\n\nif (!nouvelleValeur) {\n  return [\n    {\n      json: {\n        error: true,\n        error_type: 'empty_value',\n        message: 'La nouvelle valeur proposée est vide.',\n        proposal_id: proposal.proposal_id\n      }\n    }\n  ];\n}\n\nconst updatedRow = {\n  ...projetRow,\n  date_derniere_maj: now\n};\n\nconst ancienneValeur = clean(projetRow[champ]);\n\nif (champ === 'dernier_resume') {\n  updatedRow[champ] = nouvelleValeur;\n} else if (!ancienneValeur) {\n  updatedRow[champ] = nouvelleValeur;\n} else {\n  updatedRow[champ] = `${ancienneValeur}\\n\\n[Mise à jour ${now} — validée par ${proposal.validated_by || 'non précisé'}]\\n${nouvelleValeur}`;\n}\n\nreturn [\n  {\n    json: {\n      ...updatedRow,\n      error: false,\n      _proposal_id: proposal.proposal_id,\n      _validated_by: proposal.validated_by,\n      _decision: proposal.decision,\n      _updated_field: champ,\n      _updated_value: nouvelleValeur,\n      _applique_le: now\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -128
+      ],
+      "id": "e85d0cd1-09a1-4b86-a814-f32c6af4c0ec",
+      "name": "Code — Préparer update Projets_Memoire"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1940925434,
+          "mode": "list",
+          "cachedResultName": "Projets_Memoire",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=1940925434"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "projet": "={{ $json.projet }}",
+            "objectif_actuel": "={{ $json.objectif_actuel }}",
+            "stade_actuel": "={{ $json.stade_actuel }}",
+            "stratégie_actuelle": "={{ $json['stratégie_actuelle'] }}",
+            "decisions_cles": "={{ $json.decisions_cles }}",
+            "type_entree": "={{ $json.type_entree }}",
+            "blocages_connus": "={{ $json.blocages_connus }}",
+            "prochaines_priorites": "={{ $json.prochaines_priorites }}",
+            "dernier_resume": "={{ $json.dernier_resume }}",
+            "date_derniere_maj": "={{ $json.date_derniere_maj }}"
+          },
+          "matchingColumns": [
+            "projet"
+          ],
+          "schema": [
+            {
+              "id": "projet",
+              "displayName": "projet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "objectif_actuel",
+              "displayName": "objectif_actuel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stade_actuel",
+              "displayName": "stade_actuel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stratégie_actuelle",
+              "displayName": "stratégie_actuelle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decisions_cles",
+              "displayName": "decisions_cles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type_entree",
+              "displayName": "type_entree",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "blocages_connus",
+              "displayName": "blocages_connus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prochaines_priorites",
+              "displayName": "prochaines_priorites",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dernier_resume",
+              "displayName": "dernier_resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_derniere_maj",
+              "displayName": "date_derniere_maj",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1488,
+        -128
+      ],
+      "id": "ac82f72f-69c4-4310-927e-79e4c3b312ae",
+      "name": "Update Projets_Memoire",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Suggestion mémoire acceptée.\",\n  \"proposal_id\": \"={{ $('Code — Retrouver proposition mémoire').item.json.id }}\",\n  \"decision\": \"accepted\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        -128
+      ],
+      "id": "efabdc87-4b2e-4cb2-b861-c1c2f6423821",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code — Normaliser décision mémoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Normaliser décision mémoire": {
+      "main": [
+        [
+          {
+            "node": "Code — Retrouver proposition mémoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Retrouver proposition mémoire": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update Validé",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Refusé",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Validé": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets — Lire Projets_Memoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Refusé": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets — Lire Projets_Memoire": {
+      "main": [
+        [
+          {
+            "node": "Code — Préparer update Projets_Memoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Préparer update Projets_Memoire": {
+      "main": [
+        [
+          {
+            "node": "Update Projets_Memoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Projets_Memoire": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "17f768b6-37e1-4274-abd8-9a924d585177",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fdf93ea59647b283a678642b32ef977bddb84e357b4f9b414526e54000966a4"
+  },
+  "id": "iT0r2yZRQafA66DH",
+  "tags": []
+}

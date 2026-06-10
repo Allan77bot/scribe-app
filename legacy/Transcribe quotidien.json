@@ -1,0 +1,542 @@
+{
+  "name": "Transcribe quotidien",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d53e1e68-374f-4c69-b081-5ed62e3402a0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Scribe_Entrees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "date",
+              "lookupValue": "={{ $now.setZone('Europe/Paris').toFormat('dd/MM/yyyy') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e9c7a7a1-ac46-43ee-81ae-904aed34c228",
+      "name": "Google Sheets : lire Scribe_Entrees",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(item => item.json);\n\nconst today = $now.setZone('Europe/Paris').toFormat('dd/MM/yyyy');\n\nreturn [\n  {\n    json: {\n      date: today,\n      nombre_entrees: rows.length,\n      entrees_du_jour: rows\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "38f53a01-2667-4364-9718-0843bdfb3916",
+      "name": "Code — Préparer entrées du jour"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1940925434,
+          "mode": "list",
+          "cachedResultName": "Projets_Memoire",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=1940925434"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        0
+      ],
+      "id": "d6ba74bb-2599-43ba-a4b4-39c9aa01af09",
+      "name": "Google Sheets : lire Projets_Memoire",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Date du jour :\n{{$json.date}}\n\nNombre d’entrées du jour :\n{{$json.nombre_entrees}}\n\nEntrées du jour :\n{{$json.entrees_du_jour_json}}\n\nMémoire historique actuelle des projets :\n{{$json.memoire_projets_json}}\n\nMission :\nGénère le récap quotidien de direction en JSON strict.\n\nTu dois analyser les entrées du jour par rapport à la mémoire historique des projets.\n\nImportant :\n- Une simple phrase incomplète, une discussion floue ou une idée non confirmée ne doit pas modifier la mémoire projet.\n- Une mise à jour mémoire doit être proposée uniquement si une entrée du jour apporte une information claire, nouvelle, exploitable et utile pour l’avancement du projet.\n- Les suggestions mémoire ne doivent pas être appliquées directement. Elles seront validées ensuite par Allan ou Alphim dans l’application.\n- La mémoire projet doit rester stable, stratégique et propre.\n\nChamps autorisés pour maj_memoire_proposees :\n- objectif_actuel\n- stade_actuel\n- strategie_actuelle\n- decisions_cles\n- blocages_connus\n- prochaines_priorites\n- dernier_resume\n\nRègles pour maj_memoire_proposees :\n- Ne propose aucune mise à jour mémoire si la journée n’apporte rien de concret.\n- Ne propose pas de mise à jour mémoire pour une transcription incomplète.\n- Ne propose pas de mise à jour mémoire pour une simple hypothèse faible.\n- Si une vraie décision est prise, tu peux proposer une mise à jour de decisions_cles.\n- Si une nouvelle difficulté est identifiée, tu peux proposer une mise à jour de blocages_connus.\n- Si une nouvelle action stratégique devient prioritaire, tu peux proposer une mise à jour de prochaines_priorites.\n- Si le projet avance clairement de phase, tu peux proposer une mise à jour de stade_actuel.\n- Si la vision ou le modèle du projet évolue, tu peux proposer une mise à jour de strategie_actuelle.\n- La nouvelle valeur proposée doit être prête à être ajoutée dans le tableau Projets_Memoire.\n- Pour objectif_actuel, strategie_actuelle et decisions_cles, validation_humaine_recommandee doit toujours être true.\n\nRéponds uniquement avec ce JSON strict :\n\n{\n  \"objet_mail\": \"\",\n  \"titre\": \"\",\n  \"date\": \"\",\n  \"resume_executif\": \"\",\n  \"discussions_du_jour\": [\n    {\n      \"sujet\": \"\",\n      \"projet\": \"\",\n      \"auteurs_impliques\": [],\n      \"resume\": \"\"\n    }\n  ],\n  \"points_evolution_notes\": [\n    {\n      \"projet\": \"\",\n      \"idee\": \"\",\n      \"auteur\": \"\",\n      \"impact_potentiel\": \"\",\n      \"importance\": \"faible|moyenne|haute\"\n    }\n  ],\n  \"concordance_idees\": [\n    {\n      \"projet\": \"\",\n      \"analyse\": \"\",\n      \"alignement_avec_objectif\": \"faible|moyen|fort\",\n      \"suggestion_direction\": \"\"\n    }\n  ],\n  \"points_non_clotures\": [\n    {\n      \"projet\": \"\",\n      \"point\": \"\",\n      \"raison\": \"\",\n      \"prochaine_action_recommandee\": \"\"\n    }\n  ],\n  \"actions_prioritaires\": [\n    {\n      \"tache\": \"\",\n      \"responsable\": \"\",\n      \"projet\": \"\",\n      \"priorite\": \"basse|moyenne|haute\",\n      \"echeance_suggeree\": \"\"\n    }\n  ],\n  \"maj_memoire_proposees\": [\n    {\n      \"projet\": \"\",\n      \"champ_a_modifier\": \"\",\n      \"ancienne_valeur_resume\": \"\",\n      \"nouvelle_valeur_proposee\": \"\",\n      \"raison\": \"\",\n      \"niveau_confiance\": \"faible|moyen|haut\",\n      \"validation_humaine_recommandee\": true\n    }\n  ],\n  \"conclusion_direction\": \"\"\n}",
+        "options": {
+          "systemMessage": "Tu es le Directeur Opérationnel IA d’une agence.\n\nTu analyses les discussions vocales et notes écrites du jour entre Allan et Alphim.\n\nTa mission est de produire un récap quotidien clair, structuré et exploitable pour piloter l’avancement de l’entreprise.\n\nTu dois t’appuyer sur :\n1. Les entrées du jour.\n2. La mémoire historique des projets.\n3. Les objectifs, stratégies, blocages et priorités actuelles des projets.\n\nProjets suivis :\n- SAAS Site Web\n- SAAS Voiture\n- Discussion mindset diverse\n\nRègles importantes :\n- Ne jamais inventer une décision.\n- Si une idée est floue, la mettre dans les points non clôturés.\n- Distinguer une simple discussion d’une vraie décision.\n- Distinguer une idée intéressante d’une action concrète.\n- Toujours relier les discussions aux objectifs actuels des projets quand c’est possible.\n- Si aucune entrée n’est présente, produire un récap vide mais propre.\n- Ne réponds jamais en markdown.\n- Réponds uniquement en JSON valide.\n\n\nPour maj_memoire_proposees :\n- Ne propose une mise à jour mémoire que si l’entrée du jour apporte une information nouvelle, claire et exploitable.\n- Ne propose pas de mise à jour mémoire pour une transcription incomplète, une phrase floue ou une simple discussion sans décision.\n- Les champs autorisés sont uniquement :\nobjectif_actuel, stade_actuel, strategie_actuelle, decisions_cles, blocages_connus, prochaines_priorites, dernier_resume.\n- Si la mise à jour concerne objectif_actuel, strategie_actuelle ou decisions_cles, validation_humaine_recommandee doit toujours être true.\n- La nouvelle valeur proposée doit être prête à être ajoutée dans la mémoire projet."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "01cbca70-a34e-4047-aaec-8bc22d848e90",
+      "name": "IA : générer le mail",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4.5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        144
+      ],
+      "id": "c8f3dc03-f620-4ec4-ada3-82b1e06873c4",
+      "name": "OpenRouter Chat Model",
+      "retryOnFail": true,
+      "credentials": {
+        "openRouterApi": {
+          "id": "zkqa0wrXudqVYICn",
+          "name": "Allan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const recapNodeName = 'Code — Préparer entrées du jour';\nconst memoireNodeName = 'Google Sheets : lire Projets_Memoire';\n\nconst recap = $(recapNodeName).first().json;\n\nconst memoireProjets = $(memoireNodeName)\n  .all()\n  .map(item => item.json)\n  .filter(row => row.projet);\n\nreturn [\n  {\n    json: {\n      date: recap.date,\n      nombre_entrees: recap.nombre_entrees || 0,\n      entrees_du_jour: recap.entrees_du_jour || [],\n      memoire_projets: memoireProjets,\n      entrees_du_jour_json: JSON.stringify(recap.entrees_du_jour || [], null, 2),\n      memoire_projets_json: JSON.stringify(memoireProjets, null, 2)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "d7d93ad2-0da6-4721-93a9-b78b96365b1c",
+      "name": "Code — Construire contexte récap"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw =\n  $json.output ||\n  $json.text ||\n  $json.message?.content ||\n  $json.choices?.[0]?.message?.content ||\n  $json.response ||\n  '';\n\nraw = String(raw)\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(raw);\n} catch (error) {\n  parsed = {\n    objet_mail: `Récap Direction IA — ${$('Code — Construire contexte récap').first().json.date}`,\n    titre: `Récap Direction IA — ${$('Code — Construire contexte récap').first().json.date}`,\n    date: $('Code — Construire contexte récap').first().json.date,\n    resume_executif: raw || \"Le récap IA n’a pas pu être parsé correctement.\",\n    discussions_du_jour: [],\n    points_evolution_notes: [],\n    concordance_idees: [],\n    points_non_clotures: [\n      {\n        projet: \"Global\",\n        point: \"Erreur de parsing JSON\",\n        raison: \"La réponse IA n’était pas un JSON valide.\",\n        prochaine_action_recommandee: \"Vérifier le prompt ou relancer le workflow.\"\n      }\n    ],\n    actions_prioritaires: [],\n    maj_memoire_proposees: [],\n    conclusion_direction: \"Récap généré avec erreur de format.\"\n  };\n}\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "cfa3cac4-7acc-4d3e-95a5-a5976a1f6c42",
+      "name": "Code — Parser récap IA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const recap = $json;\n\nfunction escapeHtml(value) {\n  return String(value ?? '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction safeArray(value) {\n  return Array.isArray(value) ? value : [];\n}\n\nfunction priorityColor(priority) {\n  const p = String(priority || '').toLowerCase();\n\n  if (p === 'haute' || p === 'haut') {\n    return {\n      bg: '#FEE2E2',\n      color: '#991B1B',\n      border: '#FCA5A5',\n      label: 'Haute'\n    };\n  }\n\n  if (p === 'moyenne' || p === 'moyen') {\n    return {\n      bg: '#FEF3C7',\n      color: '#92400E',\n      border: '#FCD34D',\n      label: 'Moyenne'\n    };\n  }\n\n  return {\n    bg: '#DBEAFE',\n    color: '#1E40AF',\n    border: '#93C5FD',\n    label: 'Basse'\n  };\n}\n\nfunction alignmentBadge(value) {\n  const v = String(value || '').toLowerCase();\n\n  if (v === 'fort') {\n    return `<span style=\"display:inline-block;padding:6px 10px;border-radius:999px;background:#DCFCE7;color:#166534;font-size:12px;font-weight:700;\">Alignement fort</span>`;\n  }\n\n  if (v === 'moyen') {\n    return `<span style=\"display:inline-block;padding:6px 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-size:12px;font-weight:700;\">Alignement moyen</span>`;\n  }\n\n  return `<span style=\"display:inline-block;padding:6px 10px;border-radius:999px;background:#FEE2E2;color:#991B1B;font-size:12px;font-weight:700;\">Alignement faible</span>`;\n}\n\nfunction projectBadge(project) {\n  return `<span style=\"display:inline-block;padding:6px 10px;border-radius:999px;background:#EFF6FF;color:#1D4ED8;font-size:12px;font-weight:700;border:1px solid #BFDBFE;\">${escapeHtml(project || 'Global')}</span>`;\n}\n\nfunction emptyBlock(text = 'Aucun élément relevé.') {\n  return `\n    <tr>\n      <td style=\"padding:14px 16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;color:#64748B;font-size:14px;\">\n        ${escapeHtml(text)}\n      </td>\n    </tr>\n  `;\n}\n\nfunction sectionTitle(title, subtitle) {\n  return `\n    <tr>\n      <td style=\"padding:28px 0 12px 0;\">\n        <h2 style=\"margin:0;color:#0F172A;font-size:20px;line-height:1.3;font-weight:800;\">\n          ${escapeHtml(title)}\n        </h2>\n        ${subtitle ? `\n          <p style=\"margin:6px 0 0 0;color:#64748B;font-size:14px;line-height:1.5;\">\n            ${escapeHtml(subtitle)}\n          </p>\n        ` : ''}\n      </td>\n    </tr>\n  `;\n}\n\nconst discussions = safeArray(recap.discussions_du_jour);\nconst evolutions = safeArray(recap.points_evolution_notes);\nconst concordances = safeArray(recap.concordance_idees);\nconst nonClotures = safeArray(recap.points_non_clotures);\nconst actions = safeArray(recap.actions_prioritaires);\nconst majMemoire = safeArray(recap.maj_memoire_proposees);\n\nconst discussionsHtml = discussions.length\n  ? discussions.map(item => `\n      <tr>\n        <td style=\"padding:16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:16px;\">\n          <div style=\"margin-bottom:10px;\">\n            ${projectBadge(item.projet)}\n          </div>\n          <h3 style=\"margin:0 0 8px 0;color:#0F172A;font-size:16px;line-height:1.4;font-weight:800;\">\n            ${escapeHtml(item.sujet)}\n          </h3>\n          <p style=\"margin:0 0 10px 0;color:#334155;font-size:14px;line-height:1.6;\">\n            ${escapeHtml(item.resume)}\n          </p>\n          <p style=\"margin:0;color:#64748B;font-size:13px;line-height:1.5;\">\n            Auteur(s) : ${escapeHtml(safeArray(item.auteurs_impliques).join(', ') || 'Non précisé')}\n          </p>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;\"></td></tr>\n    `).join('')\n  : emptyBlock('Aucune discussion exploitable relevée aujourd’hui.');\n\nconst evolutionsHtml = evolutions.length\n  ? evolutions.map(item => {\n      const badge = priorityColor(item.importance);\n      return `\n        <tr>\n          <td style=\"padding:16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:16px;\">\n            <div style=\"margin-bottom:10px;\">\n              ${projectBadge(item.projet)}\n              <span style=\"display:inline-block;margin-left:6px;padding:6px 10px;border-radius:999px;background:${badge.bg};color:${badge.color};border:1px solid ${badge.border};font-size:12px;font-weight:700;\">\n                Importance ${escapeHtml(badge.label)}\n              </span>\n            </div>\n            <p style=\"margin:0 0 8px 0;color:#0F172A;font-size:15px;line-height:1.6;font-weight:700;\">\n              ${escapeHtml(item.idee)}\n            </p>\n            <p style=\"margin:0 0 6px 0;color:#334155;font-size:14px;line-height:1.6;\">\n              Impact potentiel : ${escapeHtml(item.impact_potentiel)}\n            </p>\n            <p style=\"margin:0;color:#64748B;font-size:13px;\">\n              Évoqué par : ${escapeHtml(item.auteur || 'Non précisé')}\n            </p>\n          </td>\n        </tr>\n        <tr><td style=\"height:10px;\"></td></tr>\n      `;\n    }).join('')\n  : emptyBlock('Aucun point d’évolution notable détecté.');\n\nconst concordanceHtml = concordances.length\n  ? concordances.map(item => `\n      <tr>\n        <td style=\"padding:16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:16px;\">\n          <div style=\"margin-bottom:10px;\">\n            ${projectBadge(item.projet)}\n            <span style=\"margin-left:6px;\">${alignmentBadge(item.alignement_avec_objectif)}</span>\n          </div>\n          <p style=\"margin:0 0 10px 0;color:#334155;font-size:14px;line-height:1.6;\">\n            ${escapeHtml(item.analyse)}\n          </p>\n          <div style=\"padding:12px 14px;border-radius:12px;background:#EFF6FF;border:1px solid #BFDBFE;\">\n            <p style=\"margin:0;color:#1E3A8A;font-size:14px;line-height:1.6;font-weight:700;\">\n              Suggestion direction :\n            </p>\n            <p style=\"margin:4px 0 0 0;color:#1E40AF;font-size:14px;line-height:1.6;\">\n              ${escapeHtml(item.suggestion_direction)}\n            </p>\n          </div>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;\"></td></tr>\n    `).join('')\n  : emptyBlock('Aucune concordance stratégique significative détectée.');\n\nconst nonCloturesHtml = nonClotures.length\n  ? nonClotures.map(item => `\n      <tr>\n        <td style=\"padding:16px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:16px;\">\n          <div style=\"margin-bottom:10px;\">\n            ${projectBadge(item.projet)}\n          </div>\n          <h3 style=\"margin:0 0 8px 0;color:#9A3412;font-size:15px;line-height:1.4;font-weight:800;\">\n            ${escapeHtml(item.point)}\n          </h3>\n          <p style=\"margin:0 0 8px 0;color:#7C2D12;font-size:14px;line-height:1.6;\">\n            Raison : ${escapeHtml(item.raison)}\n          </p>\n          <p style=\"margin:0;color:#9A3412;font-size:14px;line-height:1.6;font-weight:700;\">\n            Prochaine action : ${escapeHtml(item.prochaine_action_recommandee)}\n          </p>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;\"></td></tr>\n    `).join('')\n  : emptyBlock('Aucun point non clôturé détecté.');\n\nconst actionsHtml = actions.length\n  ? actions.map(item => {\n      const badge = priorityColor(item.priorite);\n      return `\n        <tr>\n          <td style=\"padding:16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:16px;\">\n            <div style=\"margin-bottom:10px;\">\n              ${projectBadge(item.projet)}\n              <span style=\"display:inline-block;margin-left:6px;padding:6px 10px;border-radius:999px;background:${badge.bg};color:${badge.color};border:1px solid ${badge.border};font-size:12px;font-weight:700;\">\n                Priorité ${escapeHtml(badge.label)}\n              </span>\n            </div>\n            <p style=\"margin:0 0 8px 0;color:#0F172A;font-size:15px;line-height:1.6;font-weight:800;\">\n              ${escapeHtml(item.tache)}\n            </p>\n            <p style=\"margin:0;color:#475569;font-size:14px;line-height:1.6;\">\n              Responsable : <strong>${escapeHtml(item.responsable || 'Non attribué')}</strong><br>\n              Échéance suggérée : ${escapeHtml(item.echeance_suggeree || 'Non précisée')}\n            </p>\n          </td>\n        </tr>\n        <tr><td style=\"height:10px;\"></td></tr>\n      `;\n    }).join('')\n  : emptyBlock('Aucune action prioritaire détectée.');\n\nconst majMemoireHtml = majMemoire.length\n  ? majMemoire.map(item => `\n      <tr>\n        <td style=\"padding:16px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:16px;\">\n          <div style=\"margin-bottom:10px;\">\n            ${projectBadge(item.projet)}\n            <span style=\"display:inline-block;margin-left:6px;padding:6px 10px;border-radius:999px;background:#F1F5F9;color:#334155;font-size:12px;font-weight:700;\">\n              Confiance : ${escapeHtml(item.niveau_confiance || 'Non précisé')}\n            </span>\n          </div>\n          <p style=\"margin:0 0 8px 0;color:#0F172A;font-size:14px;line-height:1.6;\">\n            Champ proposé : <strong>${escapeHtml(item.champ_a_modifier)}</strong>\n          </p>\n          <p style=\"margin:0 0 8px 0;color:#475569;font-size:14px;line-height:1.6;\">\n            Nouvelle valeur proposée : ${escapeHtml(item.nouvelle_valeur_proposee)}\n          </p>\n          <p style=\"margin:0;color:#64748B;font-size:13px;line-height:1.5;\">\n            Raison : ${escapeHtml(item.raison)}\n          </p>\n        </td>\n      </tr>\n      <tr><td style=\"height:10px;\"></td></tr>\n    `).join('')\n  : emptyBlock('Aucune mise à jour mémoire proposée.');\n\nconst subject = recap.objet_mail || `Récap Direction IA — ${recap.date || ''}`;\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>${escapeHtml(subject)}</title>\n</head>\n<body style=\"margin:0;padding:0;background:#F1F5F9;font-family:Arial,Helvetica,sans-serif;color:#0F172A;\">\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#F1F5F9;margin:0;padding:0;\">\n    <tr>\n      <td align=\"center\" style=\"padding:28px 12px;\">\n        <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"max-width:760px;background:#FFFFFF;border-radius:24px;overflow:hidden;border:1px solid #E2E8F0;box-shadow:0 14px 40px rgba(15,23,42,0.08);\">\n          \n          <tr>\n            <td style=\"padding:34px 28px;background:linear-gradient(135deg,#2563EB 0%,#0EA5E9 100%);\">\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                <tr>\n                  <td>\n                    <p style=\"margin:0 0 8px 0;color:#DBEAFE;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;\">\n                      Scribe IA · Rapport quotidien\n                    </p>\n                    <h1 style=\"margin:0;color:#FFFFFF;font-size:28px;line-height:1.2;font-weight:900;\">\n                      ${escapeHtml(recap.titre || 'Récap Direction IA')}\n                    </h1>\n                    <p style=\"margin:12px 0 0 0;color:#E0F2FE;font-size:15px;line-height:1.6;\">\n                      Date : ${escapeHtml(recap.date || '')}\n                    </p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding:28px;\">\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n                \n                <tr>\n                  <td style=\"padding:18px 18px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:18px;\">\n                    <p style=\"margin:0 0 8px 0;color:#2563EB;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;\">\n                      Résumé exécutif\n                    </p>\n                    <p style=\"margin:0;color:#334155;font-size:15px;line-height:1.7;\">\n                      ${escapeHtml(recap.resume_executif || 'Aucun résumé disponible.')}\n                    </p>\n                  </td>\n                </tr>\n\n                ${sectionTitle('Discussion du jour', 'Sujets réellement abordés dans les vocaux et notes du jour.')}\n                ${discussionsHtml}\n\n                ${sectionTitle('Points d’évolution notés', 'Idées, stratégies ou avancées détectées.')}\n                ${evolutionsHtml}\n\n                ${sectionTitle('Concordance des idées & suggestions IA', 'Analyse par rapport à l’objectif et à l’avancement des projets.')}\n                ${concordanceHtml}\n\n                ${sectionTitle('Points à aborder non clôturés', 'Questions ouvertes, zones floues ou sujets à reprendre.')}\n                ${nonCloturesHtml}\n\n                ${sectionTitle('Actions prioritaires', 'Tâches concrètes recommandées pour garder le momentum.')}\n                ${actionsHtml}\n\n                ${sectionTitle('Mises à jour mémoire proposées', 'Changements suggérés pour la base Projets_Memoire.')}\n                ${majMemoireHtml}\n\n                <tr>\n                  <td style=\"padding:24px 18px;background:#0F172A;border-radius:18px;\">\n                    <p style=\"margin:0 0 8px 0;color:#93C5FD;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;\">\n                      Conclusion direction\n                    </p>\n                    <p style=\"margin:0;color:#E2E8F0;font-size:15px;line-height:1.7;\">\n                      ${escapeHtml(recap.conclusion_direction || 'Aucune conclusion disponible.')}\n                    </p>\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:22px 0 0 0;text-align:center;\">\n                    <p style=\"margin:0;color:#94A3B8;font-size:12px;line-height:1.5;\">\n                      Rapport généré automatiquement par Scribe IA.\n                    </p>\n                  </td>\n                </tr>\n\n              </table>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n`;\n\nconst text = `\n${recap.titre || 'Récap Direction IA'} - ${recap.date || ''}\n\nRésumé exécutif :\n${recap.resume_executif || ''}\n\nConclusion :\n${recap.conclusion_direction || ''}\n`;\n\nreturn [\n  {\n    json: {\n      subject,\n      html,\n      text,\n      recap_json: recap\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        0
+      ],
+      "id": "518c9245-6100-41d1-963d-53a00cbce4b9",
+      "name": "Code — Générer email HTML"
+    },
+    {
+      "parameters": {
+        "sendTo": "morjonallan@gmail.com, isaiah.blackcrow@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2304,
+        0
+      ],
+      "id": "734992fa-7221-471c-8f4e-030fc399b973",
+      "name": "Send a message",
+      "webhookId": "786a8855-ea40-4675-b40f-5993954329a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "tWSxf6zBeEGUpxOi",
+          "name": "Allan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const recap = $json;\n\nconst proposals = Array.isArray(recap.maj_memoire_proposees)\n  ? recap.maj_memoire_proposees\n  : [];\n\nif (!proposals.length) {\n  return [];\n}\n\nreturn proposals\n  .filter(item => {\n    return (\n      item.projet &&\n      item.champ_a_modifier &&\n      item.nouvelle_valeur_proposee\n    );\n  })\n  .map((item, index) => {\n    return {\n      json: {\n        id: `mem_${Date.now()}_${index}`,\n        date: recap.date || new Date().toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }),\n        projet: item.projet || '',\n        champ_a_modifier: item.champ_a_modifier || '',\n        ancienne_valeur_resume: item.ancienne_valeur_resume || '',\n        nouvelle_valeur_proposee: item.nouvelle_valeur_proposee || '',\n        raison: item.raison || '',\n        niveau_confiance: item.niveau_confiance || 'moyen',\n        validation_humaine_recommandee: item.validation_humaine_recommandee === false ? 'non' : 'oui',\n        statut: 'À valider',\n        validated_by: '',\n        decision: '',\n        source_recap_date: recap.date || '',\n        applique_le: ''\n      }\n    };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        256
+      ],
+      "id": "58fa32ce-c24b-4360-a16f-3ce3be6d0fb6",
+      "name": "Code — Préparer MAJ mémoire proposées"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 243045417,
+          "mode": "list",
+          "cachedResultName": "Memoire_MAJ_Proposees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=243045417"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "date": "={{ $json.date }}",
+            "projet": "={{ $json.projet }}",
+            "champ_a_modifier": "={{ $json.champ_a_modifier }}",
+            "ancienne_valeur_resume": "={{ $json.ancienne_valeur_resume }}",
+            "nouvelle_valeur_proposee": "={{ $json.nouvelle_valeur_proposee }}",
+            "raison": "={{ $json.raison }}",
+            "niveau_confiance": "={{ $json.niveau_confiance }}",
+            "validation_humaine_recommandee": "={{ $json.validation_humaine_recommandee }}",
+            "statut": "={{ $json.statut }}",
+            "source_recap_date": "={{ $json.source_recap_date }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "projet",
+              "displayName": "projet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "champ_a_modifier",
+              "displayName": "champ_a_modifier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ancienne_valeur_resume",
+              "displayName": "ancienne_valeur_resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nouvelle_valeur_proposee",
+              "displayName": "nouvelle_valeur_proposee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "raison",
+              "displayName": "raison",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "niveau_confiance",
+              "displayName": "niveau_confiance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validation_humaine_recommandee",
+              "displayName": "validation_humaine_recommandee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "statut",
+              "displayName": "statut",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_by",
+              "displayName": "validated_by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_recap_date",
+              "displayName": "source_recap_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "applique_le",
+              "displayName": "applique_le",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2304,
+        256
+      ],
+      "id": "64deea33-fd1c-4b24-b39e-a4a04c576ac7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets : lire Scribe_Entrees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets : lire Scribe_Entrees": {
+      "main": [
+        [
+          {
+            "node": "Code — Préparer entrées du jour",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Préparer entrées du jour": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets : lire Projets_Memoire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets : lire Projets_Memoire": {
+      "main": [
+        [
+          {
+            "node": "Code — Construire contexte récap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA : générer le mail",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Construire contexte récap": {
+      "main": [
+        [
+          {
+            "node": "IA : générer le mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA : générer le mail": {
+      "main": [
+        [
+          {
+            "node": "Code — Parser récap IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Parser récap IA": {
+      "main": [
+        [
+          {
+            "node": "Code — Générer email HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code — Préparer MAJ mémoire proposées",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Générer email HTML": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Préparer MAJ mémoire proposées": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4dc146d9-d72b-4fb1-8c76-de40acc10bb6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fdf93ea59647b283a678642b32ef977bddb84e357b4f9b414526e54000966a4"
+  },
+  "id": "A4XkAKwnDYZLMIhG",
+  "tags": []
+}

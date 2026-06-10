@@ -1,0 +1,17 @@
+# Artefacts de présentation (hors dossier projet — ne pas versionner)
+presentation-scribe.html
+presentation-*.html
+
+# Secrets / env (jamais commiter les clés Supabase, Anthropic, OpenAI, Stripe)
+.env
+.env.*
+!.env.example
+
+# Dépendances / build (pour quand le code Next.js arrivera)
+node_modules/
+.next/
+dist/
+build/
+
+# Système
+.DS_Store

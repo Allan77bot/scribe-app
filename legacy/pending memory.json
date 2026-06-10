@@ -1,0 +1,132 @@
+{
+  "name": "pending memory",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "memory-pending",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8b1fd514-d8b0-44d7-bb45-d2ae6d6cb0bb",
+      "name": "Webhook",
+      "webhookId": "d2284741-584d-49fb-9581-2b6810cf4dc9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(item => item.json);\n\nfunction clean(value) {\n  return String(value ?? '').trim();\n}\n\nconst pending = rows\n  .filter(row => {\n    const statut = clean(row.statut).toLowerCase();\n    return statut === 'à valider' || statut === 'a valider';\n  })\n  .filter(row => {\n    return row.id && row.projet && row.champ_a_modifier && row.nouvelle_valeur_proposee;\n  })\n  .map(row => {\n    return {\n      id: clean(row.id),\n      date: clean(row.date),\n      projet: clean(row.projet),\n      champ_a_modifier: clean(row.champ_a_modifier),\n      ancienne_valeur_resume: clean(row.ancienne_valeur_resume),\n      nouvelle_valeur_proposee: clean(row.nouvelle_valeur_proposee),\n      raison: clean(row.raison),\n      niveau_confiance: clean(row.niveau_confiance),\n      validation_humaine_recommandee: clean(row.validation_humaine_recommandee),\n      statut: clean(row.statut),\n      source_recap_date: clean(row.source_recap_date)\n    };\n  });\n\nreturn [\n  {\n    json: {\n      success: true,\n      count: pending.length,\n      items: pending\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "a700e35c-f33f-4a98-b02b-7b319282ea0e",
+      "name": "Code — Filtrer mémoire pending"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos",
+          "mode": "list",
+          "cachedResultName": "Historiquetranscribe",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 243045417,
+          "mode": "list",
+          "cachedResultName": "Memoire_MAJ_Proposees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1drVAFmNfmPbEFP9O_vdPaBClGcXBhhV5jTscynIXvos/edit#gid=243045417"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7d1f1b1f-a224-4ac3-9435-469e1b018907",
+      "name": "Lire Memoire_MAJ_Proposees",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3S8syCzEj0byqMHZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        688,
+        0
+      ],
+      "id": "0bd4e560-03c1-4038-a7b7-35aeb35f55bc",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Lire Memoire_MAJ_Proposees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Memoire_MAJ_Proposees": {
+      "main": [
+        [
+          {
+            "node": "Code — Filtrer mémoire pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — Filtrer mémoire pending": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5888416e-c4fc-4654-9ae5-9d77b00e3371",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fdf93ea59647b283a678642b32ef977bddb84e357b4f9b414526e54000966a4"
+  },
+  "id": "J7AyhivuyToRFGur",
+  "tags": []
+}
