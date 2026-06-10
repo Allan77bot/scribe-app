@@ -7,11 +7,32 @@ presentation-*.html
 .env.*
 !.env.example
 
-# Dépendances / build (pour quand le code Next.js arrivera)
+# Dépendances / build
 node_modules/
+/.pnp
+.pnp.*
 .next/
+/out/
 dist/
 build/
+/coverage
+
+# Next.js / TypeScript / Vercel
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+*.pem
+
+# Supabase (CLI : garder migrations/ et config.toml, ignorer le reste local)
+.branches
+.temp
+supabase/.temp/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
 # Système
 .DS_Store

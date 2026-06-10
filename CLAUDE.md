@@ -66,6 +66,15 @@ Objectif : garder design, auth, capture, etc. **séparés et reviewables**.
 
 ---
 
+## Avant chaque commit touchant la base — checklist
+
+1. Toute nouvelle table de données est créée via `/nouvelle-table` (org_id + RLS + policy).
+2. Lancer `/check-rls` (ou `npm run check:rls`) → doit être **vert** (aucune table à org_id sans RLS).
+3. Jamais de clé `service_role` ni de secret côté client (uniquement `.env.local`, jamais commité).
+4. Front : mobile-first (`overflow-x:hidden`, rien qui dépasse).
+
+---
+
 ## Discipline de fin de session — NE PAS OUBLIER
 
 Avant de terminer, **toujours** :
