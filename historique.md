@@ -14,6 +14,36 @@ Format d'une entrée :
 
 ---
 
+## 2026-06-10 — Audit de sécurité adversarial de `feat/auth` + corrections
+
+- **Fait :**
+  - **Revue multi-agents** (4 lentilles indépendantes : isolation RLS, auth/session,
+    secrets, correctness → puis vérification sceptique de chaque trouvaille).
+    22 trouvailles, **12 confirmées**, corrigées dans la foulée.
+  - **CRITIQUE corrigée (isolation)** : le trigger `handle_new_user` honorait un
+    `invite_org_id` venu du client (`raw_user_meta_data`, clé anon publique) → via un
+    `signUp` direct, n'importe qui pouvait **rejoindre n'importe quelle org**. Branche
+    d'invitation **retirée** : chaque inscrit crée SA propre org. Les invitations
+    reviendront via un **système à jeton signé** (table `invitations` : token + email +
+    expiration) en `feat/invites`. Nom d'org tronqué à 120 côté trigger en défense.
+  - **HAUTE (auth)** : le `proxy` désactivait silencieusement la protection des routes
+    si les variables d'env manquaient → **bypass en DEV uniquement, échec fort en prod**.
+  - **HAUTE (auth)** : le dashboard ignorait l'erreur de `.single()` (profil null →
+    rendu dégradé silencieux) → `maybeSingle()` + **UI d'erreur claire** (pas de redirect,
+    pour éviter une boucle avec le proxy).
+  - **HAUTE (auth)** : messages d'erreur Supabase exposés en clair (énumération de
+    comptes) → **messages génériques** côté client, vrai message loggé côté serveur.
+  - **MEDIUM** : `maxLength` sur `org_name`/`display_name` côté client.
+  - **Test de non-régression** ajouté : un `invite_org_id` injecté est ignoré.
+- **Constats positifs de l'audit :**
+  - Aucune fuite de `service_role` côté client (uniquement `scripts/` + `tests/`).
+  - RLS bien activée + policies `org_id` sur les deux tables ; `current_org_id()`
+    SECURITY DEFINER sans récursion.
+- **Reporté (hors scope socle, noté pour plus tard) :**
+  - Table d'audit des entrées/sorties d'org (compliance) → quand on durcira.
+  - Types Supabase générés (`supabase gen types`) pour retirer le cast du dashboard
+    → une fois la base en ligne.
+
 ## 2026-06-10 — `feat/auth` codé : socle d'isolation (Next.js + Supabase + RLS)
 
 - **Fait :**

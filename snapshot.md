@@ -42,8 +42,11 @@ sans accord).
       dashboard (plan/quota/rétention/rôle) → logout.
 - [x] **Garde-fous RLS** : `/nouvelle-table`, `/check-rls`, `npm run check:rls`,
       checklist pré-commit dans `CLAUDE.md`.
-- [x] **Test d'isolation** écrit (`npm run test:isolation`) + script d'application
-      des migrations (`npm run db:apply`, connexion Postgres directe).
+- [x] **Test d'isolation** écrit (`npm run test:isolation`, 4 cas dont un anti-injection)
+      + script d'application des migrations (`npm run db:apply`, connexion Postgres directe).
+- [x] **Audit de sécurité adversarial** (multi-agents) passé et corrigé : 12 trouvailles
+      confirmées, dont **1 critique d'isolation** (`invite_org_id` retiré du trigger).
+      Build/lint verts. Détail → `historique.md`.
 
 ## En cours / bloqué
 
