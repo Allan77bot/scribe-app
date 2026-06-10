@@ -14,7 +14,45 @@ Format d'une entrée :
 
 ---
 
-## 2026-06-10 — Répartition des rôles clarifiée (back / front)
+## 2026-06-10 — `feat/auth` codé : socle d'isolation (Next.js + Supabase + RLS)
+
+- **Fait :**
+  - **Repo git initialisé** localement (le dossier n'était pas versionné). Fondation
+    doc commitée sur `main`, dev sur branche `feat/auth`. Pas de push (en attente d'accord).
+  - **Squelette Next.js 16** (App Router, TS, Tailwind v4, `src/`) à la racine, docs
+    préservés. PWA installable (manifest + icônes reprises de `legacy/`). Mobile-first
+    strict (`overflow-x:hidden`, viewport verrouillé).
+  - **Migration `supabase/migrations/0001_init_auth.sql`** : tables `organizations` +
+    `users` (colonnes EN, brief §5 + `retention_days`), enums `org_plan`/`user_role`,
+    `current_org_id()` en **SECURITY DEFINER** (clé anti-récursion RLS), **trigger**
+    `handle_new_user` qui crée l'org + le profil admin à l'inscription, **RLS + policies
+    `org_id`** sur les deux tables.
+  - **Auth sessions Supabase** (`@supabase/ssr`) : clients browser/server + `proxy.ts`
+    (Next 16 a renommé `middleware`→`proxy`) qui rafraîchit la session et protège
+    `/dashboard`. Jamais de token statique, jamais de `service_role` côté client.
+  - **Flux complet** : landing → inscription (crée l'équipe) → login → dashboard
+    (plan/quota/rétention/rôle) → logout. Copy FR voix active.
+  - **Garde-fous règle d'or n°2 rendus mécaniques** : commandes `/nouvelle-table` et
+    `/check-rls`, script d'audit RLS (`npm run check:rls`), checklist pré-commit dans
+    `CLAUDE.md`.
+  - **Outillage migrations/tests sans friction** : `npm run db:apply` (connexion
+    Postgres directe, aucun token d'accès Supabase requis) et `npm run test:isolation`
+    (prouve qu'org A ne lit rien d'org B — critère de mise en prod, brief §8).
+  - **Vérifié localement** : build OK, lint OK, pages publiques rendues, harnais de
+    test opérationnel (s'ignore proprement tant que les clés manquent).
+- **Décisions :**
+  - Code de l'app **à la racine** du dossier (le `.gitignore` l'anticipait déjà) ；
+    pas de sous-projet séparé. `.gitattributes` ajouté (LF normalisés).
+  - Application des migrations **par script `pg`** plutôt que CLI Supabase (`supabase`
+    et `psql` absents de la machine ; Docker présent mais inutile pour pousser en distant).
+- **Ouvert / bloquant pour finir `feat/auth` :**
+  - **Allan fournit les accès Supabase EU** (URL, anon, service_role, `SUPABASE_DB_URL`)
+    dans `.env.local` → puis `npm run db:apply` et `npm run test:isolation`.
+  - Validation du schéma par Alphime (prérequis #2) au moment de la PR croisée.
+  - Hook SessionStart (plan §3) volontairement **différé** (risque de faux positifs) ;
+    les commandes `/check-rls` + checklist couvrent l'essentiel pour l'instant.
+
+
 
 - **Décisions :**
   - **Allan = back-end** : base de données, RLS, fonctionnalités, pipeline IA, dev

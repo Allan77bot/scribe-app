@@ -5,122 +5,93 @@
 > sur Discord lors d'un point d'équipe.
 
 **Dernière mise à jour :** 2026-06-10
-**Phase :** 0 — fondation posée (doc + analyse + stack tranchée), blocages levés,
-code pas encore démarré
-**Branche active :** `claude/exciting-hawking-w6ji33`
+**Phase :** 1 — `feat/auth` **codé et vérifié en local**, en attente des clés
+Supabase pour appliquer les migrations et lancer le test d'isolation.
+**Branche active :** `feat/auth` (repo git initialisé localement ce jour)
 
 ---
 
 ## TL;DR (pour Discord)
 
-Fondation prête : doc structurée (index/snapshot/historique/spec), prototype
-analysé (`docs/analyse-legacy.md`) et **stack technique tranchée**
-(`docs/stack-technique.md`). **Toutes les décisions IA/infra sont prises (2026-06-10)** :
-route IA = **API Anthropic directe** (DPA inclus avec les conditions commerciales,
-no-training par défaut, transfert UE via SCC — **aucun blocage, zéro capex, paiement
-à l'usage**), hébergement = **Vercel**, **Hermes = outil d'orga interne**. Rétention
-= **variable selon le plan** ; résidence **Supabase EU = différenciateur assumé**
-(les concurrents Plaud/Fathom/Otter stockent aux US). **OpenRouter/DeepSeek
-rejetés** (anti-pattern RGPD). Équipe = 2 devs.
-**Prochaine vraie étape : coder le socle `feat/auth`** (Supabase + organisations
-+ RLS). Seul prérequis pour démarrer : créer le projet Supabase EU (sinon on écrit
-les migrations en local en attendant).
+Le **socle d'isolation est codé** sur `feat/auth` : Next.js 16 (App Router,
+Tailwind, PWA mobile-first) + auth par sessions Supabase + migration SQL
+(`organizations` + `users` + `current_org_id()` + **RLS/policies `org_id`** +
+trigger qui crée l'org à l'inscription). Flux complet inscription → login →
+dashboard → logout. Garde-fous règle d'or n°2 : commandes `/nouvelle-table` et
+`/check-rls`. **Build OK, lint OK, pages rendues.** Il **reste une seule chose**
+pour valider : qu'Allan colle les clés Supabase EU dans `.env.local`, puis
+`npm run db:apply` + `npm run test:isolation`. Pas encore poussé (pas de PR
+sans accord).
 
 ---
 
 ## Fait
 
-- [x] Architecture documentaire : `CLAUDE.md` (index slim), `snapshot.md`,
-      `historique.md`, brief déplacé dans `docs/brief-produit.md`.
-- [x] Workflow Git adopté : une préoccupation = une branche = une PR.
-- [x] Prototype déposé dans `legacy/` et **analysé** → `docs/analyse-legacy.md`
-      (IP à garder, mapping schéma → Supabase, anti-patterns à corriger).
+- [x] **Fondation doc** (sessions précédentes) : index/snapshot/historique/brief,
+      analyse legacy, stack tranchée.
+- [x] **Repo git** initialisé (le dossier n'était pas versionné). `main` = doc,
+      dev sur `feat/auth`.
+- [x] **Squelette Next.js 16** : App Router, TS, Tailwind v4, `src/`, PWA (manifest
+      + icônes `legacy/`), mobile-first strict.
+- [x] **Migration 0001** : `organizations` + `users` (colonnes EN), enums,
+      `current_org_id()` SECURITY DEFINER, trigger bootstrap, **RLS + policies `org_id`**.
+- [x] **Auth Supabase** (`@supabase/ssr`) : clients browser/server + `proxy.ts`
+      (refresh session + protection `/dashboard`). Aucun token statique, aucune
+      `service_role` côté client.
+- [x] **Flux** landing → inscription (crée l'équipe, rôle admin) → login →
+      dashboard (plan/quota/rétention/rôle) → logout.
+- [x] **Garde-fous RLS** : `/nouvelle-table`, `/check-rls`, `npm run check:rls`,
+      checklist pré-commit dans `CLAUDE.md`.
+- [x] **Test d'isolation** écrit (`npm run test:isolation`) + script d'application
+      des migrations (`npm run db:apply`, connexion Postgres directe).
 
-## En cours
+## En cours / bloqué
 
-- Rien de codé pour l'instant. **Plan d'attaque rédigé** → `docs/plan-attaque.md`
-  (prérequis, étapes `feat/auth`, roadmap, skills/commandes). Prêt à coder en VS Code.
+- **Bloqué sur les accès Supabase EU.** Tout le code est prêt ; il manque
+  uniquement le projet + les clés pour appliquer le SQL et prouver l'isolation.
 
 ## Prochaines étapes (par ordre)
 
-1. **Socle d'isolation** : auth + organisations + RLS sur Supabase
-   (`brief §10.1`). C'est la fondation, rien d'autre ne part avant.
-   → branche dédiée `feat/auth`.
-2. Capture (audio par URL signée) + pipeline transcription/extraction hybride.
-   On réimporte le prompt WF1 + le schéma de champs (voir analyse §2-§3),
-   on remplace seulement le transport audio (POST direct → URL signée).
-3. Tâches + validation humaine + anti-collision (la vraie nouveauté, voir
-   analyse §4 : tout ça manque dans le prototype).
-4. Rapport quotidien + accusé de lecture (réutiliser prompt WF2 + template email).
+1. **Allan** remplit `.env.local` (modèle dans `.env.example`) avec les clés du
+   projet Supabase **région EU** : `NEXT_PUBLIC_SUPABASE_URL`, anon, `service_role`,
+   `SUPABASE_DB_URL` (Settings → Database → Connection string).
+2. `npm run db:apply` → applique la migration 0001 sur la base.
+3. `npm run test:isolation` → doit être **vert** (org A ne lit rien d'org B).
+   C'est le critère de mise en prod (brief §8).
+4. PR croisée `feat/auth` : **Alphime valide le schéma** (prérequis #2) → merge.
+5. Ensuite : `feat/capture` (audio par URL signée) — front peut démarrer contre
+   le contrat de données déjà figé ici.
+
+## Comment lancer (mémo équipe)
+
+- `npm install` puis `npm run dev` → http://localhost:3000 (UI publique visible
+  même sans clés grâce au garde-fou du proxy).
+- `npm run build` / `npm run lint` → vérifs. `npm run check:rls` → audit isolation.
 
 ## Stack technique — TRANCHÉE (détail : `docs/stack-technique.md`)
 
-Next.js + **Vercel** · Supabase (Postgres/Auth/RLS + Storage URL signées, EU)
+Next.js 16 + **Vercel** · Supabase (Postgres/Auth/RLS + Storage URL signées, EU)
 · transcription OpenAI mini · extraction Claude Haiku 4.5 · synthèse Claude
-Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** (Bedrock = cible
-future) · n8n au début → code ensuite · Stripe. Comptes déjà possédés :
-Supabase, Vercel, IA (OpenAI/Anthropic/Azure).
+Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe. Comptes déjà
+possédés : Supabase, Vercel, IA (OpenAI/Anthropic/Azure).
 
 ## Organisation équipe (2 devs, les deux codent)
 
-- Répartition par domaine pour éviter les collisions (chacun ses fichiers) :
-  | Dev | Domaine | Branches types |
-  |---|---|---|
-  | Allan | **Back-end** : base/RLS, fonctionnalités, pipeline IA, dev appli (délègue à Claude Code) | `feat/auth`, `feat/pipeline`, `feat/tasks` |
-  | Alphime | **Front** : design, UX/UI, intégration des fonctionnalités, navigation | `feat/design-system`, `feat/capture` (front) |
-- **Workflow en 2 temps + parallèle** : Allan pose le socle back-end (contrat de
-  données + API), Alph relit/juge, Allan adapte → puis Alph enchaîne sur le front.
-  Pour aller plus vite : dès que le **modèle de données + le contrat d'API** sont
-  figés (tôt, ensemble), Alph peut démarrer le design system **en parallèle** contre
-  ce contrat, sans attendre tout le back-end. On converge à l'intégration.
+| Dev | Domaine | Branches types |
+|---|---|---|
+| Allan | **Back-end** : base/RLS, fonctionnalités, pipeline IA (délègue à Claude Code) | `feat/auth`, `feat/pipeline`, `feat/tasks` |
+| Alphime | **Front** : design, UX/UI, intégration, navigation | `feat/design-system`, `feat/capture` (front) |
+
+- Le **contrat de données** est désormais figé (migration 0001) → Alph peut démarrer
+  le design system **en parallèle** contre ce contrat.
 - Rituel : `git pull` → branche dédiée → push → PR → l'autre relit → merge.
-- `snapshot.md` = point de rendez-vous : on annonce sur Discord qui prend quelle
-  branche pour ne pas se doubler.
 
-## Décisions tranchées (plus aucun blocage IA/infra)
+## Décisions encore ouvertes
 
-- ~~Compte AWS pour Bedrock~~ → **API Anthropic directe**. DPA auto avec les
-  conditions commerciales, no-training par défaut, rétention 30j par défaut,
-  SCC pour le transfert UE. **ZDR** (zéro-rétention) = option à demander plus tard
-  si un gros client l'exige, pas nécessaire au MVP.
-- ~~Vercel vs Netlify~~ → **Vercel**.
-- ~~Rôle de Hermes~~ → outil d'orga interne, pas de doublon produit.
-- **Rétention** → variable selon le plan (court inclus, plus long en payant).
-- **OpenRouter / DeepSeek** → **rejetés** (route les données hors UE, pas de
-  garantie RGPD — anti-pattern déjà acté dans `analyse-legacy.md`).
-
-## Prêt à coder — chemin critique
-
-**Bloquant réel pour la 1re ligne de code de `feat/auth`** :
-1. Créer le **projet Supabase (région EU)** + récupérer URL/clés. *(Sinon : on écrit
-   les migrations SQL + policies RLS en local, prêtes à appliquer.)*
-2. **Alphime valide le schéma de données** (`brief §5`) avant d'écrire les tables.
-
-**À faire en parallèle (pas bloquant pour démarrer le code)** :
-- Accepter les **conditions commerciales Anthropic** (→ DPA) — avant `feat/pipeline`.
-- Rédiger la **politique de confidentialité** listant les sous-traitants
-  (Anthropic + OpenAI) — avant la mise en production.
-- Trancher transcription **OpenAI direct vs Azure OpenAI EU** — avant `feat/pipeline`.
-
-## Reste à décider à trois
-
-- **Intégrations CRM / Airtable / Sheets / Notion** : phase 2 (export sortant)
-  recommandé vs une synchro dès le MVP — à arbitrer selon les testeurs.
-
----
-
-## Décision ouverte — cible Route A vs Route B
-
-Le modèle de données est **multi-utilisateur dès le départ** (`brief §2-§5`),
-donc **B-ready par conception** : ça ne coûte rien de garder la porte ouverte.
-
-**Position actuelle (révisable) :**
-- **Cible stratégique = Route B** (équipes en relais 3×8) — c'est là que la
-  passation et l'anti-collision deviennent indispensables. C'est le moat.
-- **Validation initiale = via les testeurs accessibles** (profil Route A,
-  dirigeants/petites structures), qui valident la boucle de base.
-- **Construction = socle universel d'abord** (sert A et B, zéro travail jeté),
-  puis **couche différenciante B** (`shift_label`, anti-collision multi-équipe,
-  tableau « qui a lu/quand ») en priorité 2.
-
-À trancher franchement quand les premiers retours testeurs tombent.
+- **Confirmation e-mail Supabase** : à laisser ON (prod) ou OFF (tests rapides) —
+  le trigger crée l'org dans les deux cas, seul le login attend la confirmation.
+- **Transcription** OpenAI direct vs Azure OpenAI EU — avant `feat/pipeline`.
+- **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 (export) vs MVP — à trois.
+- **Route A vs Route B** : socle universel posé (multi-utilisateur), couche
+  différenciante B (`shift_label`, anti-collision multi-équipe) en priorité 2,
+  à trancher aux premiers retours testeurs.
