@@ -14,6 +14,27 @@ Format d'une entrée :
 
 ---
 
+## 2026-06-10 — Supabase Security Advisor : Critical résolu + durcissement (6 → 3)
+
+- **Déclencheur :** Allan repère dans le dashboard l'alerte **Critical** « RLS Disabled
+  in Public » sur `public._scribe_migrations` (le carnet de suivi des migrations).
+- **Fait :**
+  - **RLS activée** sur `_scribe_migrations` (sans policy → verrouillée, inaccessible via
+    l'API). Corrigé sur la base live + dans les scripts (`db-apply`/`provision` créent la
+    table avec RLS) + `check-rls` durci (échoue désormais si **une** table `public` a la
+    RLS désactivée, comme l'advisor).
+  - **Migration `0002`** : droits `EXECUTE` restreints. `handle_new_user` verrouillée
+    (trigger-only, aucun accès API) ; `current_org_id` retirée à `anon`, gardée pour
+    `authenticated` (requis par la RLS). → 4 WARN « fonctions » résolues.
+  - Advisor : **6 → 3 alertes**.
+- **Restant (assumé, non bloquant) :**
+  - INFO `rls_enabled_no_policy` sur `_scribe_migrations` (verrouillage volontaire).
+  - WARN `current_org_id` exécutable par `authenticated` : **inhérent à la RLS** (la
+    fonction est sûre, elle ne renvoie que l'org de l'appelant). Non éliminable sans
+    casser l'isolation.
+  - WARN `auth_leaked_password_protection` (vérif mots de passe fuités / HIBP) :
+    **fonctionnalité payante** (plan Pro), indisponible en gratuit (HTTP 402).
+
 ## 2026-06-10 — `feat/auth` vérifié EN RÉEL : projet Supabase EU + isolation prouvée
 
 - **Fait :**

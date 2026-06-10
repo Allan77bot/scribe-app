@@ -45,6 +45,9 @@ puis `feat/capture`. Toujours **pas poussé** sur GitHub (pas de PR sans accord)
 - [x] **Audit de sécurité adversarial** (multi-agents) passé et corrigé : 12 trouvailles
       confirmées, dont **1 critique d'isolation** (`invite_org_id` retiré du trigger).
       Build/lint verts. Détail → `historique.md`.
+- [x] **Supabase Security Advisor** : Critical résolu (RLS sur `_scribe_migrations`),
+      droits des fonctions durcis (migration `0002`). Reste 3 alertes bénignes/assumées
+      (dont 1 WARN payante HIBP). Détail → `historique.md`.
 
 ## En cours / bloqué
 
