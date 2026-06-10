@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "setup:supabase": "node --env-file=.env.local scripts/supabase-provision.mjs",
     "db:apply": "node --env-file=.env.local scripts/db-apply.mjs",
     "check:rls": "node --env-file=.env.local scripts/check-rls.mjs",
     "test:isolation": "node --env-file=.env.local --test tests/isolation.test.mjs"
