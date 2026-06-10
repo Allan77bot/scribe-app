@@ -26,10 +26,10 @@ const client = new pg.Client({
 
 const SQL = `
   select
-    c.relname                          as table_name,
-    c.relrowsecurity                   as rls_enabled,
-    count(p.polname)                   as policy_count,
-    bool_or(col.column_name = 'org_id') as has_org_id
+    c.relname                              as table_name,
+    c.relrowsecurity                       as rls_enabled,
+    count(distinct p.polname)              as policy_count,
+    bool_or(col.column_name = 'org_id')    as has_org_id
   from pg_class c
   join pg_namespace n on n.oid = c.relnamespace
   left join pg_policy p on p.polrelid = c.oid
