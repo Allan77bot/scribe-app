@@ -117,3 +117,38 @@ test("org A ne peut PAS lire l'org B, même en ciblant son id", { skip }, async 
     .eq("email", B.email);
   assert.equal(leakedUser.length, 0, "RLS bloque la lecture des membres de B");
 });
+
+// Non-régression : la faille critique invite_org_id (corrigée). Un attaquant qui
+// injecte un org_id existant via les métadonnées du signUp ne doit PAS rejoindre
+// cette org — le trigger l'ignore et lui crée sa propre org.
+test("le trigger IGNORE un invite_org_id injecté (anti-fuite d'isolation)", { skip }, async () => {
+  const attacker = {
+    email: `iso-attacker-${stamp}@scribe.test`,
+    password: `X-pass-${stamp}!`,
+    org: `Attacker ${stamp}`,
+  };
+  const { data, error } = await admin.auth.admin.createUser({
+    email: attacker.email,
+    password: attacker.password,
+    email_confirm: true,
+    // Tentative d'injection : rejoindre l'org B sans permission.
+    user_metadata: { org_name: attacker.org, invite_org_id: B.orgId },
+  });
+  assert.equal(error, null, `création attaquant : ${error?.message}`);
+  created.users.push(data.user.id);
+
+  const { data: row } = await admin
+    .from("users")
+    .select("org_id")
+    .eq("id", data.user.id)
+    .single();
+  assert.notEqual(row.org_id, B.orgId, "l'invite_org_id injecté doit être ignoré");
+
+  const { data: itsOrg } = await admin
+    .from("organizations")
+    .select("id, name")
+    .eq("id", row.org_id)
+    .single();
+  if (itsOrg?.id) created.orgs.push(itsOrg.id);
+  assert.equal(itsOrg.name, attacker.org, "l'attaquant obtient sa propre org neuve");
+});

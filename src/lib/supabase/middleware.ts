@@ -9,9 +9,15 @@ export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Pas encore configuré (avant que les clés Supabase soient renseignées) :
-  // on laisse passer pour que l'UI publique (landing, login, signup) s'affiche.
   if (!url || !anon) {
+    // En PRODUCTION, des clés manquantes = déploiement cassé : on échoue FORT
+    // plutôt que de désactiver silencieusement la protection des routes.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Supabase non configuré (NEXT_PUBLIC_SUPABASE_URL / ANON_KEY manquants en production).",
+      );
+    }
+    // En DEV uniquement : on laisse passer pour voir l'UI publique avant d'avoir les clés.
     return supabaseResponse;
   }
 

@@ -28,7 +28,15 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    redirect("/signup?error=" + encodeURIComponent(error.message));
+    // Vrai message loggé côté serveur ; message générique côté client pour ne
+    // pas révéler si l'e-mail existe déjà (anti-énumération de comptes).
+    console.error("[auth:signup]", error.message);
+    redirect(
+      "/signup?error=" +
+        encodeURIComponent(
+          "La création du compte a échoué. Vérifie tes informations, ou connecte-toi si tu as déjà un compte.",
+        ),
+    );
   }
 
   // Pas de session = confirmation e-mail requise → on invite à confirmer.
@@ -49,7 +57,12 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect("/login?error=" + encodeURIComponent(error.message));
+    // Message générique : ne pas distinguer « e-mail inconnu » de « mauvais mot
+    // de passe » (anti-énumération). Vrai message loggé côté serveur.
+    console.error("[auth:login]", error.message);
+    redirect(
+      "/login?error=" + encodeURIComponent("E-mail ou mot de passe incorrect."),
+    );
   }
 
   revalidatePath("/", "layout");

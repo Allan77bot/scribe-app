@@ -116,12 +116,18 @@ create policy "users_update_self" on public.users
 
 -- ────────────────────────────────────────────────────────────────────────
 -- 7. Bootstrap à l'inscription — trigger sur auth.users.
---    À chaque nouvel inscrit :
---      • si invite_org_id fourni  → rejoint cette org en 'member' ;
---      • sinon                    → crée une nouvelle org et devient 'admin'.
+--    Chaque inscrit crée SA propre organisation et en devient 'admin'.
 --    SECURITY DEFINER : écrit dans public.* en contournant la RLS.
 --    Fonctionne même quand la confirmation e-mail est active (la ligne
 --    auth.users est créée dès le signUp, avant confirmation).
+--
+--    SÉCURITÉ (règle d'or n°2) : on n'honore JAMAIS un org_id fourni par le
+--    client. raw_user_meta_data est contrôlé par l'appelant (options.data du
+--    signUp, clé anon publique) : accepter un invite_org_id brut permettrait à
+--    n'importe qui de rejoindre n'importe quelle org → fuite d'isolation.
+--    Rejoindre une org existante se fera plus tard via un vrai système
+--    d'invitations à jeton signé (table invitations : token + email + expiration),
+--    dans la branche feat/invites. Jamais par org_id brut.
 -- ────────────────────────────────────────────────────────────────────────
 create or replace function public.handle_new_user()
 returns trigger
@@ -136,19 +142,13 @@ declare
                            nullif(trim(new.raw_user_meta_data->>'display_name'), ''),
                            split_part(new.email, '@', 1)
                          );
-  v_invite_org   uuid := nullif(new.raw_user_meta_data->>'invite_org_id', '')::uuid;
 begin
-  if v_invite_org is not null then
-    insert into public.users (id, org_id, email, display_name, role)
-    values (new.id, v_invite_org, new.email, v_display_name, 'member');
-  else
-    insert into public.organizations (name)
-    values (coalesce(v_org_name, v_display_name || ' — équipe'))
-    returning id into v_org_id;
+  insert into public.organizations (name)
+  values (coalesce(left(v_org_name, 120), v_display_name || ' — équipe'))
+  returning id into v_org_id;
 
-    insert into public.users (id, org_id, email, display_name, role)
-    values (new.id, v_org_id, new.email, v_display_name, 'admin');
-  end if;
+  insert into public.users (id, org_id, email, display_name, role)
+  values (new.id, v_org_id, new.email, v_display_name, 'admin');
 
   return new;
 end;

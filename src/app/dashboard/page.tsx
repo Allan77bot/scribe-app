@@ -18,15 +18,45 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   // RLS garantit qu'on ne lit QUE son propre profil et sa propre org.
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("users")
     .select(
       "display_name, role, organizations(name, plan, minutes_quota, minutes_used_this_period, retention_days)",
     )
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  const org = profile?.organizations as unknown as Org | undefined;
+  // État incohérent rare : le compte auth existe mais pas le profil applicatif.
+  // On affiche un message clair + déconnexion (pas de redirect : éviterait une
+  // boucle avec le proxy qui renvoie les connectés hors de /login).
+  if (error || !profile) {
+    return (
+      <main className="flex flex-1 items-center justify-center px-6 text-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <h1 className="text-lg font-semibold text-slate-900">
+            Profil introuvable
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Ton compte existe mais son profil d&apos;équipe n&apos;a pas pu être
+            chargé. Déconnecte-toi puis reconnecte-toi. Si ça persiste, contacte
+            le support.
+          </p>
+          <form action={logout} className="mt-4">
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-base font-medium text-white transition-colors hover:bg-slate-700"
+            >
+              Se déconnecter
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // TODO: remplacer ce cast par les types générés (supabase gen types typescript)
+  // une fois la base en ligne — la relation to-one est typée objet à l'exécution.
+  const org = profile.organizations as unknown as Org | undefined;
   const minutesLeft = org
     ? Math.max(org.minutes_quota - org.minutes_used_this_period, 0)
     : 0;

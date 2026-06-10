@@ -30,6 +30,7 @@ export default async function SignupPage({
             type="text"
             name="org_name"
             required
+            maxLength={120}
             placeholder="Ex. Réception Hôtel Meaux"
             className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
           />
@@ -40,6 +41,7 @@ export default async function SignupPage({
             type="text"
             name="display_name"
             autoComplete="name"
+            maxLength={80}
             placeholder="Ex. Allan"
             className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
           />
