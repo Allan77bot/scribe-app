@@ -4,11 +4,11 @@
 // Usage :
 //   node --env-file=.env.local scripts/check-rls.mjs
 //
-// Échoue (exit 1) si une table public.* qui porte une colonne org_id n'a pas :
-//   • la Row Level Security ACTIVÉE, et
-//   • au moins une policy.
-// Avertit aussi sur les tables sans org_id non couvertes (à vérifier à la main).
-// Les tables internes (préfixe « _ ») sont ignorées.
+// Échoue (exit 1) si :
+//   • UNE table de public.* a la RLS désactivée (elle est exposée à l'API), ou
+//   • une table à colonne org_id n'a aucune policy.
+// Avertit sur les tables sans org_id (racine `organizations`, tables internes) :
+//   à vérifier à la main (RLS activée sans policy = verrouillée, c'est OK).
 // ════════════════════════════════════════════════════════════════════════
 
 import pg from "pg";
@@ -38,7 +38,6 @@ const SQL = `
    and col.table_name = c.relname
   where n.nspname = 'public'
     and c.relkind = 'r'
-    and c.relname not like '\\_%'
   group by c.relname, c.relrowsecurity
   order by c.relname;
 `;
@@ -64,18 +63,16 @@ async function main() {
     const orgId = r.has_org_id ? "oui" : "non";
     let flag = "";
 
-    if (r.has_org_id) {
-      if (!r.rls_enabled) {
-        flag = "  ✗ RLS désactivée";
-        failures++;
-      } else if (Number(r.policy_count) === 0) {
-        flag = "  ✗ aucune policy";
-        failures++;
-      } else {
-        flag = "  ✓";
-      }
+    if (!r.rls_enabled) {
+      flag = "  ✗ RLS désactivée (table public exposée à l'API)";
+      failures++;
+    } else if (r.has_org_id && Number(r.policy_count) === 0) {
+      flag = "  ✗ org_id sans policy";
+      failures++;
+    } else if (r.has_org_id) {
+      flag = "  ✓";
     } else {
-      flag = "  ⚠ pas d'org_id (à vérifier)";
+      flag = "  ⚠ pas d'org_id (racine/interne — vérifier)";
       warnings++;
     }
 

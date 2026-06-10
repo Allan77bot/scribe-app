@@ -139,6 +139,8 @@ async function main() {
       name text primary key, applied_at timestamptz not null default now()
     );
   `);
+  // Table interne : RLS activée sans policy → inaccessible via l'API publique.
+  await query(ref, "alter table public._scribe_migrations enable row level security;");
   const appliedRows = await query(
     ref,
     "select name from public._scribe_migrations;",

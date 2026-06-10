@@ -43,6 +43,11 @@ async function main() {
       applied_at  timestamptz not null default now()
     );
   `);
+  // RLS activée sans policy : table interne, inaccessible via l'API (anon/authenticated).
+  // Seuls les outils à droits élevés (ce script, le service_role) y accèdent.
+  await client.query(
+    "alter table public._scribe_migrations enable row level security;",
+  );
 
   const { rows } = await client.query("select name from public._scribe_migrations");
   const applied = new Set(rows.map((r) => r.name));
