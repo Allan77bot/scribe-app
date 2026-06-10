@@ -5,23 +5,21 @@
 > sur Discord lors d'un point d'équipe.
 
 **Dernière mise à jour :** 2026-06-10
-**Phase :** 1 — `feat/auth` **codé et vérifié en local**, en attente des clés
-Supabase pour appliquer les migrations et lancer le test d'isolation.
-**Branche active :** `feat/auth` (repo git initialisé localement ce jour)
+**Phase :** 1 — `feat/auth` **TERMINÉ et vérifié en réel** (projet Supabase EU
+provisionné, isolation prouvée 4/4). Prêt pour la PR croisée puis `feat/capture`.
+**Branche active :** `feat/auth` (repo git local, non poussé)
 
 ---
 
 ## TL;DR (pour Discord)
 
-Le **socle d'isolation est codé** sur `feat/auth` : Next.js 16 (App Router,
-Tailwind, PWA mobile-first) + auth par sessions Supabase + migration SQL
-(`organizations` + `users` + `current_org_id()` + **RLS/policies `org_id`** +
-trigger qui crée l'org à l'inscription). Flux complet inscription → login →
-dashboard → logout. Garde-fous règle d'or n°2 : commandes `/nouvelle-table` et
-`/check-rls`. **Build OK, lint OK, pages rendues.** Il **reste une seule chose**
-pour valider : qu'Allan colle les clés Supabase EU dans `.env.local`, puis
-`npm run db:apply` + `npm run test:isolation`. Pas encore poussé (pas de PR
-sans accord).
+Le **socle d'isolation est terminé et prouvé en réel** sur `feat/auth` : Next.js 16
+(PWA mobile-first) + auth sessions Supabase + RLS par org. **Projet Supabase EU
+(Frankfurt) provisionné**, migration appliquée, **test d'isolation 4/4 vert** (org A
+ne voit rien d'org B), `check:rls` vert, **audit de sécurité adversarial passé**.
+Flux inscription → login → dashboard → logout opérationnel (auto-confirm activé pour
+les tests). **Plus de blocage.** Prochain pas : PR croisée (Alph valide le schéma)
+puis `feat/capture`. Toujours **pas poussé** sur GitHub (pas de PR sans accord).
 
 ---
 
@@ -50,26 +48,28 @@ sans accord).
 
 ## En cours / bloqué
 
-- **Bloqué sur les accès Supabase EU.** Tout le code est prêt ; il manque
-  uniquement le projet + les clés pour appliquer le SQL et prouver l'isolation.
+- **Rien de bloqué.** Le socle est complet et **vérifié en réel**. En attente d'une
+  décision : ouvrir la PR croisée `feat/auth` (validation schéma par Alphime) + pousser.
 
 ## Prochaines étapes (par ordre)
 
-1. **Allan** remplit `.env.local` (modèle dans `.env.example`) avec les clés du
-   projet Supabase **région EU** : `NEXT_PUBLIC_SUPABASE_URL`, anon, `service_role`,
-   `SUPABASE_DB_URL` (Settings → Database → Connection string).
-2. `npm run db:apply` → applique la migration 0001 sur la base.
-3. `npm run test:isolation` → doit être **vert** (org A ne lit rien d'org B).
-   C'est le critère de mise en prod (brief §8).
-4. PR croisée `feat/auth` : **Alphime valide le schéma** (prérequis #2) → merge.
-5. Ensuite : `feat/capture` (audio par URL signée) — front peut démarrer contre
-   le contrat de données déjà figé ici.
+1. **Révoquer le Personal Access Token** Supabase (le setup est fait) — ou le garder
+   si on veut reprovisionner plus tard → https://supabase.com/dashboard/account/tokens
+2. PR croisée `feat/auth` : **Alphime valide le schéma** (prérequis #2) → merge.
+   (Décider quand pousser sur GitHub — rien n'est poussé pour l'instant.)
+3. `feat/capture` (audio par URL signée) — le front peut démarrer contre le
+   contrat de données déjà figé ici.
+4. **Avant prod** : réactiver la confirmation e-mail + brancher un SMTP
+   (auto-confirm est ON pour les tests).
 
 ## Comment lancer (mémo équipe)
 
-- `npm install` puis `npm run dev` → http://localhost:3000 (UI publique visible
-  même sans clés grâce au garde-fou du proxy).
-- `npm run build` / `npm run lint` → vérifs. `npm run check:rls` → audit isolation.
+- **Projet Supabase** : `scribe` (org Atelier Klar), région EU Frankfurt,
+  ref `kgbxxzujlubflsvprmef`. Les clés vivent dans `.env.local` (**non commité** :
+  Allan les partage hors-repo, ou chacun les copie depuis le dashboard Supabase).
+- `npm install` puis `npm run dev` → http://localhost:3000.
+- `npm run build` / `npm run lint` → vérifs. `npm run test:isolation` → preuve
+  d'isolation. `npm run check:rls` → audit RLS.
 
 ## Stack technique — TRANCHÉE (détail : `docs/stack-technique.md`)
 
@@ -91,8 +91,8 @@ possédés : Supabase, Vercel, IA (OpenAI/Anthropic/Azure).
 
 ## Décisions encore ouvertes
 
-- **Confirmation e-mail Supabase** : à laisser ON (prod) ou OFF (tests rapides) —
-  le trigger crée l'org dans les deux cas, seul le login attend la confirmation.
+- **Confirmation e-mail Supabase** : actuellement **OFF** (auto-confirm, pour les
+  tests). À réactiver + brancher un SMTP avant la prod.
 - **Transcription** OpenAI direct vs Azure OpenAI EU — avant `feat/pipeline`.
 - **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 (export) vs MVP — à trois.
 - **Route A vs Route B** : socle universel posé (multi-utilisateur), couche

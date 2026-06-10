@@ -14,6 +14,30 @@ Format d'une entrée :
 
 ---
 
+## 2026-06-10 — `feat/auth` vérifié EN RÉEL : projet Supabase EU + isolation prouvée
+
+- **Fait :**
+  - **Projet Supabase provisionné** via l'API de gestion (`npm run setup:supabase`) :
+    org **Atelier Klar**, projet **scribe**, région **eu-central-1 (Frankfurt)**, plan
+    free, ref `kgbxxzujlubflsvprmef`. (Création depuis un Personal Access Token fourni
+    par Allan — aucun lien GitHub requis.)
+  - **Migration `0001` appliquée** via l'endpoint `/database/query` (pas de connexion
+    Postgres directe → pas de souci IPv4/pooler).
+  - **Test d'isolation : 4/4 PASS en réel** (org A ne voit rien d'org B ; `invite_org_id`
+    injecté ignoré). **Critère de mise en prod du brief §8 satisfait.**
+  - **`check:rls` vert** ; bug de comptage cartésien des policies corrigé (`count distinct`).
+  - **Proxy** protège `/dashboard` avec les vraies clés (307 → `/login`) ; `/` et `/login`
+    en 200.
+- **Décision (phase de test, réversible) :**
+  - **Auto-confirmation e-mail activée** (`mailer_autoconfirm = true`) pour rendre
+    l'app utilisable sans SMTP. **À revisiter avant prod** : réactiver la confirmation
+    + configurer un SMTP (ou garder OFF si on assume une vérif côté invitation).
+- **Sécurité :**
+  - `.env.local` (clés réelles : anon, service_role, db_url, **access token**) **gitignoré**,
+    jamais commité (vérifié).
+  - **Personal Access Token à révoquer** maintenant que le setup est fait (ou à garder
+    si on veut reprovisionner / changer la config auth plus tard).
+
 ## 2026-06-10 — Audit de sécurité adversarial de `feat/auth` + corrections
 
 - **Fait :**
