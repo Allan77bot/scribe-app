@@ -30,7 +30,8 @@ if (!connectionString || connectionString.includes("<")) {
 const client = new pg.Client({
   connectionString,
   // Supabase impose TLS ; le certificat est valide mais on reste tolérant.
-  ssl: { rejectUnauthorized: false },
+  // `?sslmode=disable` dans l'URL → pas de TLS (Postgres local de la CI).
+  ssl: connectionString.includes("sslmode=disable") ? false : { rejectUnauthorized: false },
 });
 
 async function main() {

@@ -1,0 +1,57 @@
+# ════════════════════════════════════════════════════════════════════════
+# CI Scribe — mur déterministe (spec : docs/superpowers/specs/2026-06-12-…)
+# Tourne sans AUCUN secret : la base auditée est un conteneur jetable.
+# Rouge = pas de merge. C'est la règle d'or RLS rendue mécanique côté GitHub.
+# ════════════════════════════════════════════════════════════════════════
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint-build:
+    name: Lint + Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  rls-audit:
+    name: Migrations + audit RLS
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Image Supabase : embarque auth.users, auth.uid() et les rôles
+        # anon/authenticated dont dépendent les migrations.
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      SUPABASE_DB_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Appels node directs : les scripts npm exigent un .env.local absent en CI.
+      - name: Appliquer les migrations
+        run: node scripts/db-apply.mjs
+      - name: Audit RLS (aucune table à org_id sans RLS + policy)
+        run: node scripts/check-rls.mjs

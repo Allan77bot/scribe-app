@@ -21,7 +21,8 @@ if (!connectionString || connectionString.includes("<")) {
 
 const client = new pg.Client({
   connectionString,
-  ssl: { rejectUnauthorized: false },
+  // `?sslmode=disable` dans l'URL → pas de TLS (Postgres local de la CI).
+  ssl: connectionString.includes("sslmode=disable") ? false : { rejectUnauthorized: false },
 });
 
 const SQL = `
