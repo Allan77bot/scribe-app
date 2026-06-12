@@ -76,9 +76,13 @@ Travaille sur une branche dédiée et ouvre une PR — jamais de push sur main."
 3. la CI (lint + build + migrations + check:rls) doit être verte avant merge.
 
 > **Note protection `main`** : la protection de branche GitHub exige le plan
-> Pro sur un repo privé. Tant qu'elle n'est pas active, la règle « jamais de
-> push main » de `HERMES.md` n'est PAS appliquée mécaniquement côté GitHub —
-> décision Allan en attente (Pro à ~4 $/mois, recommandé avant de donner le PAT).
+> Pro sur un repo privé. Décision Allan (2026-06-12) : pas de Pro pour l'instant —
+> la règle « jamais de push main » de `HERMES.md` n'est donc PAS appliquée
+> mécaniquement. Risque accepté car aucun déploiement n'est branché sur `main`
+> de ce repo (un push accidentel se revert). À reconsidérer dès que Vercel
+> sera connecté. En attendant : PAT fine-grained obligatoire (jamais le compte
+> Allan77bot complet sur le VPS) — `echo <PAT> | gh auth login --with-token`
+> donne la CLI `gh` limitée à ce seul repo.
 
 ## 7. Boucle de travail type
 

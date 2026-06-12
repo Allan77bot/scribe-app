@@ -12,8 +12,15 @@
 - [ ] **Compte Supabase sandbox** : créer (ou réutiliser) un compte Supabase sur
       `contact@atelierklar.fr` → Account → Access Tokens → nouveau PAT.
       ⚠ PAS un token de ton compte perso (il donnerait accès au vrai projet).
-- [ ] **Décision protection `main`** : GitHub Pro (~4 $/mois) pour bloquer
-      mécaniquement les push sur `main` — recommandé AVANT de transmettre le PAT.
+- [ ] **Connexion CLI côté VPS** : connecter `gh` avec le PAT fine-grained,
+      JAMAIS avec le compte Allan77bot complet (sinon Hermes accède à tous les
+      repos, dont le cockpit qui déploie sur Netlify) :
+      `echo <PAT> | gh auth login --with-token`
+
+> Protection de `main` : décision Allan 2026-06-12 — pas de GitHub Pro pour
+> l'instant. Acceptable car rien ne se déploie depuis `main` de `scribe-app`
+> (pas de Vercel branché) : un push accidentel se revert. À reconsidérer dès
+> que Vercel sera connecté au repo.
 
 ## 2. Message Telegram (coller tel quel, remplacer les <…>)
 
