@@ -14,6 +14,33 @@ Format d'une entrée :
 
 ---
 
+## 2026-06-12 — Hermes rejoint Scribe + repo poussé sur GitHub
+
+- **Décisions :**
+  - **Hermes (agent autonome Atelier Klar, VPS) intègre Scribe** en bac à sable :
+    spec validée par Allan → `docs/superpowers/specs/2026-06-12-integration-hermes-design.md`.
+    Partage des rôles : Hermes = annexe/sandbox par PR ; Claude (poste Allan) =
+    cœur base/RLS ; Alphime = front ; Allan valide et merge.
+  - **Claude Code installé sur le VPS** (Fable 5) servira d'exécutant code à
+    Hermes en mode bypass — acceptable uniquement car : sandbox total (compte
+    Supabase dédié, jamais les clés EU), main par PR, CI obligatoire.
+  - **Push GitHub validé par Allan** : repo privé `Allan77bot/scribe-app`.
+  - Pilotage d'Hermes par le **Board Atelier Klar** (projet `Scribe`, Journal).
+- **Fait :**
+  - Repo poussé : `main`, `feat/auth`, `feat/integration-hermes`.
+  - **CI GitHub Actions sans secret** (lint + build + migrations + `check:rls`
+    contre conteneur `supabase/postgres` jetable) — chaîne testée verte en local ;
+    scripts pg tolèrent `sslmode=disable` pour ça.
+  - `HERMES.md` (briefing agent + mur déterministe), `docs/setup-claude-code-vps.md`,
+    `docs/briefing-hermes-telegram.md` (message + 5 cartes Board + checklist Allan).
+  - Cockpit `atelierklar-board` : 3e login **Hermes** (♣ vert) déployé sur Netlify.
+  - Brief inter-sessions écrit : `AtelierKlar/Structuration/brief-scribe-hermes-2026-06-12.md`.
+- **Ouvert :**
+  - **Protection de `main` impossible en plan GitHub Free** (repo privé) →
+    décision Allan : GitHub Pro (~4 $/mois) recommandé AVANT de donner le PAT à Hermes.
+  - Allan : créer PAT GitHub fine-grained + compte Supabase sandbox, puis coller
+    le briefing Telegram. PR croisée `feat/auth` (Alphime) désormais possible sur GitHub.
+
 ## 2026-06-10 — Supabase Security Advisor : Critical résolu + durcissement (6 → 3)
 
 - **Déclencheur :** Allan repère dans le dashboard l'alerte **Critical** « RLS Disabled

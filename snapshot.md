@@ -4,100 +4,93 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-**Dernière mise à jour :** 2026-06-10
-**Phase :** 1 — `feat/auth` **TERMINÉ et vérifié en réel** (projet Supabase EU
-provisionné, isolation prouvée 4/4). Prêt pour la PR croisée puis `feat/capture`.
-**Branche active :** `feat/auth` (repo git local, non poussé)
+**Dernière mise à jour :** 2026-06-12
+**Phase :** 1.5 — socle `feat/auth` terminé et prouvé ; **repo poussé sur GitHub**
+(`Allan77bot/scribe-app`, privé) ; **intégration d'Hermes** (agent VPS) en cours.
+**Branche active :** `feat/integration-hermes`
 
 ---
 
 ## TL;DR (pour Discord)
 
-Le **socle d'isolation est terminé et prouvé en réel** sur `feat/auth` : Next.js 16
-(PWA mobile-first) + auth sessions Supabase + RLS par org. **Projet Supabase EU
-(Frankfurt) provisionné**, migration appliquée, **test d'isolation 4/4 vert** (org A
-ne voit rien d'org B), `check:rls` vert, **audit de sécurité adversarial passé**.
-Flux inscription → login → dashboard → logout opérationnel (auto-confirm activé pour
-les tests). **Plus de blocage.** Prochain pas : PR croisée (Alph valide le schéma)
-puis `feat/capture`. Toujours **pas poussé** sur GitHub (pas de PR sans accord).
+Le **repo est sur GitHub** (privé, `Allan77bot/scribe-app` — push validé par Allan) :
+la PR croisée `feat/auth` pour Alphime est enfin possible. Nouveauté du jour :
+**Hermes (agent autonome du VPS) rejoint le projet** en bac à sable — il bossera
+sur son propre projet Supabase sandbox, par PR uniquement, piloté via le Board
+Atelier Klar, avec Claude Code installé sur le VPS pour les grosses tâches code.
+Une **CI sans secret** (lint + build + migrations + audit RLS sur conteneur jetable)
+verrouille chaque PR. Il reste à Allan : PAT GitHub + compte Supabase sandbox +
+décision GitHub Pro (protection de `main`), puis coller le briefing Telegram à Hermes.
 
 ---
 
 ## Fait
 
-- [x] **Fondation doc** (sessions précédentes) : index/snapshot/historique/brief,
-      analyse legacy, stack tranchée.
-- [x] **Repo git** initialisé (le dossier n'était pas versionné). `main` = doc,
-      dev sur `feat/auth`.
-- [x] **Squelette Next.js 16** : App Router, TS, Tailwind v4, `src/`, PWA (manifest
-      + icônes `legacy/`), mobile-first strict.
-- [x] **Migration 0001** : `organizations` + `users` (colonnes EN), enums,
-      `current_org_id()` SECURITY DEFINER, trigger bootstrap, **RLS + policies `org_id`**.
-- [x] **Auth Supabase** (`@supabase/ssr`) : clients browser/server + `proxy.ts`
-      (refresh session + protection `/dashboard`). Aucun token statique, aucune
-      `service_role` côté client.
-- [x] **Flux** landing → inscription (crée l'équipe, rôle admin) → login →
-      dashboard (plan/quota/rétention/rôle) → logout.
-- [x] **Garde-fous RLS** : `/nouvelle-table`, `/check-rls`, `npm run check:rls`,
-      checklist pré-commit dans `CLAUDE.md`.
-- [x] **Test d'isolation** écrit (`npm run test:isolation`, 4 cas dont un anti-injection)
-      + script d'application des migrations (`npm run db:apply`, connexion Postgres directe).
-- [x] **Audit de sécurité adversarial** (multi-agents) passé et corrigé : 12 trouvailles
-      confirmées, dont **1 critique d'isolation** (`invite_org_id` retiré du trigger).
-      Build/lint verts. Détail → `historique.md`.
-- [x] **Supabase Security Advisor** : Critical résolu (RLS sur `_scribe_migrations`),
-      droits des fonctions durcis (migration `0002`). Reste 3 alertes bénignes/assumées
-      (dont 1 WARN payante HIBP). Détail → `historique.md`.
+- [x] **Socle `feat/auth`** (sessions précédentes) : Next.js 16 PWA + auth sessions
+      Supabase + RLS par org, projet Supabase EU provisionné, isolation prouvée 4/4,
+      audit adversarial passé, Security Advisor traité. Détail → `historique.md`.
+- [x] **Repo poussé sur GitHub** : `main`, `feat/auth`, `feat/integration-hermes`.
+- [x] **Spec intégration Hermes validée** →
+      `docs/superpowers/specs/2026-06-12-integration-hermes-design.md`.
+- [x] **CI GitHub Actions sans secret** : lint + build + migrations + `check:rls`
+      contre un conteneur `supabase/postgres` (chaîne testée verte en local).
+- [x] **`HERMES.md`** (briefing agent + mur déterministe) +
+      **`docs/setup-claude-code-vps.md`** (Claude Code headless sur le VPS) +
+      **`docs/briefing-hermes-telegram.md`** (message prêt à coller + 5 cartes Board).
+- [x] **Cockpit Atelier Klar** : login Hermes (♣ vert) déployé sur Netlify.
 
 ## En cours / bloqué
 
-- **Rien de bloqué.** Le socle est complet et **vérifié en réel**. En attente d'une
-  décision : ouvrir la PR croisée `feat/auth` (validation schéma par Alphime) + pousser.
+- **En attente d'Allan (pour activer Hermes)** :
+  1. PAT GitHub fine-grained (repo `scribe-app` seul, Contents + Pull requests) ;
+  2. compte Supabase **sandbox dédié** (`contact@atelierklar.fr`) + PAT ;
+  3. décision **GitHub Pro** (~4 $/mois) — la protection de `main` est refusée en
+     plan Free sur repo privé ; recommandé AVANT de donner le PAT à Hermes ;
+  4. coller le briefing Telegram (`docs/briefing-hermes-telegram.md`) + créer
+     les cartes Board.
 
 ## Prochaines étapes (par ordre)
 
-1. **Révoquer le Personal Access Token** Supabase (le setup est fait) — ou le garder
-   si on veut reprovisionner plus tard → https://supabase.com/dashboard/account/tokens
-2. PR croisée `feat/auth` : **Alphime valide le schéma** (prérequis #2) → merge.
-   (Décider quand pousser sur GitHub — rien n'est poussé pour l'instant.)
-3. `feat/capture` (audio par URL signée) — le front peut démarrer contre le
-   contrat de données déjà figé ici.
-4. **Avant prod** : réactiver la confirmation e-mail + brancher un SMTP
-   (auto-confirm est ON pour les tests).
+1. Allan exécute la checklist ci-dessus → Hermes clone, lit `HERMES.md`,
+   provisionne son sandbox, prouve l'isolation (cartes Board 1-3).
+2. **PR croisée `feat/auth`** : Alphime valide le schéma → merge dans `main`.
+3. Merge de `feat/integration-hermes` (spec + CI + docs) après revue.
+4. `feat/capture` (audio par URL signée) — front démarrable contre le contrat figé.
+5. Avant prod : réactiver la confirmation e-mail + SMTP (recherche déléguée à
+   Hermes, carte Board 4).
 
 ## Comment lancer (mémo équipe)
 
-- **Projet Supabase** : `scribe` (org Atelier Klar), région EU Frankfurt,
-  ref `kgbxxzujlubflsvprmef`. Les clés vivent dans `.env.local` (**non commité** :
-  Allan les partage hors-repo, ou chacun les copie depuis le dashboard Supabase).
+- **Repo** : https://github.com/Allan77bot/scribe-app (privé).
+- **Projet Supabase réel** : `scribe` (org Atelier Klar), EU Frankfurt,
+  ref `kgbxxzujlubflsvprmef`. Clés dans `.env.local` (**non commité**, partagé
+  hors-repo). **Hermes n'utilise JAMAIS ce projet** → sandbox dédié (`HERMES.md`).
 - `npm install` puis `npm run dev` → http://localhost:3000.
-- `npm run build` / `npm run lint` → vérifs. `npm run test:isolation` → preuve
-  d'isolation. `npm run check:rls` → audit RLS.
+- `npm run build` / `npm run lint` / `npm run test:isolation` / `npm run check:rls`.
 
 ## Stack technique — TRANCHÉE (détail : `docs/stack-technique.md`)
 
 Next.js 16 + **Vercel** · Supabase (Postgres/Auth/RLS + Storage URL signées, EU)
 · transcription OpenAI mini · extraction Claude Haiku 4.5 · synthèse Claude
-Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe. Comptes déjà
-possédés : Supabase, Vercel, IA (OpenAI/Anthropic/Azure).
+Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe.
 
-## Organisation équipe (2 devs, les deux codent)
+## Organisation équipe (2 devs + 2 agents)
 
-| Dev | Domaine | Branches types |
+| Acteur | Domaine | Branches types |
 |---|---|---|
-| Allan | **Back-end** : base/RLS, fonctionnalités, pipeline IA (délègue à Claude Code) | `feat/auth`, `feat/pipeline`, `feat/tasks` |
-| Alphime | **Front** : design, UX/UI, intégration, navigation | `feat/design-system`, `feat/capture` (front) |
+| ♦ Allan | Valide PR et décisions, pilote Hermes (Telegram/Board) | — |
+| ♠ Alphime | **Front** : design, UX/UI, intégration | `feat/design-system`, `feat/capture` (front) |
+| ♥ Claude (poste Allan) | **Cœur back-end** : base/RLS, pipeline IA | `feat/auth`, `feat/pipeline` |
+| ♣ Hermes (VPS + Claude Code) | **Sandbox/annexe** : recherches, tests, docs, code périphérique — PR only | `feat/*`, `chore/*` (jamais `main`) |
 
-- Le **contrat de données** est désormais figé (migration 0001) → Alph peut démarrer
-  le design system **en parallèle** contre ce contrat.
-- Rituel : `git pull` → branche dédiée → push → PR → l'autre relit → merge.
+- Contrat de données figé (migration 0001) → Alph peut designer en parallèle.
+- Rituel : `git pull` → branche dédiée → push → PR → CI verte → revue → merge humain.
 
 ## Décisions encore ouvertes
 
-- **Confirmation e-mail Supabase** : actuellement **OFF** (auto-confirm, pour les
-  tests). À réactiver + brancher un SMTP avant la prod.
-- **Transcription** OpenAI direct vs Azure OpenAI EU — avant `feat/pipeline`.
-- **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 (export) vs MVP — à trois.
-- **Route A vs Route B** : socle universel posé (multi-utilisateur), couche
-  différenciante B (`shift_label`, anti-collision multi-équipe) en priorité 2,
-  à trancher aux premiers retours testeurs.
+- **GitHub Pro** pour la protection mécanique de `main` (cf. En cours).
+- **Confirmation e-mail Supabase** : OFF (auto-confirm tests) → réactiver + SMTP
+  avant prod (recherche : carte Hermes).
+- **Transcription** OpenAI direct vs Azure OpenAI EU (recherche : carte Hermes).
+- **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 vs MVP — à trois.
+- **Route A vs Route B** : couche B (`shift_label`, anti-collision) en priorité 2.
