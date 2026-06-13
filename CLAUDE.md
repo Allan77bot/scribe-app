@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Scribe IA — Index
 
 > Routeur du projet. À lire en premier. Court par conception : le détail vit
@@ -36,6 +40,55 @@ gravité est la **coordination active**.
 | Stack technique tranchée (infra, IA, comptes) | `docs/stack-technique.md` |
 | Analyse du prototype (IP à garder, mapping, anti-patterns) | `docs/analyse-legacy.md` |
 | Prototype existant (archive figée, ne pas modifier) | `legacy/` |
+| **Capacités & apprentissage d'Hermes** (vidéos, Mem0, skill `A:`) — snapshot + next steps | `AGENTS.md` |
+
+---
+
+## Commandes
+
+Node ≥ 18.18. Les scripts base/test lisent `.env.local` (non commité) via `--env-file`.
+
+| But | Commande |
+|---|---|
+| Dev local | `npm run dev` → http://localhost:3000 |
+| Build prod · Lint | `npm run build` · `npm run lint` |
+| Appliquer les migrations SQL | `npm run db:apply` (idempotent, journal `_scribe_migrations`) |
+| Audit RLS (règle d'or n°2) | `npm run check:rls` |
+| Test d'isolation org A ≠ org B | `npm run test:isolation` |
+| Provisionner un projet Supabase | `npm run setup:supabase` (Management API + PAT) |
+
+- **Un seul test** : `node --env-file=.env.local --test --test-name-pattern="invite_org_id" tests/isolation.test.mjs` (runner natif `node:test`).
+- Sans `.env.local` rempli : `db:apply`/`check:rls` échouent vite, `test:isolation` **s'ignore** proprement — c'est voulu.
+- **CI** (`.github/workflows/ci.yml`) = mur déterministe : `lint`+`build`, puis `db:apply`+`check:rls` **sans secret** contre un conteneur `supabase/postgres` jetable (`SUPABASE_DB_URL=…?sslmode=disable`). Rouge = pas de merge.
+
+---
+
+## Architecture du code (vue d'ensemble)
+
+App **Next.js 16** (App Router, React 19, TS, Tailwind v4, PWA) à la **racine** du repo ;
+back = **Supabase** (Postgres + Auth + RLS). Pas de service séparé.
+
+**L'isolation vit dans la base, pas dans le code.** Front et serveur n'utilisent QUE la
+**clé anon** — c'est la **RLS Postgres** qui empêche une org d'en voir une autre. La
+`service_role` n'apparaît que dans `scripts/` et `tests/`, jamais côté app.
+
+- **Pivot RLS** : `public.current_org_id()` (`SECURITY DEFINER`, migration `0001`). Chaque
+  policy compare `org_id = current_org_id()`. À l'inscription, le **trigger** `handle_new_user`
+  crée l'org + le profil admin et **ignore tout `org_id` venu du client** (faille d'isolation
+  corrigée + testée en non-régression). Rejoindre une org existante = futur système à jetons
+  signés (`feat/invites`), jamais par `org_id` brut.
+- **Flux auth** : `src/proxy.ts` (Next 16 a renommé *middleware* → **proxy**) →
+  `src/lib/supabase/middleware.ts` rafraîchit la session et garde `/dashboard` (clés manquantes
+  = échec FORT en prod, laisser-passer en DEV seul). Server Components/Actions :
+  `src/lib/supabase/server.ts` ; composant client : `client.ts`. Auth = Server Actions dans
+  `src/lib/auth/actions.ts`, messages d'erreur **génériques** (anti-énumération de comptes).
+- **Base** : schéma versionné dans `supabase/migrations/*.sql`, appliqué par `scripts/db-apply.mjs`
+  (`pg` direct, 1 transaction/fichier, journal idempotent). **Évolution de schéma = nouvelle
+  migration** (jamais rééditer une migration appliquée) ; créer les tables via `/nouvelle-table`.
+  `scripts/check-rls.mjs` = la règle d'or n°2 rendue mécanique.
+
+Stack IA (pas encore codée) : transcription OpenAI mini · extraction Claude Haiku 4.5 ·
+synthèse Claude Sonnet 4.6 · route = API Anthropic directe + DPA EU (cf. `docs/stack-technique.md`).
 
 ---
 
