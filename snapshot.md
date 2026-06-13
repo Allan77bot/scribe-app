@@ -5,23 +5,20 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.1 — SMTP + Transcription recherchés et tranchés ✅
-**Branche active :** `main`
+**Phase :** 2.2 — Pipeline IA implémenté ✅ (feat/pipeline)
+**Branche active :** `feat/pipeline`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Hermes est en ligne sur le sandbox Scribe** 🎉 Le VPS Hermes a :
-cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
-(doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
-migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
-Prochaine étape : attaquer feat/capture (audio par URL signée).
+**Pipeline IA implémenté sur `feat/pipeline`** — `processEntry` : Whisper (audio) + Haiku (extraction tâches JSON). `createEntry` câblé : audio déclenche le pipeline avant redirect. Build vert, RLS verte (entries : 4 policies, org_id OK). Prochaine étape : feat/capture (upload audio côté front par URL signée).
 
 ---
 
 ## Fait
 
+- [x] **Pipeline IA (2026-06-13)** : `src/lib/pipeline/actions.ts` (processEntry : Whisper + Haiku) + `src/lib/entries/actions.ts` (createEntry). Build ✅, RLS ✅.
 - [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
 - [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
 - [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).

@@ -1,3 +1,26 @@
+## 2026-06-13 — Phase 2 Pipeline IA — feat/pipeline
+
+### Ajouté
+- `src/lib/pipeline/actions.ts` — server action `processEntry` :
+  - Télécharge le fichier audio depuis le bucket privé `audio-uploads` (client admin service_role)
+  - Transcription via **OpenAI Whisper** (`whisper-1`)
+  - Extraction de tâches JSON via **Claude Haiku** (`claude-3-haiku-20240307`)
+  - Met à jour `entries` : `transcript` + `extracted_tasks_json` + `processed_at`
+- `src/lib/entries/actions.ts` — server action `createEntry` :
+  - Insère l'entrée (org_id RLS via client anon)
+  - Si `type=audio` → appelle `processEntry` avant le redirect
+
+### Vérifications
+- `npm run build` → ✅ compilé sans erreur TypeScript
+- `npm run check:rls` → ✅ vert (entries : RLS ON, 4 policies, org_id ✓)
+
+### Décisions
+- `processEntry` toujours via client admin (service_role) — jamais exposé côté client
+- Jamais le modèle haut de gamme pour extraction — Haiku seul (règle d'or n°5)
+- Erreur pipeline = log console + pas de crash, l'entrée existe déjà
+
+---
+
 ## 2026-06-13 — Recherches SMTP + Transcription tranchées
 
 ### Ajouté
