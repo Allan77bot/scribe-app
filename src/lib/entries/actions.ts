@@ -1,8 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
 import { createClient as createAdminSupabase } from "@supabase/supabase-js";
-import { redirect } from "next/navigation";
+import { processEntry } from "@/lib/pipeline/actions";
 
 // Client admin (service_role) — côté serveur uniquement, jamais exposé au navigateur.
 function adminClient() {
@@ -38,41 +40,58 @@ export async function getSignedUploadUrl(
   return { signedUrl: data.signedUrl, path };
 }
 
-// Insère une entrée (audio ou texte) dans la table entries.
-// La RLS garantit que l'insertion respecte l'isolation par org.
+// Insère une entrée puis déclenche le pipeline IA pour les entrées audio.
 export async function createEntry(formData: FormData) {
-  const type = String(formData.get("type") ?? "");
-  const storage_path = formData.get("storage_path")
-    ? String(formData.get("storage_path"))
-    : null;
-  const raw_text = formData.get("raw_text")
-    ? String(formData.get("raw_text"))
-    : null;
-
   const supabase = await createSessionClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Récupère l'org_id du profil (RLS garantit qu'on lit le bon profil).
+  // Récupération de l'org_id via le profil — la RLS garantit qu'on ne lit que le sien
   const { data: profile } = await supabase
     .from("users")
     .select("org_id")
     .eq("id", user.id)
     .single();
 
-  if (!profile) redirect("/login");
+  if (!profile?.org_id) redirect("/dashboard?error=no-org");
 
-  const { error } = await supabase.from("entries").insert({
-    type,
-    storage_path,
-    raw_text,
-    user_id: user.id,
-    org_id: profile.org_id,
-  });
+  const type = String(formData.get("type") ?? "text") as "audio" | "text";
+  const rawText = String(formData.get("raw_text") ?? "").trim() || null;
+  const storagePath =
+    String(formData.get("storage_path") ?? "").trim() || null;
 
-  if (error) throw new Error(error.message);
+  const { data: entry, error: insertError } = await supabase
+    .from("entries")
+    .insert({
+      org_id: profile.org_id,
+      user_id: user.id,
+      type,
+      raw_text: rawText,
+      storage_path: storagePath,
+    })
+    .select("id")
+    .single();
 
-  redirect("/dashboard/tasks");
+  if (insertError || !entry) {
+    console.error("[entries:createEntry] insert:", insertError?.message);
+    redirect("/dashboard?error=create-failed");
+  }
+
+  // Pipeline IA pour les entrées audio (transcription + extraction de tâches)
+  if (type === "audio") {
+    try {
+      const result = await processEntry(entry.id);
+      if (result.error) {
+        console.error("[entries:createEntry] pipeline:", result.error);
+      }
+    } catch (err) {
+      console.error("[entries:createEntry] pipeline unexpected:", err);
+    }
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
