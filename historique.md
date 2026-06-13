@@ -1,3 +1,22 @@
+## 2026-06-13 — Phase 1 Capture : 4 fichiers construits et validés
+
+### Ajouté
+- `src/lib/entries/actions.ts` — server actions `getSignedUploadUrl` (client admin service_role) + `createEntry` (client session + RLS)
+- `src/components/AudioRecorder.tsx` — push-to-talk, états idle/recording/recorded/uploading/error, timer, barres animées, preview audio, upload signé
+- `src/components/NoteInput.tsx` — textarea min-h-120px + envoi via server action
+- `src/app/dashboard/capture/page.tsx` — deux onglets Vocal/Écrit, charte obsidienne/ivoire/bordeaux/or, mobile-first
+- Migration `0003_entries.sql` — table entries + bucket audio-uploads + RLS 4 policies (déjà présente, commitée)
+
+### Validations
+- `npm run build` → compile OK, `/dashboard/capture` prérendu statique ✓
+- `npm run check:rls` → isolation OK, entries avec org_id + 4 policies ✓
+
+### Décisions
+- `getSignedUploadUrl` utilise le client admin (service_role) pour générer l'URL signée côté serveur
+- Upload audio = PUT direct vers l'URL signée (jamais de passage par le serveur)
+- `createEntry` redirige vers `/dashboard/tasks` (Phase 2 à venir)
+- Extension `.webm` figée dans le chemin storage même si l'appareil encode en mp4 (bucket accepte les deux)
+
 ## 2026-06-13 — Recherches SMTP + Transcription tranchées
 
 ### Ajouté

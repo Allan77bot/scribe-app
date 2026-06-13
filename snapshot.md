@@ -5,67 +5,52 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.1 — SMTP + Transcription recherchés et tranchés ✅
-**Branche active :** `main`
+**Phase :** 2.2 — feat/capture : Phase 1 Capture terminée ✅
+**Branche active :** `feat/capture`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Hermes est en ligne sur le sandbox Scribe** 🎉 Le VPS Hermes a :
-cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
-(doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
-migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
-Prochaine étape : attaquer feat/capture (audio par URL signée).
+**Phase 1 Capture construite et validée.** Les 4 fichiers sont en place sur `feat/capture` :
+server actions upload signé + createEntry, composant AudioRecorder (push-to-talk, preview),
+NoteInput (texte), page /dashboard/capture (onglets Vocal/Écrit). Build OK, check:rls vert.
+Prochaine étape : Pipeline IA Phase 2 (transcription Whisper + extraction Haiku).
 
 ---
 
 ## Fait
 
+- [x] **Phase 1 Capture (2026-06-13)** : 4 fichiers construits (`actions.ts`, `AudioRecorder.tsx`, `NoteInput.tsx`, `capture/page.tsx`). Build OK. check:rls vert.
 - [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
 - [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
 - [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).
-
-- [x] **`main` rattrape tout le projet (2026-06-13)** : fusion **fast-forward** de
-      `feat/integration-hermes` → `main` (auth + sécurité + migrations + CI + docs
-      Hermes, 14 commits). `HERMES.md` et tous les docs sont sur la branche par défaut.
-      Briefing portable Atelier Klar ajouté (`tests/projethermes.md`).
-- [x] **Socle `feat/auth`** (sessions précédentes) : Next.js 16 PWA + auth sessions
-      Supabase + RLS par org, projet Supabase EU provisionné, isolation prouvée 4/4,
-      audit adversarial passé, Security Advisor traité. Détail → `historique.md`.
+- [x] **`main` rattrape tout le projet (2026-06-13)** : fusion fast-forward de `feat/integration-hermes` → `main` (auth + sécurité + migrations + CI + docs Hermes, 14 commits).
+- [x] **Socle `feat/auth`** (sessions précédentes) : Next.js 16 PWA + auth sessions Supabase + RLS par org, projet Supabase EU provisionné, isolation prouvée 4/4.
 - [x] **Repo poussé sur GitHub** : `main`, `feat/auth`, `feat/integration-hermes`.
-- [x] **Spec intégration Hermes validée** →
-      `docs/superpowers/specs/2026-06-12-integration-hermes-design.md`.
-- [x] **CI GitHub Actions sans secret** : lint + build + migrations + `check:rls`
-      contre un conteneur `supabase/postgres` (chaîne testée verte en local).
-- [x] **`HERMES.md`** (briefing agent + mur déterministe) +
-      **`docs/setup-claude-code-vps.md`** (Claude Code headless sur le VPS) +
-      **`docs/briefing-hermes-telegram.md`** (message prêt à coller + 5 cartes Board).
+- [x] **CI GitHub Actions sans secret** : lint + build + migrations + `check:rls` contre un conteneur `supabase/postgres`.
+- [x] **`HERMES.md`** + **`docs/setup-claude-code-vps.md`** + **`docs/briefing-hermes-telegram.md`**.
 - [x] **Cockpit Atelier Klar** : login Hermes (♣ vert) déployé sur Netlify.
 
 ## En cours / bloqué
 
-- **Hermes opérationnel — sandbox prêt, environnements OK**. Prochaines tâches : créer les cartes Board (5 tâches), puis attaquer les recherches SMTP et transcription.
+- **feat/capture construite** — en attente de push + PR pour revue Allan/Alphime.
 - **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
 
 ## Prochaines étapes (par ordre)
 
-1. Allan exécute la checklist ci-dessus → Hermes clone, lit `HERMES.md`,
-   provisionne son sandbox, prouve l'isolation (cartes Board 1-3).
-2. **Revue post-merge par Alphime** : le schéma `feat/auth` est arrivé sur `main` sans
-   la PR croisée prévue (conséquence assumée du merge direct) → lui faire relire `main`.
-3. `feat/capture` (audio par URL signée) — front démarrable contre le contrat figé.
-4. Avant prod : réactiver la confirmation e-mail + SMTP (recherche déléguée à
-   Hermes, carte Board 4).
+1. Push `feat/capture` → PR → revue → merge `main`.
+2. `feat/pipeline` (Phase 2) : transcription Whisper + extraction Haiku → remplir `transcript` + `extracted_tasks_json`.
+3. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo).
+4. `feat/tasks` (Phase 3) : affichage et validation des tâches extraites.
 
 ## Comment lancer (mémo équipe)
 
 - **Repo** : https://github.com/Allan77bot/scribe-app (privé).
-- **Projet Supabase réel** : `scribe` (org Atelier Klar), EU Frankfurt,
-  ref `kgbxxzujlubflsvprmef`. Clés dans `.env.local` (**non commité**, partagé
-  hors-repo). **Hermes n'utilise JAMAIS ce projet** → sandbox dédié (`HERMES.md`).
+- **Projet Supabase réel** : `scribe` (org Atelier Klar), EU Frankfurt, ref `kgbxxzujlubflsvprmef`. Clés dans `.env.local` (**non commité**, partagé hors-repo). **Hermes n'utilise JAMAIS ce projet** → sandbox dédié (`HERMES.md`).
 - `npm install` puis `npm run dev` → http://localhost:3000.
 - `npm run build` / `npm run lint` / `npm run test:isolation` / `npm run check:rls`.
+- **Page capture** : http://localhost:3000/dashboard/capture (après login).
 
 ## Stack technique — TRANCHÉE (détail : `docs/stack-technique.md`)
 
@@ -81,9 +66,6 @@ Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe.
 | ♠ Alphime | **Front** : design, UX/UI, intégration | `feat/design-system`, `feat/capture` (front) |
 | ♥ Claude (poste Allan) | **Cœur back-end** : base/RLS, pipeline IA | `feat/auth`, `feat/pipeline` |
 | ♣ Hermes (VPS + Claude Code) | **Sandbox/annexe** : recherches, tests, docs, code périphérique — PR only | `feat/*`, `chore/*` (jamais `main`) |
-
-- Contrat de données figé (migration 0001) → Alph peut designer en parallèle.
-- Rituel : `git pull` → branche dédiée → push → PR → CI verte → revue → merge humain.
 
 ## Décisions encore ouvertes
 
