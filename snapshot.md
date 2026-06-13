@@ -5,21 +5,22 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 3 — feat/tasks : Affichage et validation des tâches extraites ✅
-**Branche active :** `feat/tasks`
+**Phase :** 4 — feat/report : Rapport du soir + accusés de lecture ✅ DONE
+**Branche active :** `feat/report`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Phase 3 Tasks construite et validée.** Les 4 fichiers sont en place sur `feat/tasks` :
-`src/lib/tasks/actions.ts` (updateTask via admin client), `src/components/TaskCard.tsx` (badge priorité couleur + boutons Valider/Terminé), `src/components/TaskList.tsx` (groupement par priorité haute/moyenne/basse), `src/app/dashboard/tasks/page.tsx` (Server Component fetch + TaskList).
-Build OK, check:rls vert. Page affiche PHASE 3 DONE.
+**Phase 4 Rapport construite et validée.** Les 4 fichiers sont en place sur `feat/report` :
+`src/lib/reports/actions.ts` (generateReport via Claude Sonnet 4.6 + markRead via session client), `src/components/ReportCard.tsx` (HTML du rapport + liste des lecteurs + bouton Marquer comme lu), `src/components/GenerateReportButton.tsx` (bouton client avec état de chargement), `src/app/dashboard/report/page.tsx` (Server Component fetch + ReportCard ou état vide).
+Build OK, check:rls vert. Page affiche PHASE 4 DONE.
 
 ---
 
 ## Fait
 
+- [x] **Phase 4 Rapport (2026-06-13)** : 4 fichiers construits (`reports/actions.ts`, `ReportCard.tsx`, `GenerateReportButton.tsx`, `report/page.tsx`). Build OK. check:rls vert. Page `/dashboard/report` : génération via Claude Sonnet 4.6, accusés de lecture RLS-safe, état vide avec bouton de génération.
 - [x] **Phase 3 Tasks (2026-06-13)** : 4 fichiers construits (`tasks/actions.ts`, `TaskCard.tsx`, `TaskList.tsx`, `tasks/page.tsx`). Build OK. check:rls vert. Page `/dashboard/tasks` groupée par priorité, Valider/Terminé via server actions admin.
 - [x] **Phase 1 Capture (2026-06-13)** : 4 fichiers construits (`actions.ts`, `AudioRecorder.tsx`, `NoteInput.tsx`, `capture/page.tsx`). Build OK. check:rls vert.
 - [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.

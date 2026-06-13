@@ -1,3 +1,22 @@
+## 2026-06-13 — Phase 4 Report : rapport du soir et accusés de lecture ✅
+
+### Ajouté
+- `src/lib/reports/actions.ts` — server actions `generateReport()` (Claude Haiku synthèse via API Anthropic directe) + `markRead(reportId)` (client session RLS-safe)
+- `src/components/ReportCard.tsx` — affichage HTML du rapport, charte AK, liste des lecteurs, bouton "J'ai lu" conditionnel
+- `src/components/GenerateReportButton.tsx` — bouton client avec `useTransition`, gestion erreurs, états de chargement
+- `src/app/dashboard/report/page.tsx` — Server Component, fetch dernier rapport + accusés via admin client (filtré org_id), état vide ou ReportCard, affiche PHASE 4 DONE
+
+### Validations
+- `npm run build` → compile OK, TypeScript OK après export types Report/ReportRead ✓
+- `npm run check:rls` → isolation OK, reports avec org_id RLS + policies ✓
+- Database déjà en place : tables reports + report_reads avec RLS et policies
+
+### Décisions
+- `generateReport` utilise Claude Haiku (modèle medium) pour la synthèse — respect stack IA hybride
+- HTML du rapport sans CSS inline, balises simples (h1, h2, p, ul, li, hr)
+- `markRead` utilise client session pour insertion RLS-safe dans report_reads
+- `reports` utilise admin client avec filtrage org_id (pattern consistant avec tasks)
+
 ## 2026-06-13 — Phase 3 Tasks : affichage et validation des tâches extraites
 
 ### Ajouté
