@@ -1,3 +1,11 @@
+## 2026-06-13 — Phase 0 : Coquille UI mobile-first ✅
+
+### Ajouté
+- `src/components/BottomNav.tsx` — nav fixe en bas, 3 onglets
+- `src/app/dashboard/layout.tsx` — layout avec BottomNav
+- `src/app/dashboard/{capture,tasks,report}/page.tsx` — placeholders
+- Build OK, PR #2 ouverte vers `prototype`
+
 ## 2026-06-13 — Recherches SMTP + Transcription tranchées
 
 ### Ajouté

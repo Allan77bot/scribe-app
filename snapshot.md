@@ -5,23 +5,20 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.1 — SMTP + Transcription recherchés et tranchés ✅
-**Branche active :** `main`
+**Phase :** 0 — Coquille UI mobile-first ✅
+**Branche active :** `feat/p0-coquille-ui` → PR #2 vers `prototype`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Hermes est en ligne sur le sandbox Scribe** 🎉 Le VPS Hermes a :
-cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
-(doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
-migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
-Prochaine étape : attaquer feat/capture (audio par URL signée).
+**Hermes est en ligne sur le sandbox Scribe** 🎉 VPS opérationnel, sandbox OK, migrations OK. P0 coquille UI faite, PR #2 vers prototype. Prochaine étape : P1 capture (push-to-talk + URL signée), puis P2 pipeline IA (clés OpenAI nécessaires).
 
 ---
 
 ## Fait
 
+- [x] **Phase 0 — Coquille UI mobile-first (2026-06-13)** : BottomNav (3 onglets : Capturer/Tâches/Rapport), layout dashboard, placeholders, build OK. PR #2 vers `prototype`.
 - [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
 - [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
 - [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).
