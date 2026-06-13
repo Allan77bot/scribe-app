@@ -45,7 +45,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect("/dashboard/capture");
 }
 
 // ── Connexion ────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect("/dashboard/capture");
 }
 
 // ── Déconnexion ──────────────────────────────────────────────────────────
