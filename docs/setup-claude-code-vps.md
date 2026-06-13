@@ -59,6 +59,10 @@ claude
 > /plugin install superpowers
 ```
 
+**Lecture recommandée** : `docs/methode-claude-code.md` — la méthode d'Allan
+pour piloter Claude Code (modèle mental, skills/subagents/hooks, boucle
+plan → exécution → vérification). Utile dès que tu délègues du code en headless.
+
 ## 6. Invocation par Hermes (headless)
 
 Hermes lance Claude Code en mode non-interactif depuis le clone :

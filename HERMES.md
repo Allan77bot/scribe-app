@@ -66,3 +66,8 @@ projet réel) reste à Claude (poste d'Allan) + validation humaine.
 Si tu délègues du code à Claude Code (mode headless) : `claude -p "<tâche>"`
 depuis le clone du repo — il lira `CLAUDE.md` et ce fichier. Installation et
 configuration : `docs/setup-claude-code-vps.md`.
+
+**Méthode de pilotage** : `docs/methode-claude-code.md` — la synthèse d'Allan
+pour faire tourner Claude Code comme un agent fiable (contexte = ressource rare,
+quand déléguer en subagent, hooks pour ce qui doit *toujours* arriver, boucle
+plan → exécution → vérification). Lecture de fond avant de déléguer du code.
