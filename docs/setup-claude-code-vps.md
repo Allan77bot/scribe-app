@@ -65,6 +65,9 @@ plan → exécution → vérification). Utile dès que tu délègues du code en 
 
 ## 6. Invocation par Hermes (headless)
 
+> Bonnes pratiques détaillées (output-format, permissions/allowlist, resume,
+> budget, robustesse) : `docs/piloter-claude-code-depuis-hermes.md`.
+
 Hermes lance Claude Code en mode non-interactif depuis le clone :
 
 ```bash
