@@ -4,17 +4,19 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-**Dernière mise à jour :** 2026-06-12
-**Phase :** 1.5 — socle `feat/auth` terminé et prouvé ; **repo poussé sur GitHub**
-(`Allan77bot/scribe-app`, privé) ; **intégration d'Hermes** (agent VPS) en cours.
-**Branche active :** `feat/integration-hermes`
+**Dernière mise à jour :** 2026-06-13
+**Phase :** 1.5 — socle `feat/auth` + intégration Hermes **mergés dans `main`**
+(fast-forward) : `main` contient désormais **tout le projet réel** (`Allan77bot/scribe-app`,
+privé). Hermes voit l'intégralité sur la branche par défaut.
+**Branche active :** `feat/integration-hermes` (à clore — prochain concern = nouvelle branche)
 
 ---
 
 ## TL;DR (pour Discord)
 
-Le **repo est sur GitHub** (privé, `Allan77bot/scribe-app` — push validé par Allan) :
-la PR croisée `feat/auth` pour Alphime est enfin possible. Nouveauté du jour :
+**`main` rattrape tout le projet** : fusion fast-forward de `feat/integration-hermes`
+→ `main` (socle auth + sécurité + migrations + CI + docs Hermes). Hermes voit
+désormais l'intégralité sur la branche par défaut, plus seulement des docs. Rappel :
 **Hermes (agent autonome du VPS) rejoint le projet** en bac à sable — il bossera
 sur son propre projet Supabase sandbox, par PR uniquement, piloté via le Board
 Atelier Klar, avec Claude Code installé sur le VPS pour les grosses tâches code.
@@ -26,6 +28,10 @@ décision GitHub Pro (protection de `main`), puis coller le briefing Telegram à
 
 ## Fait
 
+- [x] **`main` rattrape tout le projet (2026-06-13)** : fusion **fast-forward** de
+      `feat/integration-hermes` → `main` (auth + sécurité + migrations + CI + docs
+      Hermes, 14 commits). `HERMES.md` et tous les docs sont sur la branche par défaut.
+      Briefing portable Atelier Klar ajouté (`tests/projethermes.md`).
 - [x] **Socle `feat/auth`** (sessions précédentes) : Next.js 16 PWA + auth sessions
       Supabase + RLS par org, projet Supabase EU provisionné, isolation prouvée 4/4,
       audit adversarial passé, Security Advisor traité. Détail → `historique.md`.
@@ -53,10 +59,10 @@ décision GitHub Pro (protection de `main`), puis coller le briefing Telegram à
 
 1. Allan exécute la checklist ci-dessus → Hermes clone, lit `HERMES.md`,
    provisionne son sandbox, prouve l'isolation (cartes Board 1-3).
-2. **PR croisée `feat/auth`** : Alphime valide le schéma → merge dans `main`.
-3. Merge de `feat/integration-hermes` (spec + CI + docs) après revue.
-4. `feat/capture` (audio par URL signée) — front démarrable contre le contrat figé.
-5. Avant prod : réactiver la confirmation e-mail + SMTP (recherche déléguée à
+2. **Revue post-merge par Alphime** : le schéma `feat/auth` est arrivé sur `main` sans
+   la PR croisée prévue (conséquence assumée du merge direct) → lui faire relire `main`.
+3. `feat/capture` (audio par URL signée) — front démarrable contre le contrat figé.
+4. Avant prod : réactiver la confirmation e-mail + SMTP (recherche déléguée à
    Hermes, carte Board 4).
 
 ## Comment lancer (mémo équipe)

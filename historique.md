@@ -14,6 +14,29 @@ Format d'une entrée :
 
 ---
 
+## 2026-06-13 — `main` rattrape tout le projet (fusion fast-forward)
+
+- **Contexte :** Hermes ne voyait pas `HERMES.md` ni les docs d'intégration — ils
+  n'existaient que sur `feat/integration-hermes`, jamais mergés. `main` était resté à
+  la fondation documentaire (zéro code), donc invisible depuis la branche par défaut.
+- **Décision (Allan) :** **merge direct** plutôt que PR — l'option la plus propre pour
+  qu'Hermes voie tout sur la branche par défaut. Validée en connaissance de cause : la
+  branche embarque **tout le projet** (auth + sécurité + migrations + CI + docs), pas
+  seulement les docs Hermes (les commits Hermes sont empilés sur `feat/auth`).
+- **Fait :**
+  - **Fusion fast-forward** `feat/integration-hermes` → `main` (14 commits, ~9 300
+    lignes), poussée sur `origin/main`. Pas de divergence → historique préservé, aucun
+    commit de merge.
+  - `tests/projethermes.md` (briefing portable Atelier Klar) commité et inclus — repo
+    privé, **aucun secret dedans** (vérifié) ; ne contient que des IDs de Sheets.
+  - `HERMES.md`, `docs/briefing-hermes-telegram.md`, la spec d'intégration et le socle
+    `feat/auth` sont désormais sur `main` → visibles par Hermes.
+- **Conséquence assumée :** la **PR croisée `feat/auth`** (revue du schéma par Alphime)
+  prévue avant merge n'a pas eu lieu → la relecture se fera **post-merge** sur `main`.
+- **Ouvert :** activation d'Hermes inchangée (PAT GitHub fine-grained + Supabase sandbox
+  + briefing Telegram). `gh` absent du poste d'Allan → à installer si on veut des PR en
+  CLI à l'avenir.
+
 ## 2026-06-12 — Hermes rejoint Scribe + repo poussé sur GitHub
 
 - **Décisions :**
