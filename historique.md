@@ -1,3 +1,54 @@
+## 2026-06-13 — Manifeste « soul » d'Hermes (étape 1) + doc méthode Claude Code
+
+- **Décisions (validées Allan) :**
+  - **Identité d'Hermes** : pas un assistant perso → **centre opérationnel d'Atelier Klar**,
+    un **co-gérant** qui vit dans l'environnement de l'entreprise (jamais le perso d'Allan),
+    piloté via son **dashboard**. Connaît les process (vidéos → skill `A:` → Mem0).
+  - **3 piliers de l'année** : (1) **Acquisition clients sites web** (cron matin, démarrer doux,
+    encaisser vite) ; (2) **Livrer les produits récurrents** (apps MRR + sites web, puis automatiser) ;
+    (3) **Faire monter Allan en compétence** (explications simples + **test de compétence hebdo**).
+  - **Hors-périmètre** : perso d'Allan, prospection agressive au démarrage, cœur sensible de Scribe
+    (RLS/auth/clés EU → Claude + Allan), haut de gamme IA partout.
+- **Fait :**
+  - **`manifeste-soul-hermes.md`** écrit (identité + 3 piliers + hors-périmètre + métriques + com +
+    permission + recette `mem0.add` en `type:"system"`). → **étape 1 d'AGENTS.md cochée.**
+  - **`skillorganisation.md`** (via sous-agent) : méthode générale Claude Code (session en 5 temps,
+    skills d'abord, brainstorm avant de coder, sous-agents, vérif avant « fait », git, fin de session).
+  - **3 faits récents notés** (AGENTS.md + mémoire `ecosysteme-atelier-klar-hermes`) :
+    **Vercel branché + appli pushée**, Hermes **maîtrise les commandes**, **Google scraper API** en prospection.
+- **Ouvert :**
+  - ⚠️ **Re-soulever la protection de `main`** : Vercel déploie maintenant depuis le repo.
+  - **Charger le manifeste dans Mem0** (souvenir « système »).
+  - Reste les étapes 2-4 d'AGENTS.md (skill `A:` sur Mem0, boucle dreaming, transmission à Hermes).
+  - Manifeste : **métriques proposées à valider/ajuster** avec Allan.
+
+## 2026-06-13 — Hermes : capacités vidéo + apprentissage (skills + mémoire Mem0)
+
+- **Décisions :**
+  - **Hermes apprend de vidéos** via la convention `A: <lien YouTube>` (A = Amélioration) :
+    il regarde la vidéo, extrait 1-3 leçons actionnables, les écrit en mémoire, Allan valide (règle d'or n°4).
+  - **Cheat code de routage** : Hermes (DeepSeek) aiguille → **Claude Code Opus 4.8** (abo Allan)
+    fait le travail de qualité → **Gemini** regarde la vidéo. Opus 4.8, pas Fable 5 (indispo).
+  - **Routage par domaine = un tag** (`metadata.domaine`), pas une armée d'agents (anti-pattern de la vidéo).
+  - **NotebookLM mis de côté** : pas d'API pour le compte Pro (Enterprise / MCP non officiel seulement).
+  - **Permissions** : Allan (Telegram `1374851322`) seul = code lourd / skill A: ;
+    Alphim·Shane (`7533858975`) = crons / RDV / actus.
+- **Fait :**
+  - Recherche web (firecrawl) sur la lecture de vidéos + l'état de l'API NotebookLM.
+  - **Test réel concluant** : l'API Gemini (URL YouTube → `gemini-3.5-flash`) a regardé une vidéo
+    de 23 min et extrait l'archi mémoire. Clé dans `.env.local` (gitignoré).
+  - **Audit VPS** (`audit-hermes-vps.sh`, lecture seule) → pas de `MEMORY.md`/`soul.md` ;
+    conteneur minimal (ni `cron` ni `systemd`).
+  - **Exports Mem0 lus** : mémoire d'Hermes = **Mem0 cloud**, scopée `user_id` (Allan, Alphim) +
+    `agent_id` (Hermes). 2 briques sur 5 de la vidéo déjà en place (souvenirs auto + peer cards).
+  - Livrables racine : `skillYTB.md`, `skillapprentissage.md` (Mem0), `skillnotebook.md`,
+    `memoire-agent-hermes.html`, `audit-hermes-vps.sh`, **`AGENTS.md`** (snapshot + next steps) ;
+    pointeur ajouté dans `CLAUDE.md` (« Où chercher »).
+- **Ouvert (prochaines étapes — cf. `AGENTS.md`) :**
+  - Écrire le manifeste « soul » (objectifs + règle de permission).
+  - Brancher le skill A: sur Mem0 (`mem0.add` taggé domaine) ; boucle « dreaming » via le scheduler interne d'Hermes.
+  - Transmettre les skills à Hermes (vérifier `GEMINI_API_KEY` + `MEM0_API_KEY`).
+
 ## 2026-06-13 — Recherches SMTP + Transcription tranchées
 
 ### Ajouté
