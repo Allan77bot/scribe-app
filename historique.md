@@ -1,3 +1,11 @@
+## 2026-06-13 — Hermes : skill A: branché sur Mem0 (étape 2) + boucle dreaming (étape 3)
+
+- **Fait (code, pas encore déployé) :** `skillapprentissage.md` complété —
+  - **étape 2** : module `apprendre.py` (`check_sender` / `watch_video` / `save_lesson` / `validate_lesson`), **Claude dans la boucle** (il compose les leçons), rien d'auto dans Mem0.
+  - **étape 3** : `dream()` (**lecture seule**) — relit les leçons `valide_allan` par domaine, briefing du matin, à brancher sur le scheduler 9h d'Hermes.
+- **Gated (besoin VPS + `MEM0_API_KEY` + accord Allan) :** test live de `save_lesson` (domaine="test" puis `delete`) ; branchement de `dream()` sur la prospection 9h.
+- **Reste (AGENTS.md) :** étape 4 — transmettre `skillYTB.md` + `skillapprentissage.md` à Hermes (Telegram), vérifier `GEMINI_API_KEY` + `MEM0_API_KEY`.
+
 ## 2026-06-13 — Manifeste « soul » d'Hermes (étape 1) + doc méthode Claude Code
 
 - **Décisions (validées Allan) :**

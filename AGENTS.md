@@ -36,8 +36,8 @@
 ## ✅ Prochaines étapes
 
 1. [x] **Écrire le manifeste « soul »** : 3 piliers de l'année + hors-périmètre + métriques + règles de com + règle de permission. → **fait** : `manifeste-soul-hermes.md` (validé Allan 2026-06-13), reste à le charger dans Mem0 en souvenir « système ».
-2. [ ] **Brancher le skill `A:` sur Mem0** : `mem0.add(agent_id="hermes", metadata={domaine, statut, …})`. Code dans `skillapprentissage.md`.
-3. [ ] **Boucle « dreaming »** : job `mem0.search()` sur les leçons validées, branché sur le scheduler interne d'Hermes (celui de la prospection 9h).
+2. [x] **Brancher le skill `A:` sur Mem0** : → **code écrit** dans `skillapprentissage.md` (module `apprendre.py` : `check_sender`/`watch_video`/`save_lesson`/`validate_lesson`, Claude dans la boucle, rien d'auto). Reste : **test live sur le VPS** (gated, `MEM0_API_KEY`).
+3. [x] **Boucle « dreaming »** : → **code écrit** dans `skillapprentissage.md` (`dream()`, lecture seule, briefing du matin par domaine). Reste : **brancher sur le scheduler interne d'Hermes** (job prospection 9h) sur le VPS.
 4. [ ] **Transmettre à Hermes** (Telegram) `skillYTB.md` + `skillapprentissage.md`. Vérifier qu'il a `GEMINI_API_KEY` + `MEM0_API_KEY`.
 5. [ ] *(optionnel)* Garder `skillnotebook.md` en réserve si Google sort l'API NotebookLM grand public.
 
