@@ -3,11 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient as createAdminSupabase } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-05-27.dahlia",
-});
+// Paresseux : Stripe exige une apiKey, mais process.env n'est pas disponible
+// au moment du build Next.js (collecte des pages). On initialise au premier appel.
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2026-05-27.dahlia",
+    });
+  }
+  return _stripe;
+}
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getEndpointSecret(): string {
+  return process.env.STRIPE_WEBHOOK_SECRET!;
+}
 
 // Mappe un statut d'abonnement Stripe vers les valeurs autorisées par le
 // check constraint de organizations.subscription_status
@@ -42,7 +52,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    event = getStripe().webhooks.constructEvent(body, sig, getEndpointSecret());
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`⚠️ Webhook signature verification failed.`, message);
@@ -70,7 +80,7 @@ export async function POST(req: NextRequest) {
         // line_items n'est PAS inclus dans le payload de l'événement : on le
         // récupère explicitement via l'API (sinon le prix serait introuvable).
         let plan = "solo"; // défaut
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+        const lineItems = await getStripe().checkout.sessions.listLineItems(session.id, {
           limit: 1,
         });
         const priceId = lineItems.data[0]?.price?.id;
