@@ -5,22 +5,22 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.2 — feat/capture : Phase 1 Capture terminée ✅
-**Branche active :** `feat/capture`
+**Phase :** 3 — feat/tasks : Affichage et validation des tâches extraites ✅
+**Branche active :** `feat/tasks`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Phase 1 Capture construite et validée.** Les 4 fichiers sont en place sur `feat/capture` :
-server actions upload signé + createEntry, composant AudioRecorder (push-to-talk, preview),
-NoteInput (texte), page /dashboard/capture (onglets Vocal/Écrit). Build OK, check:rls vert.
-Prochaine étape : Pipeline IA Phase 2 (transcription Whisper + extraction Haiku).
+**Phase 3 Tasks construite et validée.** Les 4 fichiers sont en place sur `feat/tasks` :
+`src/lib/tasks/actions.ts` (updateTask via admin client), `src/components/TaskCard.tsx` (badge priorité couleur + boutons Valider/Terminé), `src/components/TaskList.tsx` (groupement par priorité haute/moyenne/basse), `src/app/dashboard/tasks/page.tsx` (Server Component fetch + TaskList).
+Build OK, check:rls vert. Page affiche PHASE 3 DONE.
 
 ---
 
 ## Fait
 
+- [x] **Phase 3 Tasks (2026-06-13)** : 4 fichiers construits (`tasks/actions.ts`, `TaskCard.tsx`, `TaskList.tsx`, `tasks/page.tsx`). Build OK. check:rls vert. Page `/dashboard/tasks` groupée par priorité, Valider/Terminé via server actions admin.
 - [x] **Phase 1 Capture (2026-06-13)** : 4 fichiers construits (`actions.ts`, `AudioRecorder.tsx`, `NoteInput.tsx`, `capture/page.tsx`). Build OK. check:rls vert.
 - [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
 - [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
@@ -34,15 +34,14 @@ Prochaine étape : Pipeline IA Phase 2 (transcription Whisper + extraction Haiku
 
 ## En cours / bloqué
 
-- **feat/capture construite** — en attente de push + PR pour revue Allan/Alphime.
+- **feat/tasks construite** — en attente de push + PR pour revue Allan/Alphime.
 - **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
 
 ## Prochaines étapes (par ordre)
 
-1. Push `feat/capture` → PR → revue → merge `main`.
-2. `feat/pipeline` (Phase 2) : transcription Whisper + extraction Haiku → remplir `transcript` + `extracted_tasks_json`.
-3. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo).
-4. `feat/tasks` (Phase 3) : affichage et validation des tâches extraites.
+1. Push `feat/tasks` → PR → revue → merge `main`.
+2. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo).
+3. `feat/rapport` (Phase 4) : synthèse du soir via Claude Sonnet 4.6 + rapport de passation.
 
 ## Comment lancer (mémo équipe)
 

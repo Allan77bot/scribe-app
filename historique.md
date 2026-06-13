@@ -1,3 +1,20 @@
+## 2026-06-13 — Phase 3 Tasks : affichage et validation des tâches extraites
+
+### Ajouté
+- `src/lib/tasks/actions.ts` — server action `updateTask(entryId, taskIndex, updates)` via client admin (service_role) ; lecture-modification-écriture du tableau JSONB
+- `src/components/TaskCard.tsx` — carte tâche avec badge priorité couleur (haute=#6E1F2C, moyenne=#A8804D, basse=#F0E8D6/obsidienne), assigné, deadline, boutons Valider / Terminé via `useTransition`
+- `src/components/TaskList.tsx` — Server Component, groupement par priorité (haute → moyenne → basse), render TaskCard pour chaque tâche
+- `src/app/dashboard/tasks/page.tsx` — Server Component, fetch entries avec extracted_tasks_json (RLS org garantie), aplatissement en liste de tâches avec entryId+index, affiche PHASE 3 DONE
+
+### Validations
+- `npm run build` → compile OK, TypeScript OK, `/dashboard/tasks` dynamique ✓
+- `npm run check:rls` → isolation OK, 0 table à org_id sans RLS ✓
+
+### Décisions
+- `updateTask` bypasse la RLS volontairement (admin client) car le token session n'a pas les droits d'écriture JSONB partielle ; la route est serveur-only (`"use server"`)
+- `status` et `assignee` sont fusionnés dans le JSONB existant (pas de migration schéma) — évolution possible sans breaking change
+- TaskList = Server Component (pas d'interactivité propre), TaskCard = Client Component (useTransition pour les boutons)
+
 ## 2026-06-13 — Phase 1 Capture : 4 fichiers construits et validés
 
 ### Ajouté
