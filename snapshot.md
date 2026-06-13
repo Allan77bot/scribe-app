@@ -4,11 +4,9 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-**Dernière mise à jour :** 2026-06-13
-**Phase :** 1.5 — socle `feat/auth` + intégration Hermes **mergés dans `main`**
-(fast-forward) : `main` contient désormais **tout le projet réel** (`Allan77bot/scribe-app`,
-privé). Hermes voit l'intégralité sur la branche par défaut.
-**Branche active :** `feat/integration-hermes` (à clore — prochain concern = nouvelle branche)
+**Dernière mise à jour :** 2026-06-12
+**Phase :** 1.5 — socle `feat/auth` ✅ provisioning sandbox terminé
+**Branche active :** `main` (première PR à venir sur une branche dédiée)
 
 ---
 

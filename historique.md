@@ -289,3 +289,26 @@ Format d'une entrée :
   - Récupérer le prototype existant (HTML push-to-talk + workflows n8n) dans
     `legacy/` pour analyse → prochaine étape.
   - Confirmer les stacks déjà possédées par l'équipe avant de coder l'infra.
+
+## 2026-06-12 — Sandbox scribe opérationnel
+
+✅ **Provisioning sandbox Supabase terminé**
+- Projet existant `doorjfxqetoawqnvguvz` → renommé scribe-sandbox
+- Connexion via pooler AWS (IPv4)
+- `.env.local` généré (anon + service_role + DB URL pooler)
+- `npm install` — 385 packages installés
+
+✅ **Migrations appliquées** (2/2)
+- `0001_init_auth.sql` → tables `organizations`, `users`, triggers org+profil auto
+- `0002_harden_function_grants.sql` → hardening des grants
+
+✅ **Tests d'isolation** 4/4 pass — RLS fonctionnelle
+- Création org + profil par inscription
+- Org A ne voit QUE ses données
+- Cross-org bloqué même en ciblant l'ID
+- Injection `invite_org_id` ignorée (anti-fuite)
+
+✅ **Check RLS** — vert
+- `users` → RLS ON + policies org_id ✓
+- `organizations` → RLS ON (table racine, sans policy = OK)
+- `_scribe_migrations` → RLS ON (table interne)
