@@ -1,25 +1,21 @@
-## 2026-06-13 — Phase 2 Pipeline IA — feat/pipeline
+## 2026-06-13 — Phase 1 Capture : 4 fichiers construits et validés
 
 ### Ajouté
-- `src/lib/pipeline/actions.ts` — server action `processEntry` :
-  - Télécharge le fichier audio depuis le bucket privé `audio-uploads` (client admin service_role)
-  - Transcription via **OpenAI Whisper** (`whisper-1`)
-  - Extraction de tâches JSON via **Claude Haiku** (`claude-3-haiku-20240307`)
-  - Met à jour `entries` : `transcript` + `extracted_tasks_json` + `processed_at`
-- `src/lib/entries/actions.ts` — server action `createEntry` :
-  - Insère l'entrée (org_id RLS via client anon)
-  - Si `type=audio` → appelle `processEntry` avant le redirect
+- `src/lib/entries/actions.ts` — server actions `getSignedUploadUrl` (client admin service_role) + `createEntry` (client session + RLS)
+- `src/components/AudioRecorder.tsx` — push-to-talk, états idle/recording/recorded/uploading/error, timer, barres animées, preview audio, upload signé
+- `src/components/NoteInput.tsx` — textarea min-h-120px + envoi via server action
+- `src/app/dashboard/capture/page.tsx` — deux onglets Vocal/Écrit, charte obsidienne/ivoire/bordeaux/or, mobile-first
+- Migration `0003_entries.sql` — table entries + bucket audio-uploads + RLS 4 policies (déjà présente, commitée)
 
-### Vérifications
-- `npm run build` → ✅ compilé sans erreur TypeScript
-- `npm run check:rls` → ✅ vert (entries : RLS ON, 4 policies, org_id ✓)
+### Validations
+- `npm run build` → compile OK, `/dashboard/capture` prérendu statique ✓
+- `npm run check:rls` → isolation OK, entries avec org_id + 4 policies ✓
 
 ### Décisions
-- `processEntry` toujours via client admin (service_role) — jamais exposé côté client
-- Jamais le modèle haut de gamme pour extraction — Haiku seul (règle d'or n°5)
-- Erreur pipeline = log console + pas de crash, l'entrée existe déjà
-
----
+- `getSignedUploadUrl` utilise le client admin (service_role) pour générer l'URL signée côté serveur
+- Upload audio = PUT direct vers l'URL signée (jamais de passage par le serveur)
+- `createEntry` redirige vers `/dashboard/tasks` (Phase 2 à venir)
+- Extension `.webm` figée dans le chemin storage même si l'appareil encode en mp4 (bucket accepte les deux)
 
 ## 2026-06-13 — Recherches SMTP + Transcription tranchées
 
