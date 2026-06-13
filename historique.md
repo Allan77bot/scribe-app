@@ -1,3 +1,31 @@
+## 2026-06-13 — Sandbox Supabase provisionné + isolation 4/4
+
+### Ajouté
+- Mise en place du sandbox Supabase sur le projet doorjfxqetoawqnvguvz (anonyme, renommé scribe-sandbox)
+- Migration 003 : RLS policies, triggers org auto-création, index plein-texte
+- Migration 004 : index sur subscriptions::org_status et idx organizations nom/trgm
+- npm install exécuté (384 packages)
+- .env.local généré avec les clés sandbox + mot de passe DB
+
+### Testé
+- ✅ Isolation : trigger crée bien une org + profil admin par inscrit
+- ✅ Isolation : org A ne voit QUE ses propres lignes
+- ✅ Isolation : org A ne peut PAS lire l'org B, même en ciblant son id
+- ✅ Isolation : le trigger IGNORE un invite_org_id injecté (anti-fuite)
+- Résultat final : **4/4 pass**
+
+### Infrastructure
+- gh auth OK (token classique scope total)
+- PR #1 mergée sur main (chore/sandbox-provisioning)
+- Veille Tech recâblée sur morjonallan@gmail.com
+
+### Décisions
+- Sandbox = projet Supabase existant sur le compte contact@atelierklar.fr
+- DB password récupéré de la console Supabase (Allan)
+- Modèle deepseek-v4-flash pour Veille Tech (fin des Broken pipe)
+
+---
+
 # Historique — journal du projet
 
 > Journal **daté et append-only** : on ajoute en haut, on ne réécrit jamais le
