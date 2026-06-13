@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comment un agent IA se souvient et s'améliore — Scribe</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --card:#181b22;
+    --card2:#1f232c;
+    --ink:#eef1f6;
+    --muted:#9aa3b2;
+    --line:#2a2f3a;
+    --accent:#6ea8fe;
+    --accent2:#7ee0b8;
+    --warn:#f5c969;
+    --bad:#ff8b8b;
+    --radius:18px;
+    --shadow:0 6px 22px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    overflow-x:hidden;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, rgba(110,168,254,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(126,224,184,.08), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;
+    font-size:16px;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:20px 16px 64px;
+  }
+  header.hero{
+    background:linear-gradient(160deg,#1b2230,#13161d);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px 20px;
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+  }
+  .kicker{
+    display:inline-block;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent2);
+    background:rgba(126,224,184,.10);
+    border:1px solid rgba(126,224,184,.25);
+    padding:5px 10px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:26px;
+    line-height:1.2;
+    margin:0 0 10px;
+    letter-spacing:-.01em;
+  }
+  h1 .accent{color:var(--accent);}
+  .lede{color:var(--muted);font-size:15px;margin:0;}
+
+  section{margin:26px 0;}
+  h2{
+    font-size:20px;
+    margin:0 0 6px;
+    letter-spacing:-.01em;
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  h2 .em{font-size:22px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 16px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    box-shadow:var(--shadow);
+    margin:14px 0;
+  }
+  .card h3{font-size:16px;margin:0 0 8px;}
+  p{margin:10px 0;}
+  .muted{color:var(--muted);}
+  strong{color:#fff;}
+  code{
+    background:#0c0e13;
+    border:1px solid var(--line);
+    padding:1px 6px;
+    border-radius:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.88em;
+    color:#cfe0ff;
+  }
+
+  /* ---- Big idea box ---- */
+  .bigidea{
+    background:linear-gradient(150deg,rgba(110,168,254,.14),rgba(126,224,184,.10));
+    border:1px solid rgba(110,168,254,.35);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    box-shadow:var(--shadow);
+  }
+  .bigidea .tag{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+  .bigidea p{font-size:16px;margin:8px 0 0;}
+
+  /* ---- Memory file cards (schéma A) ---- */
+  .files{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .file{
+    background:var(--card2);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:14px;
+    padding:14px;
+  }
+  .file:nth-child(2){border-left-color:var(--accent2);}
+  .file:nth-child(3){border-left-color:var(--warn);}
+  .file:nth-child(4){border-left-color:#c89bff;}
+  .file .fname{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:14px;color:#fff;font-weight:600;margin-bottom:4px;
+    display:flex;align-items:center;gap:7px;
+  }
+  .file .role{font-size:13px;color:var(--muted);margin:6px 0;}
+  .file .ana{font-size:12.5px;color:#c6cedd;background:#0c0e13;border:1px dashed var(--line);border-radius:8px;padding:7px 9px;margin-top:8px;}
+  .file .who{
+    display:inline-block;margin-top:9px;font-size:11px;letter-spacing:.04em;
+    padding:3px 8px;border-radius:999px;border:1px solid var(--line);
+  }
+  .who.you{color:var(--accent2);border-color:rgba(126,224,184,.4);background:rgba(126,224,184,.08);}
+  .who.ai{color:var(--accent);border-color:rgba(110,168,254,.4);background:rgba(110,168,254,.08);}
+
+  /* ---- Flow / cycle diagrams ---- */
+  .flow{display:flex;flex-direction:column;gap:0;margin:6px 0;}
+  .node{
+    background:var(--card2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:13px 14px;
+    position:relative;
+  }
+  .node .lbl{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+  .node .txt{font-size:14.5px;margin-top:3px;}
+  .node.time{border-color:rgba(110,168,254,.45);background:linear-gradient(140deg,rgba(110,168,254,.14),transparent);}
+  .node.out{border-color:rgba(126,224,184,.45);background:linear-gradient(140deg,rgba(126,224,184,.14),transparent);}
+  .arrow{
+    align-self:center;
+    width:2px;height:22px;
+    background:linear-gradient(var(--accent),transparent);
+    position:relative;
+  }
+  .arrow::after{
+    content:"▼";
+    position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+    color:var(--accent);font-size:11px;line-height:1;
+  }
+  .badge{
+    display:inline-block;font-size:11px;font-weight:700;
+    width:22px;height:22px;line-height:22px;text-align:center;
+    border-radius:50%;background:var(--accent);color:#0b0e14;margin-right:8px;
+  }
+
+  /* ---- Loop visual (act/write/read) ---- */
+  .loop{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+    background:#0c0e13;border:1px solid var(--line);border-radius:14px;padding:14px;
+  }
+  .loop .step{
+    background:var(--card2);border:1px solid var(--line);border-radius:999px;
+    padding:8px 13px;font-size:13px;white-space:nowrap;
+  }
+  .loop .step.k{border-color:rgba(126,224,184,.45);color:var(--accent2);}
+  .loop .sep{color:var(--accent);font-weight:700;}
+  .loop .ret{width:100%;text-align:center;color:var(--muted);font-size:12px;margin-top:2px;}
+
+  /* ---- Skill A: 3 columns flow ---- */
+  .lane{
+    display:grid;grid-template-columns:1fr;gap:12px;
+  }
+  .lanecol{
+    background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;
+  }
+  .lanecol .head{
+    font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+    margin-bottom:8px;display:flex;align-items:center;gap:7px;
+  }
+  .lanecol.mem .head{color:var(--accent2);}
+  .lanecol ol{margin:0;padding-left:20px;}
+  .lanecol li{font-size:13.5px;margin:6px 0;}
+
+  /* ---- Lesson block (visual) ---- */
+  .lesson{
+    background:#0c0e13;border:1px solid var(--line);border-radius:14px;padding:14px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;
+  }
+  .lesson .ltitle{color:var(--accent2);font-size:14px;font-weight:700;margin-bottom:10px;font-family:inherit;}
+  .lesson .row{display:flex;gap:8px;margin:7px 0;flex-wrap:wrap;}
+  .lesson .field{color:var(--accent);min-width:120px;font-weight:600;}
+  .lesson .val{color:#cdd6e6;flex:1;min-width:160px;}
+  .pill-ok{display:inline-block;background:rgba(126,224,184,.12);border:1px solid rgba(126,224,184,.4);color:var(--accent2);border-radius:999px;padding:2px 9px;font-size:11px;}
+
+  /* ---- Tables ---- */
+  .tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line);}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:13.5px;}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:#0c0e13;color:#fff;font-size:12px;letter-spacing:.04em;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  td code{font-size:.82em;}
+  .st-bad{color:var(--bad);font-weight:600;}
+  .st-ok{color:var(--accent2);font-weight:600;}
+  .st-warn{color:var(--warn);font-weight:600;}
+
+  /* ---- Steps list ---- */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;}
+  ol.steps>li{
+    counter-increment:s;position:relative;
+    background:var(--card2);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px 13px 52px;margin:10px 0;font-size:14.5px;
+  }
+  ol.steps>li::before{
+    content:counter(s);position:absolute;left:12px;top:12px;
+    width:28px;height:28px;line-height:28px;text-align:center;
+    background:var(--accent);color:#0b0e14;border-radius:9px;font-weight:700;font-size:14px;
+  }
+  ol.steps>li b{color:#fff;}
+
+  /* ---- Audit / pre ---- */
+  .note{
+    background:rgba(245,201,105,.08);border:1px solid rgba(245,201,105,.35);
+    border-radius:12px;padding:12px 14px;font-size:13.5px;color:#f3e5c0;margin:12px 0;
+  }
+  .note b{color:var(--warn);}
+  .copybar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:#0c0e13;border:1px solid var(--line);border-bottom:none;
+    border-radius:12px 12px 0 0;padding:9px 12px;font-size:12px;color:var(--muted);
+  }
+  .copybar .fn{font-family:ui-monospace,Menlo,Consolas,monospace;color:#cfe0ff;}
+  .copybtn{
+    background:var(--accent);color:#0b0e14;border:none;border-radius:8px;
+    padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;
+  }
+  pre{
+    margin:0;background:#0a0c10;border:1px solid var(--line);border-radius:0 0 12px 12px;
+    padding:14px;overflow-x:auto;font-size:11.5px;line-height:1.5;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c8d3e6;
+    max-height:420px;overflow-y:auto;
+  }
+  pre::-webkit-scrollbar{height:8px;width:8px;}
+  pre::-webkit-scrollbar-thumb{background:#2a2f3a;border-radius:8px;}
+
+  /* ---- 3 voies ---- */
+  .voies{display:grid;grid-template-columns:1fr;gap:12px;}
+  .voie{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .voie .vh{font-weight:700;color:#fff;font-size:14.5px;margin-bottom:6px;}
+  .voie .vtag{font-size:11px;color:var(--accent2);}
+  .quote{
+    border-left:3px solid var(--accent);background:#0c0e13;border-radius:0 8px 8px 0;
+    padding:8px 12px;font-size:13px;color:#cdd6e6;margin:8px 0;font-style:italic;
+  }
+
+  footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+
+  /* ===== Responsive ===== */
+  @media (max-width:560px){
+    h1{font-size:23px;}
+    .files{grid-template-columns:1fr;}
+    .wrap{padding:16px 13px 56px;}
+    body{font-size:15.5px;}
+  }
+  @media (min-width:620px){
+    .lane{grid-template-columns:1fr 1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <span class="kicker">🧠 Scribe · note interne</span>
+    <h1>Comment un agent IA <span class="accent">se souvient</span> et <span class="accent">s'améliore tout seul</span></h1>
+    <p class="lede">Tiré de la vidéo « 100 hours of Hermes Agent lessons » (Jack Roberts, Nous Research). Appliqué à ton agent Hermes.</p>
+  </header>
+
+  <!-- ============ 1. L'IDÉE EN 30s ============ -->
+  <section>
+    <h2><span class="em">⚡</span> L'idée en 30 secondes</h2>
+    <div class="bigidea">
+      <span class="tag">À graver</span>
+      <p>La plupart des gens utilisent une IA comme un <strong>chatbot</strong> : on demande, elle répond, <strong>elle oublie tout</strong>. La vraie puissance arrive quand l'agent <strong>écrit ce qu'il apprend dans des fichiers texte</strong> qu'il relit ensuite.</p>
+      <p style="margin-top:10px">Sa mémoire n'est pas dans son « cerveau » — elle est <strong>sur le disque</strong>. Et une fois par jour, il relit ses notes pour devenir un peu meilleur.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. SCHÉMA A : LES FICHIERS ============ -->
+  <section>
+    <h2><span class="em">🗄️</span> Comment marche sa mémoire</h2>
+    <p class="sub">Quatre fichiers, comme les tiroirs d'un bureau bien rangé. Chacun a un rôle.</p>
+
+    <div class="files">
+      <div class="file">
+        <div class="fname">📓 MEMORY.md</div>
+        <div class="role">Le journal de bord : ce qui a été décidé, quand et pourquoi.</div>
+        <div class="ana">≈ Le carnet de notes que tu relis avant chaque réunion.</div>
+        <span class="who ai">l'agent l'écrit</span>
+      </div>
+      <div class="file">
+        <div class="fname">🧭 soul.md</div>
+        <div class="role">Le manifeste : ton identité, tes 3 objectifs de l'année, les limites, et comment l'agent doit te parler.</div>
+        <div class="ana">≈ La fiche de poste qu'on donne à un nouvel employé le 1er jour.</div>
+        <span class="who you">TU le remplis</span>
+      </div>
+      <div class="file">
+        <div class="fname">👥 Peer Cards</div>
+        <div class="role">Une fiche par personne : son ton, ses préférences, votre historique.</div>
+        <div class="ana">≈ Le carnet d'adresses annoté (« lui, va droit au but »).</div>
+        <span class="who ai">l'agent l'enrichit</span>
+      </div>
+      <div class="file">
+        <div class="fname">🔎 Recherche floue</div>
+        <div class="role">Retrouver en une seconde n'importe quoi dit dans le passé.</div>
+        <div class="ana">≈ Le Ctrl+F géant sur toutes tes vieilles conversations.</div>
+        <span class="who ai">indexé auto</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <p style="margin:0"><strong>À retenir :</strong></p>
+      <p style="margin:8px 0 0"><span class="who you" style="margin:0">soul.md</span> &nbsp;= tu le remplis <strong>toi</strong>, mise à jour ~1×/mois.</p>
+      <p style="margin:8px 0 0"><span class="who ai" style="margin:0">MEMORY.md</span> &nbsp;= l'agent l'écrit <strong>lui-même</strong> en fin de chaque échange.</p>
+    </div>
+
+    <div class="bigidea" style="margin-top:14px">
+      <span class="tag">⚡ Ton cas réel</span>
+      <p style="margin:8px 0 0">La vidéo range tout dans des <strong>fichiers</strong>. Toi, ta mémoire est sur <strong>Mem0</strong> (cloud) — une base qui range et retrouve les souvenirs toute seule. <strong>Même principe, en mieux.</strong> Les concepts de la vidéo s'y traduisent direct :</p>
+      <div class="tablewrap" style="margin-top:12px">
+        <table>
+          <tr><th>Concept vidéo</th><th>Chez toi (Mem0)</th></tr>
+          <tr><td>📓 MEMORY.md (journal)</td><td class="st-ok">✅ souvenirs auto-extraits</td></tr>
+          <tr><td>👥 Peer cards</td><td class="st-ok">✅ déjà là : 1 scope <code>user_id</code>/personne (Allan, Alphim)</td></tr>
+          <tr><td>🗂️ appris/&lt;domaine&gt;.md</td><td>un tag <code>metadata.domaine</code> (pas un dossier)</td></tr>
+          <tr><td>🧭 soul.md (manifeste)</td><td class="st-bad">❌ à ajouter</td></tr>
+          <tr><td>🌙 dreaming (cron)</td><td>un job <code>mem0.search()</code> via le scheduler d'Hermes</td></tr>
+        </table>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:10px"><strong>2 briques sur 5 sont déjà en place.</strong> On n'efface rien — on complète.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px;font-size:16px">👥 Peer cards : qui peut quoi</h3>
+      <p class="sub" style="margin:0 0 12px">Un profil par personne, avec ses <strong>permissions</strong>. Deux interlocuteurs, deux niveaux d'accès.</p>
+      <div class="files" style="grid-template-columns:1fr">
+        <div class="file">
+          <div class="fname">♦ Allan — Telegram <code>1374851322</code></div>
+          <div class="role"><strong>Décideur.</strong> SEUL à déclencher les tâches lourdes de code (→ Claude Code / Opus 4.8). Valide les PR (règle d'or n°4).</div>
+        </div>
+        <div class="file">
+          <div class="fname">♠ Alphim · Shane — Telegram <code>7533858975</code></div>
+          <div class="role">Crons, RDV, veille / actus. <strong>Pas de code lourd.</strong> S'il en demande → Hermes propose, exécute seulement après accord d'Allan.</div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:10px"><strong>Règle de routage :</strong> avant toute tâche lourde de code, Hermes vérifie que l'émetteur = Allan. Si c'est Alphim → escalade à Allan d'abord.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. LE DÉCLIC ============ -->
+  <section>
+    <h2><span class="em">💡</span> Le déclic : apprendre = écrire dans un fichier</h2>
+    <div class="bigidea" style="border-color:rgba(126,224,184,.4);background:linear-gradient(150deg,rgba(126,224,184,.16),rgba(110,168,254,.08))">
+      <span class="tag" style="color:var(--accent2)">Le principe clé</span>
+      <p>Pour un agent, <strong>« apprendre » ne veut PAS dire changer son cerveau.</strong><br>Ça veut dire <strong>écrire une leçon dans sa mémoire</strong> (chez toi : Mem0) — qu'il relira ensuite.</p>
+    </div>
+
+    <p class="muted">Le « cerveau » de l'IA (le modèle) est <strong>figé</strong> : impossible à modifier à chaque conversation. Alors on contourne par l'extérieur :</p>
+
+    <div class="loop">
+      <span class="step">🎯 AGIR</span><span class="sep">→</span>
+      <span class="step k">✍️ ÉCRIRE la leçon</span><span class="sep">→</span>
+      <span class="step k">📖 RELIRE le fichier</span><span class="sep">→</span>
+      <span class="step">🚀 MIEUX AGIR</span>
+      <div class="ret">↑ et la boucle recommence, en mieux ↑</div>
+    </div>
+
+    <div class="card">
+      <p style="margin:0">C'est la différence entre :</p>
+      <p style="margin:8px 0 0">❌ un collègue qui <strong>répète la même erreur</strong> chaque semaine (mémoire = zéro) ;</p>
+      <p style="margin:8px 0 0">✅ un collègue qui <strong>note dans son carnet</strong> et ne refait jamais deux fois la faute.</p>
+      <p style="margin:12px 0 0" class="muted">La mémoire de l'agent, ce n'est pas de la magie : <strong>c'est de la discipline d'écriture.</strong> Des fichiers <code>.md</code> qu'on écrit, qu'on relit, qu'on sauvegarde. Rien de plus — et c'est déjà énorme.</p>
+    </div>
+    <p class="muted" style="font-size:13px">Pour Scribe, c'est exactement la logique de <code>snapshot.md</code> + <code>historique.md</code> : écrire l'état en fin de session, le relire au début de la suivante.</p>
+  </section>
+
+  <!-- ============ 4. SCHÉMA B : DREAMING ============ -->
+  <section>
+    <h2><span class="em">🌙</span> La boucle qui le rend meilleur</h2>
+    <p class="sub">La « Dreaming Sequence » : chaque matin, l'agent se réveille seul, relit tout, réfléchit, et te livre un plan.</p>
+
+    <div class="flow">
+      <div class="node time">
+        <div class="lbl">⏰ 06:00 — déclenchement automatique</div>
+        <div class="txt">L'agent se réveille <strong>tout seul</strong>. Personne ne l'allume : un minuteur programmé (un <em>cron job</em>) le lance.</div>
+      </div>
+      <div class="arrow"></div>
+      <div class="node">
+        <div class="lbl">📖 Relecture</div>
+        <div class="txt">Il rouvre <strong>soul.md</strong> (tes objectifs) + <strong>MEMORY.md</strong> (le journal) + les notes de réunion de la veille.</div>
+      </div>
+      <div class="arrow"></div>
+      <div class="node">
+        <div class="lbl">💭 « Le rêve »</div>
+        <div class="txt">Il ne fait pas qu'avaler le texte : il <strong>fait des liens</strong>, synthétise, réfléchit à ta journée.</div>
+      </div>
+      <div class="arrow"></div>
+      <div class="node">
+        <div class="lbl">📝 Production</div>
+        <div class="txt"><strong>3 recommandations clés</strong> + <strong>1 tâche non-négociable</strong>.</div>
+      </div>
+      <div class="arrow"></div>
+      <div class="node out">
+        <div class="lbl">📨 08:00 — livraison</div>
+        <div class="txt">Tu reçois ton briefing sur Telegram, <strong>avant de commencer ta journée</strong>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p style="margin:0" class="muted">« Rêver » est une image : ça veut juste dire <strong>relire ses notes au calme et en tirer des conclusions</strong> — comme toi le dimanche soir quand tu prépares ta semaine. Ce qui rend l'agent meilleur jour après jour, ce n'est pas un cerveau plus gros : c'est <strong>cette boucle quotidienne sur une mémoire écrite</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. SCHÉMA C : SKILL A: ============ -->
+  <section>
+    <h2><span class="em">🎓</span> Ton skill « A: &lt;lien&gt; »</h2>
+    <p class="sub"><strong>A: = Apprendre.</strong> Tu envoies un lien YouTube préfixé <code>A:</code>, Hermes regarde la vidéo, en tire des leçons, les écrit en mémoire, puis te confirme ce qu'il a retenu.</p>
+
+    <div class="lane">
+      <div class="lanecol">
+        <div class="head">📱 Ton téléphone</div>
+        <ol>
+          <li>Tu envoies <code>A: https://youtu…</code></li>
+          <li>(plus tard) tu lis la fiche</li>
+          <li>tu réponds <strong>« ok »</strong> ou <strong>« corrige X »</strong></li>
+        </ol>
+      </div>
+      <div class="lanecol">
+        <div class="head">🤖 Hermes → 💪 Claude Code · Opus 4.8</div>
+        <ol>
+          <li>Hermes (DeepSeek) détecte <code>A:</code> et <strong>aiguille</strong></li>
+          <li><strong>Claude Code (Opus 4.8, ton abo)</strong> prend le relais — le muscle</li>
+          <li>regarde la vidéo (Gemini par URL, vidéos publiques)</li>
+          <li>extrait <strong>1 à 3 leçons</strong> (pas un résumé)</li>
+          <li><strong>détecte le domaine</strong> → tag <code>metadata.domaine</code></li>
+          <li><strong>te renvoie la fiche</strong> → « je valide ? »</li>
+        </ol>
+      </div>
+      <div class="lanecol mem">
+        <div class="head">💾 Mémoire (Mem0)</div>
+        <ol>
+          <li><code>mem0.add()</code> de la leçon, <code>agent_id="hermes"</code></li>
+          <li>tag <code>metadata</code> : domaine, source, date, <code>statut:"propose"</code></li>
+          <li>après ton « ok » → <code>statut:"valide_allan"</code></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3 style="margin:0 0 10px;font-size:16px">💡 Le cheat code : qui fait quoi</h3>
+      <p class="sub" style="margin:0 0 12px">Tu paies déjà Claude. Donc tout le travail de qualité passe par <strong>Claude Code (Opus 4.8)</strong> — coût en plus = 0. DeepSeek ne fait qu'aiguiller.</p>
+      <div class="tablewrap">
+        <table>
+          <tr><th>Rôle</th><th>Qui</th><th>Pourquoi</th></tr>
+          <tr><td>🧭 Aiguilleur</td><td>Hermes · DeepSeek</td><td>pas cher, route la tâche — ne fait pas le gros œuvre</td></tr>
+          <tr><td>💪 Muscle qualité</td><td>Claude Code · <strong>Opus 4.8</strong> (ton abo)</td><td>code, extraction, écriture — qualité sans surcoût</td></tr>
+          <tr><td>👁️ Les yeux</td><td>Gemini · gemini-3.5-flash</td><td>regarde la vidéo (gratuit en preview)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px;font-size:16px">🏷️ Une seule tête, des casquettes (routage par domaine)</h3>
+      <p class="sub" style="margin:0 0 12px">Pas une armée d'agents (la vidéo le déconseille). UN seul Hermes ; le domaine est un <strong>tag Mem0</strong>, pas un dossier.</p>
+      <div class="files" style="grid-template-columns:1fr 1fr">
+        <div class="file"><div class="fname">🏷️ domaine: marketing</div><div class="role">stratégie, positionnement, copy</div></div>
+        <div class="file"><div class="fname">🏷️ domaine: ads</div><div class="role">acquisition payante, créas</div></div>
+        <div class="file"><div class="fname">🏷️ domaine: claude-code</div><div class="role">utiliser Claude Code à fond</div></div>
+        <div class="file"><div class="fname">🏷️ domaine: saas</div><div class="role">produit, pricing, rétention</div></div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:10px">Hermes « met la casquette » = il fait <code>mem0.search(..., filters={"metadata":{"domaine":"marketing"}})</code>. Pour une grosse tâche, il lance un <strong>sous-agent jetable</strong> (le temps de la tâche), jamais un agent permanent.</p>
+    </div>
+
+    <div class="note" style="margin-top:14px">
+      <b>Règle d'or n°4 :</b> rien n'est considéré comme acquis tant que tu n'as pas dit « oui ». L'IA <strong>propose</strong>, tu <strong>confirmes</strong>, puis seulement la leçon devient active.
+    </div>
+
+    <h3 style="margin:22px 0 6px;font-size:16px">📋 Le format d'une leçon (bloc-type)</h3>
+    <p class="sub">Chaque leçon = un bloc avec des champs fixes. Daté, sourcé, actionnable.</p>
+    <div class="lesson">
+      <div class="ltitle">[LEÇON] &lt;titre court et parlant&gt;</div>
+      <div class="row"><span class="field">Source</span><span class="val">titre vidéo — auteur — URL YouTube</span></div>
+      <div class="row"><span class="field">Vue le</span><span class="val">AAAA-MM-JJ (validée par Allan le …)</span></div>
+      <div class="row"><span class="field">Leçon</span><span class="val">1–2 phrases. L'idée transférable, pas le résumé.</span></div>
+      <div class="row"><span class="field">Quand l'appliquer</span><span class="val">le déclencheur concret : « Quand je… », « Avant de… »</span></div>
+      <div class="row"><span class="field">Comment</span><span class="val">l'action précise, étape(s). Copier-coller mental.</span></div>
+      <div class="row"><span class="field">Lien Scribe</span><span class="val">comment ça touche le projet, ou « veille »</span></div>
+      <div class="row"><span class="field">Statut</span><span class="val">proposé · <span class="pill-ok">✅ validé Allan</span> · ❌ écarté</span></div>
+    </div>
+    <p class="muted" style="font-size:13px;margin-top:10px"><strong>Pourquoi ces champs :</strong> « Quand l'appliquer » fait qu'une leçon <strong>se redéclenche toute seule</strong> plus tard. « Comment » donne l'action prête à l'emploi. « Statut » = la trace de ta validation (sans ✅, la leçon n'est pas active).</p>
+
+    <h3 style="margin:22px 0 6px;font-size:16px">✅ Exemple rempli (sur CETTE vidéo)</h3>
+    <div class="lesson">
+      <div class="ltitle">[LEÇON] Pour un agent, « apprendre » = écrire dans un fichier relu, pas changer son modèle</div>
+      <div class="row"><span class="field">Source</span><span class="val">« 100 hours of Hermes Agent lessons » — Jack Roberts (Nous Research) — youtube.com/…</span></div>
+      <div class="row"><span class="field">Vue le</span><span class="val">2026-06-13 (validée par Allan le 2026-06-13)</span></div>
+      <div class="row"><span class="field">Leçon</span><span class="val">Un agent ne retient rien dans ses poids. Sa mémoire = des .md plats (MEMORY journal, soul manifeste, peer cards). Apprendre = y écrire une leçon ; progresser = les relire chaque jour (Dreaming 6h).</span></div>
+      <div class="row"><span class="field">Quand l'appliquer</span><span class="val">Dès qu'on demande de « retenir » / « ne plus refaire ». Et à chaque démarrage de session.</span></div>
+      <div class="row"><span class="field">Comment</span><span class="val">(1) Écrire la leçon datée+sourcée. (2) <code>mem0.add()</code> taggé domaine+statut. (3) Le « dreaming » la relit via <code>mem0.search()</code>. (4) Si ce n'est pas écrit, ça n'existe pas.</span></div>
+      <div class="row"><span class="field">Lien Scribe</span><span class="val">Méta — fondement du skill « A: » + renforce la règle d'or n°4.</span></div>
+      <div class="row"><span class="field">Statut</span><span class="val"><span class="pill-ok">✅ validé Allan</span></span></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <p style="margin:0"><strong>« A: » nourrit la mémoire ; la Dreaming Sequence la fait travailler.</strong> Une leçon écrite mais jamais relue ne sert à rien. Garde-fou : seules les leçons <span class="pill-ok">✅ validé Allan</span> entrent dans le « rêve » de 6h.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6. PLAN DE MISE EN PLACE ============ -->
+  <section>
+    <h2><span class="em">🛠️</span> Le plan de mise en place</h2>
+    <p class="sub">Bonne nouvelle : la mémoire (Mem0) et les peer cards existent <strong>déjà</strong>. On complète, on n'efface rien.</p>
+    <ol class="steps">
+      <li><b>Écrire le manifeste (« soul »)</b> : tes 3 piliers de l'année + hors-périmètre + métriques + règles de com + la règle de permission (Allan seul = code lourd). En config ou en souvenirs Mem0 « système » prioritaires.</li>
+      <li><b>Brancher le skill « A: »</b> sur Mem0 : <code>A: &lt;url&gt;</code> → Hermes aiguille → <strong>Claude Code (Opus 4.8)</strong> → Gemini regarde → <code>mem0.add()</code> taggé <code>domaine</code> → tu valides.</li>
+      <li><b>La boucle « dreaming »</b> : un job qui fait <code>mem0.search()</code> sur les leçons <span class="pill-ok">validées</span>, branché sur le <strong>scheduler interne d'Hermes</strong> (celui de la prospection 9h — pas de cron dans le conteneur).</li>
+      <li><b>Confirmer les permissions</b> : Allan (<code>1374851322</code>) = décideur / code lourd ; Alphim·Shane (<code>7533858975</code>) = crons / RDV / actus.</li>
+      <li><b>Garde-fou</b> : seules les leçons <span class="pill-ok">✅ validé Allan</span> entrent dans le « dreaming ».</li>
+    </ol>
+  </section>
+
+  <!-- ============ 7. ÉTAPE 0 : AUDIT ============ -->
+  <section>
+    <h2><span class="em">🔍</span> Étape 0 : auditer Hermes</h2>
+    <div class="note">
+      <b>✅ Audit fait (13/06/2026).</b> Résultat : Hermes n'a <strong>pas</strong> de fichiers <code>MEMORY.md</code>/<code>soul.md</code> — et c'est <strong>normal</strong> : sa mémoire est sur <strong>Mem0</strong> (cloud), pas sur le disque. Le conteneur est minimal (ni <code>cron</code> ni <code>systemd</code>) → le « dreaming » passera par le scheduler interne. Le script ci-dessous reste utile pour re-diagnostiquer le VPS quand tu veux.
+    </div>
+
+    <div class="card">
+      <h3>Ce que l'audit fait (et ne fait pas)</h3>
+      <p style="margin:0" class="muted">C'est un diagnostic <strong>en lecture seule</strong> : il regarde les fichiers d'Hermes sur le VPS et te dit ce qui existe. Il ne touche à RIEN, ne supprime RIEN, et <strong>n'affiche jamais la valeur d'un secret</strong> — seulement <code>PRESENT</code> ou <code>ABSENT</code>.</p>
+    </div>
+
+    <h3 style="margin:20px 0 6px;font-size:16px">📡 Comment le lancer — 3 voies</h3>
+    <div class="voies">
+      <div class="voie">
+        <div class="vh">A · Par Telegram <span class="vtag">le plus simple, depuis ton tél</span></div>
+        <div class="quote">« Hermes, crée le fichier <code>audit-hermes-vps.sh</code> avec ce contenu, lance-le en lecture seule, et renvoie-moi le rapport complet tel quel. Il ne modifie rien. [coller le script] »</div>
+        <p class="muted" style="margin:0;font-size:13px">Hermes l'exécute lui-même et te recolle le rapport. Zéro terminal.</p>
+      </div>
+      <div class="voie">
+        <div class="vh">B · Par Claude Code du VPS <span class="vtag">le plus fiable</span></div>
+        <div class="quote">claude -p "Crée le fichier audit-hermes-vps.sh avec le contenu fourni, lance-le, et colle-moi le rapport. Lecture seule, ne modifie rien d'autre." --permission-mode acceptEdits</div>
+        <p class="muted" style="margin:0;font-size:13px">Claude Code écrit, lance et te rend la sortie propre.</p>
+      </div>
+      <div class="voie">
+        <div class="vh">C · Direct dans le terminal SSH <span class="vtag">si tu y as accès</span></div>
+        <div class="quote">nano audit-hermes-vps.sh&nbsp;&nbsp;# colle, Ctrl+O puis Ctrl+X<br>bash audit-hermes-vps.sh&nbsp;&nbsp;# pas besoin de chmod</div>
+        <p class="muted" style="margin:0;font-size:13px">Le rapport s'affiche : tu le copies et tu me le renvoies.</p>
+      </div>
+    </div>
+    <div class="note" style="margin-top:12px">
+      Dans les 3 cas : <b>récupère le rapport ENTIER et renvoie-le moi.</b> C'est sur cette sortie qu'on décide la suite.
+    </div>
+
+    <h3 style="margin:22px 0 6px;font-size:16px">📖 Tableau d'interprétation</h3>
+    <p class="sub">« ce que tu vois » → « ce que ça veut dire » → « action ».</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Ce que tu vois</th><th>Ce que ça veut dire</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>MEMORY.md</code> <span class="st-bad">ABSENT</span> partout</td>
+            <td>Aucune mémoire durable. C'est un chatbot passif (anti-pattern n°1).</td>
+            <td>Priorité absolue : créer MEMORY.md (étape 2).</td>
+          </tr>
+          <tr>
+            <td><code>MEMORY.md</code> <span class="st-ok">PRESENT</span></td>
+            <td>Bonne base.</td>
+            <td>Vérifier sa fraîcheur : pas bougé depuis des semaines = boucle d'écriture inactive.</td>
+          </tr>
+          <tr>
+            <td><code>soul.md</code> <span class="st-bad">ABSENT</span></td>
+            <td>L'agent n'a pas de cap : ni tes piliers ni tes règles de com.</td>
+            <td>Écrire soul.md toi-même (étape 3).</td>
+          </tr>
+          <tr>
+            <td><code>Peer cards</code> <span class="st-bad">0 trouvée</span></td>
+            <td>Il traite tout le monde pareil, sans historique.</td>
+            <td>Créer au moins ta peer card (étape 4).</td>
+          </tr>
+          <tr>
+            <td><span class="st-warn">AUCUN cron dreaming</span> mais prospection 9h OK</td>
+            <td>Le cron marche, mais la boucle d'amélioration n'existe pas.</td>
+            <td>Ajouter le cron dreaming à 6h (étape 6). Le multiplicateur.</td>
+          </tr>
+          <tr>
+            <td><code>scribe-app</code> <span class="st-ok">PRESENT</span> (branche : main)</td>
+            <td>Le clone de Claude Code est en place.</td>
+            <td>OK. Rappel : jamais coder sur <code>main</code>.</td>
+          </tr>
+          <tr>
+            <td><code>.env</code> : N fichier(s)</td>
+            <td>Des secrets vivent sur le VPS (normal). Présence seulement.</td>
+            <td>Vérifier qu'aucune clé du vrai Supabase EU n'y est. Au moindre doute → on s'arrête.</td>
+          </tr>
+          <tr>
+            <td>Clé Gemini <span class="st-bad">ABSENTE</span></td>
+            <td>Hermes ne peut pas « regarder » de vidéo.</td>
+            <td>Poser <code>GEMINI_API_KEY</code> dans <code>.env.local</code>. Prérequis du skill « A: ».</td>
+          </tr>
+          <tr>
+            <td>Docker : conteneur <code>hermes</code> actif</td>
+            <td>La mémoire vit peut-être DANS le conteneur, pas sur l'hôte.</td>
+            <td>Relancer la partie fichiers via <code>docker exec</code> (le rapport donne la commande).</td>
+          </tr>
+          <tr>
+            <td>Tout est <span class="st-bad">ABSENT</span></td>
+            <td>Hermes est au stade « chatbot ». Point de départ normal, pas un échec.</td>
+            <td>Dérouler les étapes 1→8 dans l'ordre.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:24px 0 6px;font-size:16px">📜 Le script d'audit</h3>
+    <p class="sub">Copie tout le bloc. Lecture seule, garanti sans modification.</p>
+    <div class="copybar">
+      <span class="fn">audit-hermes-vps.sh</span>
+      <button class="copybtn" type="button" onclick="(function(b){var p=b.parentNode.nextElementSibling;var r=document.createRange();r.selectNodeContents(p);var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');b.textContent='Copié ✓';}catch(e){b.textContent='Sélectionné';}setTimeout(function(){b.textContent='Copier';},1800);})(this)">Copier</button>
+    </div>
+    <pre>#!/usr/bin/env bash
+# =============================================================================
+#  audit-hermes-vps.sh - Audit MEMOIRE d'Hermes (LECTURE SEULE)
+# -----------------------------------------------------------------------------
+#  But : decouvrir l'etat reel de la memoire d'Hermes sur le VPS, au regard du
+#        stack de la video (MEMORY.md / soul.md / peer cards / dreaming / skill A:).
+#
+#  GARANTIES DE SURETE (ce script ne fait QUE lire) :
+#    - Il NE cree, NE modifie, NE supprime, NE deplace AUCUN fichier.
+#    - Il N'AFFICHE JAMAIS la valeur d'un secret : seulement "PRESENT" / "ABSENT".
+#    - Il ne plante pas si un chemin manque : il le signale et continue.
+#    - Aucune commande reseau, aucun push, aucun appel d'API.
+#
+#  USAGE :
+#    bash audit-hermes-vps.sh                          # affiche le rapport
+#    bash audit-hermes-vps.sh > rapport-audit.txt      # (option) sauvegarde
+#
+#  Copie le rapport ENTIER et renvoie-le a Allan / Claude pour decider la suite.
+# =============================================================================
+
+# Volontairement PAS de 'set -e' : on veut continuer meme si une verif echoue.
+set -u 2>/dev/null || true
+export LC_ALL=C 2>/dev/null || true
+
+# --- Marqueurs visuels -------------------------------------------------------
+OK="[ PRESENT ]"
+NO="[ ABSENT  ]"
+WARN="[  INFO   ]"
+
+line()  { printf '%s\n' "------------------------------------------------------------"; }
+title() { printf '\n============================================================\n  %s\n============================================================\n' "$1"; }
+
+# Renvoie le 1er chemin existant d'une liste de candidats (fichier OU dossier).
+first_existing() {
+  local p
+  for p in "$@"; do
+    [ -e "$p" ] &amp;&amp; { printf '%s' "$p"; return 0; }
+  done
+  return 1
+}
+
+# Affiche "label : PRESENT (chemin, date) / ABSENT" pour un FICHIER.
+check_file() {
+  local label="$1"; shift
+  local found
+  if found="$(first_existing "$@")" &amp;&amp; [ -n "$found" ]; then
+    local meta=""
+    meta="$(date -r "$found" '+%Y-%m-%d %H:%M' 2>/dev/null || stat -c '%y' "$found" 2>/dev/null | cut -d. -f1 || true)"
+    if [ -n "$meta" ]; then
+      printf '  %-22s %s  ->  %s  (modifie: %s)\n' "$label" "$OK" "$found" "$meta"
+    else
+      printf '  %-22s %s  ->  %s\n' "$label" "$OK" "$found"
+    fi
+  else
+    printf '  %-22s %s\n' "$label" "$NO"
+  fi
+}
+
+# Cherche des fichiers par motif dans des racines, sans planter.
+# N'affiche QUE le NOMBRE et les CHEMINS - jamais le contenu.
+LAST_MATCH_LIST=""
+count_matches() {
+  local pattern="$1"; shift
+  local roots=("$@")
+  local r out total=0
+  LAST_MATCH_LIST=""
+  for r in "${roots[@]}"; do
+    [ -d "$r" ] || continue
+    while IFS= read -r out; do
+      [ -n "$out" ] || continue
+      LAST_MATCH_LIST="${LAST_MATCH_LIST}${out}"$'\n'
+      total=$((total + 1))
+    done &lt; &lt;(find "$r" -maxdepth 4 -iname "$pattern" -type f 2>/dev/null)
+  done
+  printf '%s' "$total"
+}
+
+has_cmd() { command -v "$1" >/dev/null 2>&amp;1; }
+
+# =============================================================================
+title "AUDIT MEMOIRE HERMES - $(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'date indisponible')"
+printf '  Hote    : %s\n' "$(hostname 2>/dev/null || echo 'inconnu')"
+printf '  Utilisateur courant : %s\n' "$(whoami 2>/dev/null || id -un 2>/dev/null || echo 'inconnu')"
+printf '  HOME    : %s\n' "${HOME:-non defini}"
+printf '\n  RAPPEL : ce script est en LECTURE SEULE. Il ne modifie rien\n'
+printf '           et n affiche jamais la valeur d un secret.\n'
+
+# --- Emplacements probables a inspecter --------------------------------------
+ROOTS=(
+  "${HOME:-/root}"
+  "/root"
+  "/home"
+  "/app"
+  "/workspace"
+  "/data"
+  "/srv"
+  "/opt/hermes"
+  "/opt/Hermes"
+  "/hermes"
+  "${HOME:-/root}/hermes"
+  "${HOME:-/root}/Hermes"
+  "${HOME:-/root}/work"
+  "${HOME:-/root}/work/scribe-app"
+  "/var/lib/hermes"
+)
+EXISTING_ROOTS=()
+seen=""
+for r in "${ROOTS[@]}"; do
+  case " $seen " in *" $r "*) continue;; esac
+  seen="$seen $r"
+  [ -d "$r" ] &amp;&amp; EXISTING_ROOTS+=("$r")
+done
+
+title "0) EMPLACEMENTS INSPECTES (existants seulement)"
+if [ "${#EXISTING_ROOTS[@]}" -eq 0 ]; then
+  printf '  %s Aucun dossier candidat trouve sur l hote.\n' "$WARN"
+  printf '       -> La memoire vit peut-etre DANS un conteneur Docker (voir 6).\n'
+else
+  for r in "${EXISTING_ROOTS[@]}"; do printf '  - %s\n' "$r"; done
+fi
+
+# =============================================================================
+title "1) MEMOIRE STRUCTUREE (le coeur de la video)"
+
+check_file "MEMORY.md" \
+  "${HOME:-/root}/MEMORY.md" \
+  "${HOME:-/root}/memory/MEMORY.md" \
+  "${HOME:-/root}/hermes/MEMORY.md" \
+  "${HOME:-/root}/.hermes/MEMORY.md" \
+  "/app/MEMORY.md" "/app/memory/MEMORY.md" \
+  "/workspace/MEMORY.md" "/workspace/memory/MEMORY.md" \
+  "/data/MEMORY.md" "/data/memory/MEMORY.md" \
+  "/opt/hermes/MEMORY.md" "/opt/hermes/memory/MEMORY.md" \
+  "/hermes/MEMORY.md"
+
+m_count="$(count_matches 'MEMORY.md' "${EXISTING_ROOTS[@]}")"
+printf '  %-22s %s trouve(s) par recherche elargie\n' "(MEMORY.md tous)" "${m_count:-0}"
+if [ "${m_count:-0}" -gt 0 ] &amp;&amp; [ -n "${LAST_MATCH_LIST:-}" ]; then
+  printf '%s' "$LAST_MATCH_LIST" | sed 's/^/        ./'
+fi
+
+check_file "soul.md" \
+  "${HOME:-/root}/soul.md" \
+  "${HOME:-/root}/memory/soul.md" \
+  "${HOME:-/root}/hermes/soul.md" \
+  "${HOME:-/root}/.hermes/soul.md" \
+  "/app/soul.md" "/app/memory/soul.md" \
+  "/workspace/soul.md" "/data/soul.md" \
+  "/opt/hermes/soul.md" "/hermes/soul.md"
+
+s_count="$(count_matches 'soul.md' "${EXISTING_ROOTS[@]}")"
+printf '  %-22s %s trouve(s) par recherche elargie\n' "(soul.md tous)" "${s_count:-0}"
+if [ "${s_count:-0}" -gt 0 ] &amp;&amp; [ -n "${LAST_MATCH_LIST:-}" ]; then
+  printf '%s' "$LAST_MATCH_LIST" | sed 's/^/        ./'
+fi
+
+# --- Peer cards --------------------------------------------------------------
+printf '\n  Peer cards (un fichier par personne) :\n'
+pc_total=0
+pc_list=""
+for r in "${EXISTING_ROOTS[@]}"; do
+  while IFS= read -r d; do
+    [ -n "$d" ] || continue
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      pc_list="${pc_list}${f}"$'\n'
+      pc_total=$((pc_total + 1))
+    done &lt; &lt;(find "$d" -maxdepth 2 -iname '*.md' -type f 2>/dev/null)
+  done &lt; &lt;(find "$r" -maxdepth 4 -type d \( -iname 'peer*' -o -iname 'peers' -o -iname 'peer-cards' -o -iname 'people' -o -iname 'contacts' \) 2>/dev/null)
+done
+for r in "${EXISTING_ROOTS[@]}"; do
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$pc_list" in *"$f"*) ;; *) pc_list="${pc_list}${f}"$'\n'; pc_total=$((pc_total + 1));; esac
+  done &lt; &lt;(find "$r" -maxdepth 4 -type f -iname '*peer*card*.md' 2>/dev/null)
+done
+if [ "$pc_total" -gt 0 ]; then
+  printf '    %s %d fichier(s) candidat(s) :\n' "$OK" "$pc_total"
+  printf '%s' "$pc_list" | sed 's/^/        ./'
+else
+  printf '    %s 0 peer card trouvee\n' "$NO"
+fi
+
+# --- Index de sessions / recherche floue (bonus video) -----------------------
+printf '\n  Index de sessions / recherche floue (optionnel) :\n'
+sess_dir="$(first_existing \
+  "${HOME:-/root}/sessions" "${HOME:-/root}/memory/sessions" \
+  "/app/sessions" "/data/sessions" "/workspace/sessions" 2>/dev/null || true)"
+if [ -n "${sess_dir:-}" ]; then
+  n="$(find "$sess_dir" -maxdepth 3 -type f 2>/dev/null | wc -l | tr -d ' ')"
+  printf '    %s %s  (%s fichier(s))\n' "$OK" "$sess_dir" "${n:-?}"
+else
+  printf '    %s aucun dossier de sessions repere\n' "$NO"
+fi
+
+# =============================================================================
+title "2) BOUCLE D'AMELIORATION (cron / dreaming sequence)"
+
+printf '  crontab utilisateur :\n'
+if has_cmd crontab; then
+  cron_out="$(crontab -l 2>/dev/null || true)"
+  if [ -n "$cron_out" ]; then
+    printf '    %s crontab non vide. Lignes (tokens masques par precaution) :\n' "$OK"
+    printf '%s\n' "$cron_out" | sed -E 's/(sk-[A-Za-z0-9_-]{6,}|[A-Za-z0-9_-]{24,})/&lt;masque&gt;/g; s/^/        | /'
+    if printf '%s' "$cron_out" | grep -Eiq 'dream|reveil|brief'; then
+      printf '    %s Un motif type "dreaming/briefing matinal" SEMBLE present.\n' "$OK"
+    else
+      printf '    %s AUCUN cron de type "dreaming/briefing" detecte.\n' "$NO"
+    fi
+    if printf '%s' "$cron_out" | grep -Eiq 'prospect'; then
+      printf '    %s Le cron "prospection" semble bien present (attendu : 9h).\n' "$OK"
+    fi
+  else
+    printf '    %s crontab vide pour cet utilisateur.\n' "$NO"
+  fi
+else
+  printf '    %s commande "crontab" indisponible ici.\n' "$WARN"
+fi
+
+printf '\n  cron systeme (presence des dossiers, pas le contenu sensible) :\n'
+for c in /etc/crontab /etc/cron.d /etc/cron.daily /etc/cron.hourly; do
+  if [ -e "$c" ]; then
+    printf '    %s %s\n' "$OK" "$c"
+  else
+    printf '    %s %s\n' "$NO" "$c"
+  fi
+done
+
+printf '\n  Timers systemd :\n'
+if has_cmd systemctl; then
+  t="$(systemctl list-timers --all --no-pager 2>/dev/null | grep -Ei 'dream|hermes|brief|prospect' || true)"
+  if [ -n "$t" ]; then
+    printf '    %s timer(s) pertinent(s) :\n' "$OK"
+    printf '%s\n' "$t" | sed 's/^/        | /'
+  else
+    printf '    %s aucun timer systemd "hermes/dreaming" repere.\n' "$NO"
+  fi
+else
+  printf '    %s systemctl indisponible (normal en conteneur).\n' "$WARN"
+fi
+
+# =============================================================================
+title "3) REPO DE TRAVAIL scribe-app (clone de Claude Code)"
+repo="$(first_existing \
+  "${HOME:-/root}/work/scribe-app" \
+  "${HOME:-/root}/scribe-app" \
+  "/app/scribe-app" "/workspace/scribe-app" "/srv/scribe-app" 2>/dev/null || true)"
+if [ -n "${repo:-}" ]; then
+  printf '  %s %s\n' "$OK" "$repo"
+  if [ -d "$repo/.git" ]; then
+    br="$(git -C "$repo" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
+    printf '    branche courante : %s\n' "$br"
+    [ "$br" = "main" ] &amp;&amp; printf '    %s sur "main" -> rappel : jamais coder directement sur main.\n' "$WARN"
+    for f in CLAUDE.md HERMES.md snapshot.md; do
+      [ -e "$repo/$f" ] &amp;&amp; printf '    %s %s\n' "$OK" "$f" || printf '    %s %s\n' "$NO" "$f"
+    done
+  else
+    printf '    %s dossier present mais pas un depot git (.git absent).\n' "$WARN"
+  fi
+else
+  printf '  %s scribe-app introuvable dans les emplacements usuels.\n' "$NO"
+  printf '       -> voir docs/setup-claude-code-vps.md 3 (clone via PAT).\n'
+fi
+
+# =============================================================================
+title "4) SECRETS / .env  (PRESENCE SEULEMENT - jamais le contenu)"
+printf '  Recherche de fichiers .env* (on n affiche NI le contenu NI les cles) :\n'
+env_total=0
+for r in "${EXISTING_ROOTS[@]}"; do
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    env_total=$((env_total + 1))
+    sz="$(wc -c &lt; "$f" 2>/dev/null | tr -d ' ' || echo '?')"
+    printf '    %s %s  (%s octets)\n' "$OK" "$f" "${sz:-?}"
+  done &lt; &lt;(find "$r" -maxdepth 4 -type f \( -iname '.env' -o -iname '.env.*' -o -iname '*.env' \) 2>/dev/null)
+done
+if [ "$env_total" -eq 0 ]; then
+  printf '    %s aucun fichier .env repere sur l hote.\n' "$NO"
+  printf '       (peut vivre dans le conteneur Docker - voir 6.)\n'
+else
+  printf '    -> %d fichier(s) .env trouve(s). VERIFIE QU AUCUNE cle du vrai\n' "$env_total"
+  printf '       projet Supabase EU n y figure (mur deterministe). Au moindre\n'
+  printf '       doute : on s arrete et on demande.\n'
+fi
+
+printf '\n  Cle Gemini (presence du NOM de variable uniquement) :\n'
+gem_found="non"
+if [ -n "${GEMINI_API_KEY:-}" ]; then
+  printf '    %s variable GEMINI_API_KEY definie dans l environnement (valeur masquee).\n' "$OK"
+  gem_found="oui"
+fi
+for r in "${EXISTING_ROOTS[@]}"; do
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if grep -qiE '^[[:space:]]*GEMINI_API_KEY[[:space:]]*=' "$f" 2>/dev/null; then
+      printf '    %s nom "GEMINI_API_KEY" present dans : %s (valeur NON affichee)\n' "$OK" "$f"
+      gem_found="oui"
+    fi
+  done &lt; &lt;(find "$r" -maxdepth 4 -type f \( -iname '.env' -o -iname '.env.*' -o -iname '*.env' \) 2>/dev/null)
+done
+[ "$gem_found" = "non" ] &amp;&amp; printf '    %s aucune variable GEMINI_API_KEY reperee.\n' "$NO"
+
+# =============================================================================
+title "5) OUTILS (video / apprentissage 'A:')"
+for tool in yt-dlp youtube-dl ffmpeg; do
+  if has_cmd "$tool"; then
+    v="$("$tool" --version 2>/dev/null | head -n1 || echo 'version inconnue')"
+    printf '  %-22s %s  (%s)\n' "$tool" "$OK" "$v"
+  else
+    printf '  %-22s %s\n' "$tool" "$NO"
+  fi
+done
+if ! has_cmd yt-dlp &amp;&amp; has_cmd python3; then
+  if python3 -m yt_dlp --version >/dev/null 2>&amp;1; then
+    printf '  %-22s %s (via "python3 -m yt_dlp")\n' "yt-dlp (module py)" "$OK"
+  fi
+fi
+
+# =============================================================================
+title "6) SOCLE TECHNIQUE (OS / Docker / Node)"
+if [ -r /etc/os-release ]; then
+  os_name="$(. /etc/os-release 2>/dev/null; printf '%s %s' "${NAME:-?}" "${VERSION:-}")"
+  printf '  OS .................... %s\n' "${os_name:-inconnu}"
+else
+  printf '  OS .................... %s\n' "$(uname -a 2>/dev/null || echo inconnu)"
+fi
+printf '  Kernel ............... %s\n' "$(uname -r 2>/dev/null || echo '?')"
+
+in_container="non"
+if [ -f /.dockerenv ]; then in_container="oui (/.dockerenv)"; fi
+if grep -qaE 'docker|containerd|kubepods' /proc/1/cgroup 2>/dev/null; then in_container="oui (cgroup)"; fi
+printf '  Dans un conteneur ? .. %s\n' "$in_container"
+
+for c in node npm git claude python3; do
+  if has_cmd "$c"; then
+    printf '  %-20s %s  (%s)\n' "$c" "$OK" "$($c --version 2>/dev/null | head -n1 || echo '?')"
+  else
+    printf '  %-20s %s\n' "$c" "$NO"
+  fi
+done
+
+if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+  printf '  CLAUDE_CODE_OAUTH_TOKEN  %s (defini dans l env - valeur masquee)\n' "$OK"
+else
+  printf '  CLAUDE_CODE_OAUTH_TOKEN  %s (pas dans CET env ; peut etre dans ~/.bashrc)\n' "$WARN"
+fi
+
+printf '\n  Docker (vue hote) :\n'
+if has_cmd docker; then
+  dps="$(docker ps --format '    {{.Names}}  |  image={{.Image}}  |  {{.Status}}' 2>/dev/null || true)"
+  if [ -n "$dps" ]; then
+    printf '%s\n' "$dps"
+    hname="$(docker ps --format '{{.Names}}' 2>/dev/null | grep -i hermes | head -n1 || true)"
+    if [ -n "$hname" ]; then
+      printf '\n    %s Conteneur Hermes repere : "%s".\n' "$OK" "$hname"
+      printf '       Si la memoire est A L INTERIEUR, relance la partie fichiers\n'
+      printf '       DEPUIS le conteneur (lecture seule, sans rien modifier) :\n'
+      printf '           docker exec -it %s sh -c "ls -la / /app /root /workspace 2>/dev/null"\n' "$hname"
+      printf '           docker exec -it %s sh -c "ls -la /app/*.md /root/*.md 2>/dev/null"\n' "$hname"
+    fi
+  else
+    printf '    %s aucun conteneur en cours (ou acces docker restreint).\n' "$WARN"
+  fi
+else
+  printf '    %s commande "docker" indisponible ici (normal si on est DANS le conteneur).\n' "$WARN"
+fi
+
+# =============================================================================
+title "SYNTHESE RAPIDE"
+printf '  (relire le detail ci-dessus ; voici les 4 signaux a regarder en 1er)\n\n'
+syn() { printf '  %-34s %s\n' "$1" "$2"; }
+[ "${m_count:-0}" -gt 0 ] &amp;&amp; syn "MEMORY.md (journal de bord)"     "$OK" || syn "MEMORY.md (journal de bord)"     "$NO"
+[ "${s_count:-0}" -gt 0 ] &amp;&amp; syn "soul.md (manifeste / objectifs)" "$OK" || syn "soul.md (manifeste / objectifs)" "$NO"
+[ "${pc_total:-0}" -gt 0 ] &amp;&amp; syn "Peer cards (relations)"         "$OK" || syn "Peer cards (relations)"         "$NO"
+syn "Dreaming/cron matinal" "(voir section 2 ci-dessus)"
+
+printf '\n'
+line
+printf '  FIN DE L AUDIT - LECTURE SEULE. Aucun fichier modifie.\n'
+printf '  Copie ce rapport en ENTIER et renvoie-le pour decider la suite.\n'
+line
+exit 0</pre>
+
+    <div class="note" style="margin-top:14px">
+      📨 <b>Rappel :</b> une fois lancé, colle la sortie complète à Claude. Tant que le rapport n'est pas là, on est dans le flou — c'est lui qui décide tout le reste.
+    </div>
+  </section>
+
+  <footer>
+    🧠 Scribe · Atelier Klar — note pour Allan, à lire sur ton téléphone.<br>
+    Source : « 100 hours of Hermes Agent lessons in 23 minutes » — Jack Roberts (Nous Research).<br>
+    Principe à garder : <strong>apprendre = écrire une leçon dans un fichier qu'on relit. Rien n'est actif sans ton « ok ».</strong>
+  </footer>
+
+</div>
+</body>
+</html>
