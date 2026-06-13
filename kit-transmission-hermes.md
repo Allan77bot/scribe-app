@@ -118,7 +118,7 @@ Dans le job de prospection de 9h d'Hermes (scheduler interne — pas de cron
 système), au tout début du run :
 
 ```python
-from skill_apprendre import dream          # les fonctions de skillapprentissage.md
+from apprendre import dream                # le module runnable du repo (apprendre.py)
 brief = dream("acquisition clients site web", ["marketing", "ads", "saas"])
 # → préfixer `brief` au contexte de la tâche de prospection.
 ```

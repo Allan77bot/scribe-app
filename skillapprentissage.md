@@ -142,53 +142,12 @@ client.add(
 > valider). Rien ne s'écrit dans Mem0 sans passer par Claude **et** la validation
 > d'Allan (règle d'or n°4).
 
-`apprendre.py` (Python ≥ 3.10 · `pip install mem0ai requests`) :
+Le module complet et **exécutable** vit dans **[`apprendre.py`](./apprendre.py)** (racine du
+repo) — `pip install mem0ai requests`. Il expose : `check_sender` · `watch_video` ·
+`save_lesson` · `validate_lesson` · `dream`.
 
-```python
-import os, requests
-from mem0 import MemoryClient
-
-ALLAN_ID = "1374851322"            # Telegram — seul autorisé à déclencher A:
-GEMINI_MODEL = "gemini-3.5-flash"
-mem0 = MemoryClient()              # lit MEM0_API_KEY
-
-def check_sender(sender_id: str) -> bool:
-    """Règle de permission : seul Allan déclenche A: (tâche lourde de code)."""
-    if str(sender_id) != ALLAN_ID:
-        raise PermissionError("Émetteur non autorisé — escalader à Allan avant d'exécuter.")
-    return True
-
-def watch_video(url: str) -> str:
-    """Les yeux : Gemini regarde la vidéo PUBLIQUE et renvoie son analyse brute."""
-    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
-    prompt = ("Analyse cette vidéo (audio + écran). Donne 1 à 3 LEÇONS transférables "
-              "et actionnables (pas un résumé), et le DOMAINE principal "
-              "(marketing/ads/claude-code/saas/...). Pour chaque leçon : quand l'appliquer + comment.")
-    payload = {"contents": [{"parts": [
-        {"text": prompt},
-        {"file_data": {"file_uri": url}},
-    ]}]}
-    r = requests.post(endpoint, headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"]},
-                      json=payload, timeout=600)
-    r.raise_for_status()
-    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
-
-def save_lesson(content: str, domaine: str, source: str, date: str) -> str:
-    """Écrit UNE leçon dans Mem0. Statut 'propose' tant qu'Allan n'a pas validé."""
-    res = mem0.add(
-        messages=[{"role": "user", "content": content}],
-        agent_id="hermes",
-        metadata={"type": "lecon", "domaine": domaine,
-                  "source": source, "date": date, "statut": "propose"},
-    )
-    return res["id"] if isinstance(res, dict) else res[0]["id"]
-
-def validate_lesson(memory_id: str, domaine: str, source: str, date: str) -> None:
-    """Sur 'ok' d'Allan : la leçon devient active (relue par le dreaming)."""
-    mem0.update(memory_id=memory_id,
-                metadata={"type": "lecon", "domaine": domaine, "source": source,
-                          "date": date, "statut": "valide_allan"})
-```
+> **Source de vérité unique** : le code runnable est dans `apprendre.py`. On l'édite
+> là — pas une copie collée ici — pour zéro risque de divergence.
 
 **Orchestration (Claude Code dans la boucle)** — à la réception d'un `A: <url>` :
 
@@ -213,26 +172,14 @@ def validate_lesson(memory_id: str, domaine: str, source: str, date: str) -> Non
 > (`mem0.search`) : aucune écriture, donc rien à valider — contrairement à
 > `save_lesson`.
 
-```python
-def dream(focus: str, domaines: list[str], par_domaine: int = 3) -> str:
-    """Relit les leçons VALIDÉES pertinentes pour la tâche du jour → briefing compact.
-    À appeler par le scheduler interne d'Hermes (job prospection 9h)."""
-    lignes = []
-    for d in domaines:
-        hits = mem0.search(
-            query=focus, agent_id="hermes", limit=par_domaine,
-            filters={"metadata": {"domaine": d, "statut": "valide_allan"}},
-        )
-        for h in hits:
-            lignes.append(f"- [{d}] {h.get('memory') or h.get('content', '')}")
-    if not lignes:
-        return "Aucune leçon validée pertinente — rien à appliquer aujourd'hui."
-    return "🧠 Briefing du jour (leçons à appliquer) :\n" + "\n".join(lignes)
-```
+`dream()` (lecture seule) vit dans **[`apprendre.py`](./apprendre.py)**.
+Signature : `dream(focus, domaines, par_domaine=3)` → renvoie un briefing texte des
+leçons `valide_allan` des domaines visés.
 
 **Branchement (scheduler interne d'Hermes, 9h)** :
 
 ```python
+from apprendre import dream
 # Au lancement de la prospection du matin :
 brief = dream("acquisition clients site web", ["marketing", "ads", "saas"])
 # → préfixer `brief` au contexte de la tâche : Hermes applique ce qu'il a appris,
