@@ -1,3 +1,30 @@
+## 2026-06-13 — Phase 5 Billing : abonnements Stripe + quotas ✅
+
+### Ajouté
+- `src/app/api/stripe/webhook/route.ts` — webhook Stripe (signature vérifiée via `constructEvent`), client admin service_role. Gère `checkout.session.completed` (lie customer/subscription, statut active, plan déduit du prix Stripe), `customer.subscription.updated` (statut mappé), `customer.subscription.deleted` (canceled).
+- `src/lib/billing/actions.ts` — server action `createCheckoutSession(plan)` : vérifie admin, crée/récupère le `stripe_customer_id`, ouvre une Checkout Session (mode subscription, metadata `org_id`), retourne l'URL.
+- `src/components/UpgradeButton.tsx` — bouton client (`useTransition`) qui appelle l'action et redirige vers Stripe. Charte AK.
+- `src/app/dashboard/billing/page.tsx` — Server Component : plan + statut, quota X/Y minutes avec barre de progression, paliers supérieurs proposés (admin seulement), compteur d'essai (30 j depuis `created_at`), message de fin d'abonnement. Affiche PHASE 5 DONE.
+- `supabase/migrations/0005_billing.sql` — colonnes `stripe_customer_id`, `stripe_subscription_id`, `subscription_status` (check trial/active/past_due/canceled/unpaid) + index. RLS héritée d'`organizations` (déjà en place).
+- `.env.example` — bloc Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_*`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`) + `SUPABASE_URL` (utilisé par le client admin, jusque-là non documenté).
+
+### Corrigé (bugs des fichiers initiaux)
+- `searchParams` typé en `Promise` + `await` (convention Next 16, comme login/signup).
+- `UpgradeButton` extrait en composant client : l'ancien bouton inline utilisait `window`/`alert` dans un Server Component passé à `<form action>` → cassé.
+- `checkout.session.completed` : `line_items` n'est PAS dans le payload → récupéré via `stripe.checkout.sessions.listLineItems` (sinon le plan retombait toujours sur "solo").
+- `subscription.status` mappé vers les valeurs autorisées par le check constraint (`trialing`→trial, `incomplete*`→unpaid…) : sinon l'update échouait et Stripe rejouait le webhook en boucle.
+
+### Validations
+- `npm run build` → compile + TypeScript OK ✓
+- `npm run check:rls` → isolation OK (0005 n'ajoute que des colonnes à `organizations`) ✓
+- `npm run db:apply` → 0005 déjà appliquée sur le sandbox ✓
+- `npm run lint` → 0 erreur sur les fichiers billing (2 erreurs préexistantes dans `reports/actions.ts`, hors périmètre `feat/billing`)
+
+### Décisions
+- Webhook + actions suivent le pattern existant : client admin via `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (idem `reports/actions.ts`).
+- `/dashboard/billing` protégé par `src/proxy.ts` (Next 16) via `startsWith("/dashboard")` — rien à ajouter. Le webhook `/api/stripe/webhook` passe (seules les routes `/dashboard` sont redirigées).
+- Stripe en mode TEST. IDs de prix en placeholder via env (à configurer par Allan).
+
 ## 2026-06-13 — Phase 4 Report : rapport du soir et accusés de lecture ✅
 
 ### Ajouté

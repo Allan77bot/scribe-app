@@ -5,21 +5,22 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 4 — feat/report : Rapport du soir + accusés de lecture ✅ DONE
-**Branche active :** `feat/report`
+**Phase :** 5 — feat/billing : Abonnements Stripe + quotas ✅ DONE
+**Branche active :** `feat/billing`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Phase 4 Rapport construite et validée.** Les 4 fichiers sont en place sur `feat/report` :
-`src/lib/reports/actions.ts` (generateReport via Claude Sonnet 4.6 + markRead via session client), `src/components/ReportCard.tsx` (HTML du rapport + liste des lecteurs + bouton Marquer comme lu), `src/components/GenerateReportButton.tsx` (bouton client avec état de chargement), `src/app/dashboard/report/page.tsx` (Server Component fetch + ReportCard ou état vide).
-Build OK, check:rls vert. Page affiche PHASE 4 DONE.
+**Phase 5 Billing construite et validée.** En place sur `feat/billing` :
+`src/app/api/stripe/webhook/route.ts` (webhook signé, client admin, gère checkout.session.completed / subscription.updated / subscription.deleted), `src/lib/billing/actions.ts` (`createCheckoutSession` admin-only), `src/components/UpgradeButton.tsx` (bouton client → Stripe Checkout), `src/app/dashboard/billing/page.tsx` (plan + statut + quota minutes + barre + paliers upgrade + compteur d'essai), `supabase/migrations/0005_billing.sql` (colonnes Stripe sur `organizations`).
+4 bugs des fichiers initiaux corrigés (searchParams Promise, bouton client, line_items récupérés, statut Stripe mappé). Build OK, check:rls vert, lint propre côté billing. Page affiche PHASE 5 DONE.
 
 ---
 
 ## Fait
 
+- [x] **Phase 5 Billing (2026-06-13)** : webhook Stripe + `createCheckoutSession` + page billing + migration 0005. Build OK. check:rls vert. `/dashboard/billing` protégé par `proxy.ts`. Stripe en mode TEST, prix en placeholder via env. Détail + bugs corrigés dans `historique.md`.
 - [x] **Phase 4 Rapport (2026-06-13)** : 4 fichiers construits (`reports/actions.ts`, `ReportCard.tsx`, `GenerateReportButton.tsx`, `report/page.tsx`). Build OK. check:rls vert. Page `/dashboard/report` : génération via Claude Sonnet 4.6, accusés de lecture RLS-safe, état vide avec bouton de génération.
 - [x] **Phase 3 Tasks (2026-06-13)** : 4 fichiers construits (`tasks/actions.ts`, `TaskCard.tsx`, `TaskList.tsx`, `tasks/page.tsx`). Build OK. check:rls vert. Page `/dashboard/tasks` groupée par priorité, Valider/Terminé via server actions admin.
 - [x] **Phase 1 Capture (2026-06-13)** : 4 fichiers construits (`actions.ts`, `AudioRecorder.tsx`, `NoteInput.tsx`, `capture/page.tsx`). Build OK. check:rls vert.
@@ -35,14 +36,16 @@ Build OK, check:rls vert. Page affiche PHASE 4 DONE.
 
 ## En cours / bloqué
 
-- **feat/tasks construite** — en attente de push + PR pour revue Allan/Alphime.
+- **feat/billing construite** — en attente de push + PR pour revue Allan/Alphime.
+- **Stripe à configurer (Allan)** : créer les produits/prix en mode TEST, renseigner `STRIPE_*` dans `.env.local`, déclarer le webhook `POST /api/stripe/webhook` (récupérer `STRIPE_WEBHOOK_SECRET`).
 - **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
 
 ## Prochaines étapes (par ordre)
 
-1. Push `feat/tasks` → PR → revue → merge `main`.
-2. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo).
-3. `feat/rapport` (Phase 4) : synthèse du soir via Claude Sonnet 4.6 + rapport de passation.
+1. Push `feat/billing` → PR → revue → merge `main`.
+2. Allan : configurer Stripe (produits, prix, webhook) en mode TEST puis tester un upgrade de bout en bout.
+3. Brancher la consommation réelle (`minutes_used_this_period`) sur le pipeline transcription + reset périodique.
+4. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo) + bascule Stripe en mode live.
 
 ## Comment lancer (mémo équipe)
 
