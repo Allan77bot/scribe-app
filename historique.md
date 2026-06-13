@@ -10,6 +10,20 @@
 - Snapshot.md mis à jour section Décisions + Fait
 - Cartes Board SMTP + Transcription marquées "Fait"
 
+## 2026-06-13 — Mission prototype Scribe : grosse construction lancée
+
+### Ajouté
+- Spec mission lue : 6 phases (coquille → capture → pipeline IA → tâches → rapport → billing)
+- Branche `prototype` créée depuis `main` (avec push origin — déjà existante, mergée à jour)
+- Canevas mission enregistré : docs/superpowers/specs/2026-06-13-prototype-app-complete-hermes-design.md
+- Cartes Board créées : 7 tâches (branche prototype + 6 phases)
+- En attente : procédure de connexion Claude Code (Allan envoie)
+
+### Décisions
+- Toute PR → `prototype`, JAMAIS `main`
+- Sans clés IA : phases P0-P1 faisables (coquille UI + capture storage)
+- Claude Code piloté par Hermes pour chaque phase (mode plan d'abord)
+
 ## 2026-06-13 — Hermes opérationnel sur le sandbox Scribe
 
 ### Ajouté
