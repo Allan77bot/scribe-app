@@ -5,8 +5,8 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.0 — Hermes opérationnel sur le sandbox ✅
-**Branche active :** `main` (première PR à venir sur une branche dédiée)
+**Phase :** 2.1 — SMTP + Transcription recherchés et tranchés ✅
+**Branche active :** `main`
 
 ---
 
@@ -16,14 +16,13 @@
 cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
 (doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
 migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
-Prochaine étape : cartes Board créées, puis attaque task 1 (Recherche SMTP) et
-task 2 (Transcription OpenAI vs Azure). Claude Code est authentifié côté Hermes
-pour les tâches code dur/design.
+Prochaine étape : attaquer feat/capture (audio par URL signée).
 
 ---
 
 ## Fait
 
+- [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
 - [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
 - [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).
 
@@ -89,8 +88,10 @@ Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe.
 ## Décisions encore ouvertes
 
 - **GitHub Pro** pour la protection mécanique de `main` (cf. En cours).
-- **Confirmation e-mail Supabase** : OFF (auto-confirm tests) → réactiver + SMTP
-  avant prod (recherche : carte Hermes).
-- **Transcription** OpenAI direct vs Azure OpenAI EU (recherche : carte Hermes).
 - **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 vs MVP — à trois.
 - **Route A vs Route B** : couche B (`shift_label`, anti-collision) en priorité 2.
+
+## Décisions tranchées par Hermes
+
+- **SMTP transactionnel** → **Brevo (Sendinblue)** : serveurs Paris, 9k emails/mois gratuits, intégration Supabase 2 min. ✅
+- **Transcription** → **OpenAI Whisper API direct** pour le MVP (~1,80€/mois). **Azure OpenAI EU** backup si RGPD client. **Whisper local** trop lourd. ✅

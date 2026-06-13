@@ -1,3 +1,15 @@
+## 2026-06-13 — Recherches SMTP + Transcription tranchées
+
+### Ajouté
+- Recherche SMTP transactionnel → **Brevo (Sendinblue)** recommandé 🇫🇷
+  - Serveurs Paris, 9k/mois gratuits, intégration Supabase en 2 min
+- Recherche transcription → **OpenAI Whisper API direct** pour le MVP
+  - Coût : ~1,80€/mois pour 5h audio
+  - Azure OpenAI EU = backup si RGPD client
+  - Whisper local = trop lourd pour le MVP
+- Snapshot.md mis à jour section Décisions + Fait
+- Cartes Board SMTP + Transcription marquées "Fait"
+
 ## 2026-06-13 — Hermes opérationnel sur le sandbox Scribe
 
 ### Ajouté
