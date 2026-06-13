@@ -34,5 +34,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Cache de recherche web (firecrawl) — local, ne jamais versionner
+.firecrawl/
+
 # Système
 .DS_Store

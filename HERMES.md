@@ -71,3 +71,8 @@ configuration : `docs/setup-claude-code-vps.md`.
 pour faire tourner Claude Code comme un agent fiable (contexte = ressource rare,
 quand déléguer en subagent, hooks pour ce qui doit *toujours* arriver, boucle
 plan → exécution → vérification). Lecture de fond avant de déléguer du code.
+
+**Bonnes pratiques d'invocation** (flags `-p`/`--output-format`/`--permission-mode`,
+`--resume`, allowlist d'outils, budget, robustesse) :
+`docs/piloter-claude-code-depuis-hermes.md` — le « comment » concret pour lancer
+Claude Code en headless depuis l'orchestrateur, phase par phase.
