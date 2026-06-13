@@ -1,3 +1,16 @@
+## 2026-06-13 — Hermes opérationnel sur le sandbox Scribe
+
+### Ajouté
+- Clonage du repo scribe-app sur le VPS Hermes (/opt/data/scribe-app)
+- gh auth avec PAT classique ADMIN (compte Allan77bot)
+- .env.local sandbox configuré (URL, anon key, service_role, DB password, project ref)
+- Sandbox Supabase doorjfxqetoawqnvguvz (rename → scribe-sandbox)
+- npm install réussi (384 packages)
+- db:apply — migrations déjà à jour (0001 + 0002)
+- test:isolation 4/4 passés OK
+- check:rls vert
+- Claude Code CLI authentifié (morjonallan@gmail.com)
+
 ## 2026-06-13 — Sandbox Supabase provisionné + isolation 4/4
 
 ### Ajouté

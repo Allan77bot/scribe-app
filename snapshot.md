@@ -4,27 +4,28 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-**Dernière mise à jour :** 2026-06-12
-**Phase :** 1.5 — socle `feat/auth` ✅ provisioning sandbox terminé
+| **Dernière mise à jour :** 2026-06-13
+**Phase :** 2.0 — Hermes opérationnel sur le sandbox ✅
 **Branche active :** `main` (première PR à venir sur une branche dédiée)
 
 ---
 
-## TL;DR (pour Discord)
+**TL;DR (pour Discord)**
 
-**`main` rattrape tout le projet** : fusion fast-forward de `feat/integration-hermes`
-→ `main` (socle auth + sécurité + migrations + CI + docs Hermes). Hermes voit
-désormais l'intégralité sur la branche par défaut, plus seulement des docs. Rappel :
-**Hermes (agent autonome du VPS) rejoint le projet** en bac à sable — il bossera
-sur son propre projet Supabase sandbox, par PR uniquement, piloté via le Board
-Atelier Klar, avec Claude Code installé sur le VPS pour les grosses tâches code.
-Une **CI sans secret** (lint + build + migrations + audit RLS sur conteneur jetable)
-verrouille chaque PR. Il reste à Allan : PAT GitHub + compte Supabase sandbox +
-décision GitHub Pro (protection de `main`), puis coller le briefing Telegram à Hermes.
+**Hermes est en ligne sur le sandbox Scribe** 🎉 Le VPS Hermes a :
+cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
+(doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
+migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
+Prochaine étape : cartes Board créées, puis attaque task 1 (Recherche SMTP) et
+task 2 (Transcription OpenAI vs Azure). Claude Code est authentifié côté Hermes
+pour les tâches code dur/design.
 
 ---
 
 ## Fait
+
+- [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
+- [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).
 
 - [x] **`main` rattrape tout le projet (2026-06-13)** : fusion **fast-forward** de
       `feat/integration-hermes` → `main` (auth + sécurité + migrations + CI + docs
@@ -45,13 +46,8 @@ décision GitHub Pro (protection de `main`), puis coller le briefing Telegram à
 
 ## En cours / bloqué
 
-- **En attente d'Allan (pour activer Hermes)** :
-  1. PAT GitHub fine-grained (repo `scribe-app` seul, Contents + Pull requests) ;
-  2. compte Supabase **sandbox dédié** (`contact@atelierklar.fr`) + PAT ;
-  3. décision **GitHub Pro** (~4 $/mois) — la protection de `main` est refusée en
-     plan Free sur repo privé ; recommandé AVANT de donner le PAT à Hermes ;
-  4. coller le briefing Telegram (`docs/briefing-hermes-telegram.md`) + créer
-     les cartes Board.
+- **Hermes opérationnel — sandbox prêt, environnements OK**. Prochaines tâches : créer les cartes Board (5 tâches), puis attaquer les recherches SMTP et transcription.
+- **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
 
 ## Prochaines étapes (par ordre)
 
