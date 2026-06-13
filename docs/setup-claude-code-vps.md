@@ -14,8 +14,37 @@
 
 ```bash
 npm install -g @anthropic-ai/claude-code
-claude          # premier lancement → login avec l'abonnement (compte Claude)
 ```
+
+**Authentification VPS (headless) — ne PAS utiliser le login interactif.**
+Le login navigateur (`claude` → `/login`) lie l'URL et le code OAuth au process
+`claude` qui les a générés, et le code expire en quelques minutes. Sur un serveur
+sans navigateur (a fortiori relayé par un agent qui renvoie de vieux liens), on
+tombe dans une boucle **« code expiré »**. La bonne méthode = un **token longue
+durée** (1 an) posé **une seule fois** :
+
+1. **Sur une machine avec navigateur** (le PC d'Allan, déjà connecté à Claude Code) :
+   ```bash
+   claude setup-token
+   ```
+   Autoriser dans le navigateur → la commande affiche un token (`sk-ant-oat…`).
+   Le copier. (Le token est lié au **compte**, pas à la machine → il est portable.)
+
+2. **Sur le VPS**, le poser dans l'environnement que Claude Code lira :
+   ```bash
+   echo 'export CLAUDE_CODE_OAUTH_TOKEN=<le-token>' >> ~/.bashrc && source ~/.bashrc
+   ```
+
+3. Vérifier : `claude -p "dis bonjour"` répond **sans demander de login**.
+
+Claude Code lit `CLAUDE_CODE_OAUTH_TOKEN` **en priorité** sur le login interactif
+(abonnement Pro/Max requis ; token scoped inférence). Le poser là où tourne le
+process qu'Hermes lance (`~/.bashrc`, `.env` chargé, ou env systemd) — pas seulement
+dans un shell perso. ⚠ Le mode `--bare` ne lit pas ce token → enlever `--bare`, ou
+utiliser `ANTHROPIC_API_KEY`.
+
+> **Hermes ne fait JAMAIS le login interactif.** C'est Allan qui pose le token, une
+> fois. Hermes lance ensuite juste `claude -p …`, l'auth est transparente.
 
 ## 3. Accès au repo
 
