@@ -66,8 +66,11 @@ def save_lesson(content: str, domaine: str, source: str, date: str) -> str:
         agent_id="hermes",
         metadata={"type": "lecon", "domaine": domaine,
                   "source": source, "date": date, "statut": "propose"},
+        infer=False,
     )
-    return res["id"] if isinstance(res, dict) else res[0]["id"]
+    # mem0ai v2.0.5 : les résultats arrivent dans res['results'][0]['id']
+    results = res.get("results", [])
+    return results[0]["id"] if results else res.get("event_id", "")
 
 
 def validate_lesson(memory_id: str, domaine: str, source: str, date: str) -> None:
@@ -85,8 +88,8 @@ def dream(focus: str, domaines: list[str], par_domaine: int = 3) -> str:
     lignes = []
     for d in domaines:
         hits = _client().search(
-            query=focus, agent_id="hermes", limit=par_domaine,
-            filters={"metadata": {"domaine": d, "statut": "valide_allan"}},
+            query=focus, limit=par_domaine,
+            filters={"agent_id": "hermes", "metadata": {"domaine": d, "statut": "valide_allan"}},
         )
         for h in hits:
             lignes.append(f"- [{d}] {h.get('memory') or h.get('content', '')}")
