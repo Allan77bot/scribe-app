@@ -1,3 +1,23 @@
+## 2026-06-14 — Accès Google d'Hermes : on garde l'OAuth complet (pas de service account)
+
+- **Question d'Allan :** Hermes a proposé un **service account** pour le CRM, mais il a déjà
+  l'**OAuth complet** d'Allan (Gmail envoi, Drive, devis/factures, Sheets) — « il y avait accès encore hier ».
+- **Décision (Allan) :** on **garde l'OAuth complet**, on **abandonne** le service account — un SA
+  serait scopé à un seul Sheet = downgrade pour tout ce qu'Hermes fait déjà. SA conservé en **option
+  archivée** (isoler un jour un job mono-Sheet).
+- **Diag du « marchait hier, mort aujourd'hui » :** pas un manque d'accès, un manque de **durabilité
+  côté cron**. 2 causes possibles (compatibles OAuth) : (a) token absent de l'env du cron (plus nu que
+  la session) ; (b) **refresh token expiré** — app OAuth en mode « Test » → Google périme le refresh à **7 jours**.
+- **Fix durable acté :** publier l'app OAuth **« En production »** (supprime l'expiration 7 j) +
+  re-générer un refresh token + le stocker dans le **même env durable** que `GEMINI`/`MEM0`, lu par le
+  cron. `kit-credentials-hermes.md` réécrit (Réf 1 = OAuth complet, service account archivé en alternative).
+- **Nouveau bug VPS :** cron **`Watchdog tâches Board`** en échec → `task_watchdog.py` **introuvable**
+  (`…/profiles/prospection/scripts/`). Prompt de diag (lecture seule) envoyé à Hermes — script jamais
+  écrit ? mauvais profil ? chemin du cron faux ?
+- **Ouvert :** archi — **fusionner ou non le dossier « organisation »** (structure boîte) avec le repo
+  Scribe (SaaS). Reco Claude : **garder séparé** (produit ≠ ops boîte). À trancher.
+- **Housekeeping :** `.gitignore` ignore désormais les exports Mem0 locaux (`__mem0_v2/`, `*__mem0_dl/`).
+
 ## 2026-06-14 — Audit du travail autonome d'Hermes + correction de dream()
 
 - **Contexte :** Hermes a déployé en autonomie (nuit) les étapes 1-3 (manifeste, skill A:, dreaming)

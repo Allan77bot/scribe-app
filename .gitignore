@@ -37,5 +37,9 @@ yarn-error.log*
 # Cache de recherche web (firecrawl) — local, ne jamais versionner
 .firecrawl/
 
+# Exports / téléchargements Mem0 (artefacts locaux Hermes — ne jamais versionner)
+__mem0_v2/
+*__mem0_dl/
+
 # Système
 .DS_Store

@@ -33,15 +33,18 @@ credentials du brief matinal.
 ## En cours / bloqué
 
 - **Merge `feat/hermes-capabilities` → `main`** : audité + prouvé, attend la décision d'Allan.
-- **Brief matinal d'Hermes** bloqué sur 3 accès (CRM Google, Telegram, clés IA) — cause : env du cron plus nu que la session. Runbook : `kit-credentials-hermes.md`.
+- **Brief matinal d'Hermes** bloqué sur 3 accès (Google, Telegram, clés IA). **Décision 2026-06-14 : garder l'OAuth complet d'Allan** (Gmail/Drive/Sheets/devis-factures), **pas** de service account. Fix durable = app OAuth « En production » (sinon refresh token mort à 7 j) + token dans l'env du cron. Diag d'Hermes attendu (token absent du cron vs expiré). Runbook : `kit-credentials-hermes.md`.
+- ⚠️ **Cron `Watchdog tâches Board` en échec** : `task_watchdog.py` introuvable (`/home/hermes/.hermes/profiles/prospection/scripts/`). À diagnostiquer côté VPS (script jamais créé ? mauvais profil ? chemin du cron faux).
+- **Dossier « organisation » (structure boîte)** : fusionner avec le repo Scribe ou garder séparé ? **Reco : séparé** (produit SaaS ≠ ops boîte). À trancher avec Allan.
 - ⚠️ **Protection de `main`** : Vercel déploie depuis le repo → à re-soulever (GitHub Pro ?).
 
 ## Prochaines étapes (par ordre)
 
-1. **Câbler les credentials du brief** (service account Google + token Telegram) → `kit-credentials-hermes.md`.
-2. **Décider du merge** de `feat/hermes-capabilities` vers `main`.
-3. **Polish optionnel** `apprendre.py` : garde-fou `save_lesson`, test stubbé, `__pycache__/` dans `.gitignore`, identité git dédiée Hermes.
-4. Reprendre le **cœur Scribe** : `feat/capture` (audio par URL signée).
+1. **Réparer le cron `Watchdog tâches Board`** (VPS) : `task_watchdog.py` introuvable → retrouver/recréer au bon chemin + bon profil.
+2. **Câbler les credentials du brief** : OAuth Google durable (app « En production » + token dans l'env du cron) + token Telegram → `kit-credentials-hermes.md`.
+3. **Décider du merge** de `feat/hermes-capabilities` vers `main`.
+4. **Polish optionnel** `apprendre.py` : garde-fou `save_lesson`, test stubbé, `__pycache__/` dans `.gitignore`, identité git dédiée Hermes.
+5. Reprendre le **cœur Scribe** : `feat/capture` (audio par URL signée).
 
 ## Comment lancer (mémo équipe)
 
