@@ -91,7 +91,9 @@ def dream(focus: str, domaines: list[str], par_domaine: int = 3) -> str:
             query=focus, limit=par_domaine,
             filters={"agent_id": "hermes", "metadata": {"domaine": d, "statut": "valide_allan"}},
         )
-        for h in hits:
+        # mem0ai v2.0.5 : search() renvoie dict{'results':[...]}, pas une liste brute
+        hits_list = hits.get("results", []) if isinstance(hits, dict) else hits
+        for h in hits_list:
             lignes.append(f"- [{d}] {h.get('memory') or h.get('content', '')}")
     if not lignes:
         return "Aucune leçon validée pertinente — rien à appliquer aujourd'hui."
