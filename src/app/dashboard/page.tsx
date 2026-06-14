@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/auth/actions";
@@ -9,6 +10,31 @@ type Org = {
   minutes_used_this_period: number;
   retention_days: number;
 };
+
+// Raccourcis vers les modules. L'accueil devient le hub qui les relie tous
+// (la navigation basse reste disponible partout via le layout).
+const MODULES = [
+  {
+    href: "/dashboard/capture",
+    title: "Capturer une note",
+    desc: "Vocal ou écrit → tâches extraites",
+  },
+  {
+    href: "/dashboard/tasks",
+    title: "Tâches",
+    desc: "Suivi, validation, assignation",
+  },
+  {
+    href: "/dashboard/report",
+    title: "Rapport du soir",
+    desc: "Passation + accusés de lecture",
+  },
+  {
+    href: "/dashboard/billing",
+    title: "Facturation",
+    desc: "Plan, quotas, abonnement",
+  },
+];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -31,12 +57,13 @@ export default async function DashboardPage() {
   // boucle avec le proxy qui renvoie les connectés hors de /login).
   if (error || !profile) {
     return (
-      <main className="flex flex-1 items-center justify-center px-6 text-center">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-lg font-semibold text-slate-900">
-            Profil introuvable
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
+      <main className="flex min-h-screen flex-1 items-center justify-center px-6 text-center">
+        <div
+          className="w-full max-w-sm rounded-2xl p-6"
+          style={{ background: "#1A1214", color: "#F0E8D6" }}
+        >
+          <h1 className="text-lg font-semibold">Profil introuvable</h1>
+          <p className="mt-2 text-sm" style={{ color: "#A8804D" }}>
             Ton compte existe mais son profil d&apos;équipe n&apos;a pas pu être
             chargé. Déconnecte-toi puis reconnecte-toi. Si ça persiste, contacte
             le support.
@@ -44,7 +71,8 @@ export default async function DashboardPage() {
           <form action={logout} className="mt-4">
             <button
               type="submit"
-              className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-base font-medium text-white transition-colors hover:bg-slate-700"
+              className="w-full rounded-lg px-4 py-2.5 text-base font-medium transition-opacity hover:opacity-90"
+              style={{ background: "#6E1F2C", color: "#F0E8D6" }}
             >
               Se déconnecter
             </button>
@@ -62,13 +90,19 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+    <main
+      className="flex min-h-screen flex-col overflow-x-hidden"
+      style={{ background: "#0A0708", color: "#F0E8D6" }}
+    >
+      <header
+        className="flex items-center justify-between border-b px-5 py-4"
+        style={{ borderColor: "rgba(240,232,214,0.08)" }}
+      >
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-900">
+          <p className="truncate text-base font-semibold">
             {org?.name ?? "Mon équipe"}
           </p>
-          <p className="truncate text-xs text-slate-500">
+          <p className="truncate text-xs" style={{ color: "#A8804D" }}>
             {profile?.display_name || user.email}
             {profile?.role === "admin" ? " · admin" : ""}
           </p>
@@ -76,52 +110,103 @@ export default async function DashboardPage() {
         <form action={logout}>
           <button
             type="submit"
-            className="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+            className="shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+            style={{ borderColor: "rgba(240,232,214,0.2)", color: "#F0E8D6" }}
           >
             Se déconnecter
           </button>
         </form>
       </header>
 
-      <main className="mx-auto w-full max-w-md px-5 py-6">
-        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-sm font-medium text-slate-500">Ton organisation</h2>
+      <div className="mx-auto w-full max-w-md px-5 py-6">
+        {/* Synthèse organisation */}
+        <section
+          className="rounded-2xl p-5"
+          style={{ background: "#1A1214" }}
+        >
+          <h2 className="text-sm font-medium" style={{ color: "#A8804D" }}>
+            Ton organisation
+          </h2>
           <dl className="mt-3 grid grid-cols-2 gap-4">
             <div>
-              <dt className="text-xs text-slate-500">Plan</dt>
-              <dd className="text-base font-semibold text-slate-900 capitalize">
+              <dt className="text-xs" style={{ color: "#A8804D" }}>
+                Plan
+              </dt>
+              <dd className="text-base font-semibold capitalize">
                 {org?.plan ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Minutes restantes</dt>
-              <dd className="text-base font-semibold text-slate-900">
+              <dt className="text-xs" style={{ color: "#A8804D" }}>
+                Minutes restantes
+              </dt>
+              <dd className="text-base font-semibold">
                 {minutesLeft}
-                <span className="text-sm font-normal text-slate-400">
+                <span className="text-sm font-normal" style={{ opacity: 0.5 }}>
                   {" "}
                   / {org?.minutes_quota ?? 0}
                 </span>
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Rétention</dt>
-              <dd className="text-base font-semibold text-slate-900">
+              <dt className="text-xs" style={{ color: "#A8804D" }}>
+                Rétention
+              </dt>
+              <dd className="text-base font-semibold">
                 {org?.retention_days ?? 0} j
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Ton rôle</dt>
-              <dd className="text-base font-semibold text-slate-900 capitalize">
+              <dt className="text-xs" style={{ color: "#A8804D" }}>
+                Ton rôle
+              </dt>
+              <dd className="text-base font-semibold capitalize">
                 {profile?.role ?? "—"}
               </dd>
             </div>
           </dl>
         </section>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
-          Socle prêt. Prochaine étape : la capture vocale.
-        </p>
-      </main>
-    </div>
+        {/* Accès rapide aux modules */}
+        <h2
+          className="mt-7 mb-3 text-sm font-medium"
+          style={{ color: "#A8804D" }}
+        >
+          Que veux-tu faire ?
+        </h2>
+        <div className="grid grid-cols-1 gap-3">
+          {MODULES.map((m) => (
+            <Link
+              key={m.href}
+              href={m.href}
+              className="flex items-center justify-between rounded-2xl p-4 transition-opacity hover:opacity-90"
+              style={{ background: "#1A1214" }}
+            >
+              <div className="min-w-0">
+                <p className="text-base font-semibold">{m.title}</p>
+                <p className="mt-0.5 text-xs" style={{ color: "#A8804D" }}>
+                  {m.desc}
+                </p>
+              </div>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                style={{ color: "#6E1F2C" }}
+                className="shrink-0"
+              >
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }

@@ -43,10 +43,18 @@ export async function generateReport(): Promise<{ id?: string; error?: string }>
     // Construit le prompt pour la synthèse
     const tasksDone: string[] = [];
     const tasksPending: string[] = [];
-    let totalEntries = entries.length;
+    const totalEntries = entries.length;
+
+    // Forme minimale d'une tâche extraite telle que stockée en JSON.
+    type ExtractedTask = {
+      title?: string;
+      priority?: string;
+      assignee_suggestion?: string;
+      status?: string;
+    };
 
     for (const e of entries) {
-      const tasks = (e.extracted_tasks_json as any[]) || [];
+      const tasks = (e.extracted_tasks_json as ExtractedTask[]) || [];
       for (const t of tasks) {
         const line = `- ${t.title || "Sans titre"} (priorité: ${t.priority || "—"}, assigné: ${t.assignee_suggestion || "—"})`;
         if (t.status === "fait") {
