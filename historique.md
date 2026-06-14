@@ -1,3 +1,24 @@
+## 2026-06-14 — Audit du travail autonome d'Hermes + correction de dream()
+
+- **Contexte :** Hermes a déployé en autonomie (nuit) les étapes 1-3 (manifeste, skill A:, dreaming)
+  sur le VPS via `kit-transmission-hermes.md`. Il a buté — et s'est arrêté proprement — sur
+  PEP 668 (pip) puis `MEM0_API_KEY` absente de l'env ; les deux résolus (env durable).
+- **Audit adversarial (workflow 33 agents) :** discipline **solide** (rien sur `main`, code isolé
+  sur la branche, zéro clé fuitée, scope minimal). MAIS **3 bugs high** :
+  - `dream()` itérait le retour de `search()` comme une liste alors que mem0ai v2.0.5 renvoie un
+    dict `{results:[...]}` → briefing **toujours vide** (échec silencieux avalé par le try/except).
+  - filtre « leçons validées seulement » **jamais testé** → risque de fuite de leçons non validées (règle d'or n°4).
+  - `save_lesson` pouvait renvoyer un mauvais id si `add()` asynchrone.
+- **Corrigé + prouvé par Hermes (runtime VPS) :** fix `dream()` (commit `64408c4`, **vérifié d'ici**) ;
+  test du filtre → seule la leçon `valide_allan` ressort (la `propose` est filtrée) ; `add(infer=False)`
+  renvoie bien `results[0]['id']` ; entrée test supprimée (404) ; manifeste chargé **verbatim** (type=system) ;
+  0 leçon validée (règle « ne rien valider la nuit » respectée).
+- **Capté en mémoire :** pièges API → `mem0ai-v205-gotchas` ; workflow de transmission → `ecosysteme-atelier-klar-hermes`.
+- **Découvert :** le **brief matinal** d'Hermes (cron) cale sur 3 accès manquants (CRM Google, Telegram,
+  clés IA) — cause = env du cron plus nu que la session. Runbook : `kit-credentials-hermes.md`.
+- **Ouvert :** merge `feat/hermes-capabilities` → `main` (audité, prêt) ; câbler les credentials du brief ;
+  polish optionnel `apprendre.py`.
+
 ## 2026-06-13 — Hermes : skill A: branché sur Mem0 (étape 2) + boucle dreaming (étape 3)
 
 - **Fait (code, pas encore déployé) :** `skillapprentissage.md` complété —

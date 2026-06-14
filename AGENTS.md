@@ -6,7 +6,7 @@
 
 ---
 
-## 📸 Snapshot — état au 2026-06-13
+## 📸 Snapshot — état au 2026-06-14
 
 **Livré (à la racine du repo) :**
 - `skillYTB.md` — Hermes peut lire des vidéos YouTube. Gemini officiel d'abord (URL → audio+image), `yt-dlp` en dépannage. **Testé : Gemini a regardé une vidéo de 23 min → OK.**
@@ -16,6 +16,8 @@
 - `audit-hermes-vps.sh` — diagnostic **lecture seule** du VPS.
 - `manifeste-soul-hermes.md` — **le « soul » d'Hermes** : identité (co-gérant d'Atelier Klar), 3 piliers de l'année, hors-périmètre, métriques, règles de com + de permission. À charger en souvenir Mem0 « système ». **(étape 1 ✅)**
 - `kit-transmission-hermes.md` — **runbook de mise en prod (étape 4)** : vérifier les clés, tester Mem0 (safe), charger le manifeste, transmettre les skills (message Telegram prêt), brancher le dreaming. À exécuter sur le VPS.
+- `apprendre.py` — **module runnable** du skill `A:` + `dream()` (source de vérité unique ; `skillapprentissage.md` pointe dessus). Corrigé pour mem0ai v2.0.5 (commit `64408c4`).
+- `kit-credentials-hermes.md` — **runbook credentials** : débloquer le brief matinal (service account Google/CRM, token Telegram, clés IA). À exécuter sur le VPS.
 
 **Découvertes (audit VPS + exports Mem0) :**
 - **Mémoire d'Hermes = Mem0 cloud** (pas de fichiers `.md`). Scopée par `user_id` (Allan ; Alphim/Shane) + `agent_id` (Hermes).
@@ -28,6 +30,12 @@
 - **Hermes maîtrise les commandes** (bien assimilées).
 - **Google scraper API** adopté pour la prospection (SERP plus pertinents que le scraping maison).
 
+**Audit + correction (2026-06-14) :**
+- Étapes 1-3 **déployées par Hermes en autonomie** sur le VPS, puis **auditées** (workflow 33 agents) : discipline OK (rien sur `main`, zéro clé fuitée, scope minimal).
+- 3 bugs high → **corrigés + prouvés** : `dream()` cassé (dict/liste mem0ai v2.0.5) → fix commit `64408c4` ; filtre `valide_allan` **testé** (seules les leçons validées ressortent → règle d'or n°4 OK) ; retour `add(infer=False)`.
+- Pièges API mem0ai v2.0.5 → mémoire `mem0ai-v205-gotchas`.
+- ⚠️ **Brief matinal (cron) bloqué** sur 3 accès (CRM Google, Telegram, clés IA) — env du cron plus nu que la session → `kit-credentials-hermes.md`.
+
 **Archi de routage (le « cheat code ») :**
 - Hermes (DeepSeek) = **aiguilleur**. Claude Code (**Opus 4.8**, abo Allan) = **muscle qualité**. Gemini = **les yeux** (vidéo).
 - Permissions : **Allan** (`1374851322`) seul = code lourd / skill `A:`. **Alphim·Shane** (`7533858975`) = crons / RDV / actus.
@@ -39,8 +47,11 @@
 1. [x] **Écrire le manifeste « soul »** : 3 piliers de l'année + hors-périmètre + métriques + règles de com + règle de permission. → **fait** : `manifeste-soul-hermes.md` (validé Allan 2026-06-13), reste à le charger dans Mem0 en souvenir « système ».
 2. [x] **Brancher le skill `A:` sur Mem0** : → **code écrit** dans `skillapprentissage.md` (module `apprendre.py` : `check_sender`/`watch_video`/`save_lesson`/`validate_lesson`, Claude dans la boucle, rien d'auto). Reste : **test live sur le VPS** (gated, `MEM0_API_KEY`).
 3. [x] **Boucle « dreaming »** : → **code écrit** dans `skillapprentissage.md` (`dream()`, lecture seule, briefing du matin par domaine). Reste : **brancher sur le scheduler interne d'Hermes** (job prospection 9h) sur le VPS.
-4. [ ] **Transmettre à Hermes** (Telegram) `skillYTB.md` + `skillapprentissage.md`. Vérifier qu'il a `GEMINI_API_KEY` + `MEM0_API_KEY`. → **runbook prêt** : `kit-transmission-hermes.md` (à exécuter sur le VPS).
-5. [ ] *(optionnel)* Garder `skillnotebook.md` en réserve si Google sort l'API NotebookLM grand public.
+4. [x] **Transmettre à Hermes** + déployer : fait par Hermes sur le VPS (nuit 13→14), **audité + corrigé** (cf. `historique.md` 2026-06-14). Manifeste chargé, skill `A:` + dreaming branchés, `dream()` corrigé.
+5. [ ] **Câbler les credentials du brief matinal** (service account Google/CRM, token Telegram, clés IA) → `kit-credentials-hermes.md`.
+6. [ ] **Décider du merge** `feat/hermes-capabilities` → `main` (audité, prêt — décision Allan).
+7. [ ] *(optionnel)* Polish `apprendre.py` : garde-fou `save_lesson` (lever si pas d'id), test stubbé, `__pycache__/` dans `.gitignore`, identité git dédiée Hermes.
+8. [ ] *(optionnel)* Garder `skillnotebook.md` en réserve si Google sort l'API NotebookLM grand public.
 
 ---
 

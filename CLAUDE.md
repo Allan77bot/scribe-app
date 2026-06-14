@@ -29,6 +29,17 @@ gravité est la **coordination active**.
 
 ---
 
+## Démarrage de session — à lire EN PREMIER
+
+> Méthode complète : **`skillorganisation.md`** (les 5 temps d'une session). Le boot, en bref :
+
+1. **Lire `snapshot.md`** (état présent + branche active) + cette page ; `MEMORY.md` est chargé auto. → reprendre sans tout réexpliquer.
+2. **Vérifier `git branch`**, **identifier LA préoccupation du jour** (une seule), **choisir/créer une branche dédiée** (`feat/`, `fix/`, `chore/`, `docs/`). Jamais coder sur `main`.
+3. **Skills d'abord** : si un skill peut s'appliquer (même 1 %), l'invoquer AVANT d'agir ; **brainstormer + faire valider** AVANT de coder.
+4. **Prouver** (lint/build/test) avant de dire « c'est fait » ; **tracer** avant de partir (réécrire `snapshot.md` + entrée datée `historique.md`).
+
+---
+
 ## Où chercher
 
 | Besoin | Fichier |
@@ -41,6 +52,7 @@ gravité est la **coordination active**.
 | Analyse du prototype (IP à garder, mapping, anti-patterns) | `docs/analyse-legacy.md` |
 | Prototype existant (archive figée, ne pas modifier) | `legacy/` |
 | **Capacités & apprentissage d'Hermes** (vidéos, Mem0, skill `A:`) — snapshot + next steps | `AGENTS.md` |
+| **Méthode de session Claude Code** (comment bien démarrer / finir une session) | `skillorganisation.md` |
 
 ---
 

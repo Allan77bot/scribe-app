@@ -1,62 +1,47 @@
 # Snapshot — où on en est
 
-> État **présent** du projet. Ce fichier est **réécrit** à chaque session
-> (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
-> sur Discord lors d'un point d'équipe.
+> État **présent** du projet. Réécrit à chaque session (historique → `historique.md`).
+> Conçu pour être copié/collé sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-13
-**Phase :** 2.1 — SMTP + Transcription recherchés et tranchés ✅
-**Branche active :** `main`
+**Dernière mise à jour :** 2026-06-14
+**Phase :** Hermes — capacités (soul + apprentissage + dreaming) construites, auditées, corrigées ✅
+**Branche active :** `feat/hermes-capabilities` (auditée + prouvée, **prête à merger**, non mergée)
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Hermes est en ligne sur le sandbox Scribe** 🎉 Le VPS Hermes a :
-cloné le repo, authentifié gh (ADMIN), provisionné le sandbox Supabase
-(doorjfxqetoawqnvguvz → rebaptisé scribe-sandbox), .env.local avec mot de passe,
-migrations appliquées (déjà à jour), 4/4 tests isolation OK, RLS vérifiée verte.
-Prochaine étape : attaquer feat/capture (audio par URL signée).
+Nuit du 13→14 : on a doté Hermes de son **manifeste « soul »** (identité co-gérant
+d'Atelier Klar + 3 piliers de l'année), branché le **skill `A:`** (apprendre d'une
+vidéo → Mem0) et la **boucle dreaming** (briefing matinal des leçons validées).
+Hermes a déployé tout ça en autonomie sur le VPS. **Audit multi-agents** : discipline
+nickel (rien sur `main`, zéro clé fuitée, scope minimal), mais `dream()` était cassé
+(bug dict/liste mem0ai v2.0.5) → **corrigé + prouvé** (le filtre ne ressort QUE les
+leçons validées → règle d'or n°4 OK). Reste : décider du merge + câbler les
+credentials du brief matinal.
 
 ---
 
 ## Fait
 
-- [x] **Recherches SMTP + Transcription tranchées (2026-06-13)** : SMTP → Brevo (France, 9k/mois gratos, Supabase 2 min). Transcription → OpenAI direct (1,80€/mois MVP), Azure EU backup si RGPD client nécessaire.
-- [x] **Hermes opérationnel sur le sandbox (2026-06-13)** : cloné le repo, gh auth ADMIN, sandbox Supabase doorjfxqetoawqnvguvz provisionné, .env.local avec mot de passe DB, migrations appliquées (0001 + 0002 déjà à jour), 4/4 test:isolation OK, check:rls vert.
-- [x] **Claude Code authentifié** sur le VPS Hermes (compte morjonallan@gmail.com).
-
-- [x] **`main` rattrape tout le projet (2026-06-13)** : fusion **fast-forward** de
-      `feat/integration-hermes` → `main` (auth + sécurité + migrations + CI + docs
-      Hermes, 14 commits). `HERMES.md` et tous les docs sont sur la branche par défaut.
-      Briefing portable Atelier Klar ajouté (`tests/projethermes.md`).
-- [x] **Socle `feat/auth`** (sessions précédentes) : Next.js 16 PWA + auth sessions
-      Supabase + RLS par org, projet Supabase EU provisionné, isolation prouvée 4/4,
-      audit adversarial passé, Security Advisor traité. Détail → `historique.md`.
-- [x] **Repo poussé sur GitHub** : `main`, `feat/auth`, `feat/integration-hermes`.
-- [x] **Spec intégration Hermes validée** →
-      `docs/superpowers/specs/2026-06-12-integration-hermes-design.md`.
-- [x] **CI GitHub Actions sans secret** : lint + build + migrations + `check:rls`
-      contre un conteneur `supabase/postgres` (chaîne testée verte en local).
-- [x] **`HERMES.md`** (briefing agent + mur déterministe) +
-      **`docs/setup-claude-code-vps.md`** (Claude Code headless sur le VPS) +
-      **`docs/briefing-hermes-telegram.md`** (message prêt à coller + 5 cartes Board).
-- [x] **Cockpit Atelier Klar** : login Hermes (♣ vert) déployé sur Netlify.
+- [x] **Manifeste « soul » d'Hermes (2026-06-13)** : identité + 3 piliers + hors-périmètre + métriques + com + permission → `manifeste-soul-hermes.md`, chargé en mémoire système Mem0 (verbatim).
+- [x] **Skill `A:` + boucle dreaming (2026-06-14)** : `apprendre.py` (`check_sender`/`watch_video`/`save_lesson`/`validate_lesson`/`dream`), déployé sur le VPS par Hermes (suivant `kit-transmission-hermes.md`).
+- [x] **Audit adversarial (2026-06-14)** : 3 bugs high trouvés → **corrigés + prouvés au runtime** (dict/liste `dream()` → commit `64408c4` ; filtre `valide_allan` testé ; retour `add(infer=False)`). Pièges API → mémoire `mem0ai-v205-gotchas`.
+- [x] **Méthode de session documentée** → `skillorganisation.md`. Runbooks → `kit-transmission-hermes.md`, `kit-credentials-hermes.md`.
+- [x] *(sessions précédentes)* **Socle Scribe** : Next.js 16 PWA + auth sessions Supabase + RLS par org (isolation prouvée 4/4), CI sans secret verte, Hermes opérationnel sur le sandbox Supabase. Détail → `historique.md`.
 
 ## En cours / bloqué
 
-- **Hermes opérationnel — sandbox prêt, environnements OK**. Prochaines tâches : créer les cartes Board (5 tâches), puis attaquer les recherches SMTP et transcription.
-- **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
+- **Merge `feat/hermes-capabilities` → `main`** : audité + prouvé, attend la décision d'Allan.
+- **Brief matinal d'Hermes** bloqué sur 3 accès (CRM Google, Telegram, clés IA) — cause : env du cron plus nu que la session. Runbook : `kit-credentials-hermes.md`.
+- ⚠️ **Protection de `main`** : Vercel déploie depuis le repo → à re-soulever (GitHub Pro ?).
 
 ## Prochaines étapes (par ordre)
 
-1. Allan exécute la checklist ci-dessus → Hermes clone, lit `HERMES.md`,
-   provisionne son sandbox, prouve l'isolation (cartes Board 1-3).
-2. **Revue post-merge par Alphime** : le schéma `feat/auth` est arrivé sur `main` sans
-   la PR croisée prévue (conséquence assumée du merge direct) → lui faire relire `main`.
-3. `feat/capture` (audio par URL signée) — front démarrable contre le contrat figé.
-4. Avant prod : réactiver la confirmation e-mail + SMTP (recherche déléguée à
-   Hermes, carte Board 4).
+1. **Câbler les credentials du brief** (service account Google + token Telegram) → `kit-credentials-hermes.md`.
+2. **Décider du merge** de `feat/hermes-capabilities` vers `main`.
+3. **Polish optionnel** `apprendre.py` : garde-fou `save_lesson`, test stubbé, `__pycache__/` dans `.gitignore`, identité git dédiée Hermes.
+4. Reprendre le **cœur Scribe** : `feat/capture` (audio par URL signée).
 
 ## Comment lancer (mémo équipe)
 
@@ -87,7 +72,8 @@ Sonnet 4.6 · **route IA = API Anthropic directe + DPA EU** · Stripe.
 
 ## Décisions encore ouvertes
 
-- **GitHub Pro** pour la protection mécanique de `main` (cf. En cours).
+- **Merge `feat/hermes-capabilities` → `main`** (audité, prêt — décision Allan).
+- **GitHub Pro** pour la protection mécanique de `main` (urgent depuis que Vercel déploie).
 - **Intégrations CRM/Airtable/Sheets/Notion** : phase 2 vs MVP — à trois.
 - **Route A vs Route B** : couche B (`shift_label`, anti-collision) en priorité 2.
 
