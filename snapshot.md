@@ -4,22 +4,25 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-13
-**Phase :** 5 — feat/billing : Abonnements Stripe + quotas ✅ DONE
-**Branche active :** `feat/billing`
+| **Dernière mise à jour :** 2026-06-14
+**Phase :** Navigation — feat/capture-audio : nav basse + dashboard-hub ✅ DONE
+**Branche active :** `feat/capture-audio`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Phase 5 Billing construite et validée.** En place sur `feat/billing` :
-`src/app/api/stripe/webhook/route.ts` (webhook signé, client admin, gère checkout.session.completed / subscription.updated / subscription.deleted), `src/lib/billing/actions.ts` (`createCheckoutSession` admin-only), `src/components/UpgradeButton.tsx` (bouton client → Stripe Checkout), `src/app/dashboard/billing/page.tsx` (plan + statut + quota minutes + barre + paliers upgrade + compteur d'essai), `supabase/migrations/0005_billing.sql` (colonnes Stripe sur `organizations`).
-4 bugs des fichiers initiaux corrigés (searchParams Promise, bouton client, line_items récupérés, statut Stripe mappé). Build OK, check:rls vert, lint propre côté billing. Page affiche PHASE 5 DONE.
+**Les modules sont enfin reliés.** Jusqu'ici `capture` / `tasks` / `report` /
+`billing` existaient en îlots isolés, sans aucun lien, et l'accueil pointait
+vers rien. Construit sur `feat/capture-audio` :
+`src/components/DashboardNav.tsx` (barre basse fixe mobile-first, route active via `usePathname`, icônes SVG inline, safe-area iOS), `src/app/dashboard/layout.tsx` (fond sombre du design system + espace réservé sous la nav, appliqué aux 5 pages), `src/app/dashboard/page.tsx` (l'accueil devient un hub sombre avec cartes d'accès rapide + synthèse org). Bonus : 2 erreurs lint pré-existantes de Phase 4 corrigées (`reports/actions.ts`) pour garder la CI verte.
+Build OK, lint propre. `check:rls` non exécutable sur ce poste (pas de `SUPABASE_DB_URL`) mais sans objet : module 100 % front, zéro migration. Poussé sur origin, pas de PR (attente accord).
 
 ---
 
 ## Fait
 
+- [x] **Navigation + dashboard-hub (2026-06-14)** : `DashboardNav.tsx` (barre basse fixe, route active) + `dashboard/layout.tsx` (thème sombre commun + nav sur les 5 pages) + accueil refait en hub avec cartes d'accès rapide. Les modules sont reliés. Lint propre, build OK. Détail dans `historique.md`.
 - [x] **Phase 5 Billing (2026-06-13)** : webhook Stripe + `createCheckoutSession` + page billing + migration 0005. Build OK. check:rls vert. `/dashboard/billing` protégé par `proxy.ts`. Stripe en mode TEST, prix en placeholder via env. Détail + bugs corrigés dans `historique.md`.
 - [x] **Phase 4 Rapport (2026-06-13)** : 4 fichiers construits (`reports/actions.ts`, `ReportCard.tsx`, `GenerateReportButton.tsx`, `report/page.tsx`). Build OK. check:rls vert. Page `/dashboard/report` : génération via Claude Sonnet 4.6, accusés de lecture RLS-safe, état vide avec bouton de génération.
 - [x] **Phase 3 Tasks (2026-06-13)** : 4 fichiers construits (`tasks/actions.ts`, `TaskCard.tsx`, `TaskList.tsx`, `tasks/page.tsx`). Build OK. check:rls vert. Page `/dashboard/tasks` groupée par priorité, Valider/Terminé via server actions admin.

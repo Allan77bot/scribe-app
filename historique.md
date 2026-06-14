@@ -1,3 +1,42 @@
+## 2026-06-14 — Navigation + dashboard-hub : on relie enfin les modules ✅
+
+### Contexte
+Les pages `capture` / `tasks` / `report` / `billing` existaient toutes mais
+en **îlots isolés** : aucun lien entre elles, l'accueil (`/dashboard`) ne
+pointait vers rien et restait sur l'ancien thème clair. On ne pouvait naviguer
+qu'en tapant les URLs. Module manquant le plus évident → la navigation.
+
+### Ajouté
+- `src/components/DashboardNav.tsx` — barre de navigation basse fixe,
+  mobile-first (`max-w-md`, safe-area iOS). Route active mise en évidence via
+  `usePathname` (l'accueil ne s'allume pas sur les sous-routes). Icônes SVG
+  inline, aucune dépendance ajoutée. Charte AK (#0A0708 / #F0E8D6 / #A8804D).
+- `src/app/dashboard/layout.tsx` — layout commun à tout le dashboard : fond
+  sombre du design system + `pb-24` pour réserver l'espace sous la nav fixe.
+  La nav est désormais présente sur les 5 pages.
+
+### Modifié
+- `src/app/dashboard/page.tsx` — l'accueil devient un **hub** : passé au thème
+  sombre (cohérent avec les modules), cartes d'accès rapide vers chaque module,
+  synthèse org conservée (plan, minutes restantes, rétention, rôle). Fallback
+  « Profil introuvable » re-stylé en sombre.
+- `src/lib/reports/actions.ts` — fix de 2 erreurs lint **pré-existantes**
+  (Phase 4) qui rendaient la CI rouge : `prefer-const` sur `totalEntries` +
+  `any[]` remplacé par un type local `ExtractedTask`.
+
+### Validations
+- `npm run lint` → propre ✓
+- `npm run build` → compile + TypeScript OK, 13 routes générées ✓
+- `npm run check:rls` → **non exécutable ici** (`SUPABASE_DB_URL` absent de
+  `.env.local` sur ce poste). Sans impact : ce module est 100 % front, aucune
+  migration, aucune table à `org_id` ajoutée → posture RLS inchangée.
+- Aucune migration créée → rien à appliquer sur le sandbox.
+
+### Branche
+`feat/capture-audio` poussée sur origin. Pas de PR (attente accord Allan).
+
+---
+
 ## 2026-06-13 — Phase 5 Billing : abonnements Stripe + quotas ✅
 
 ### Ajouté
