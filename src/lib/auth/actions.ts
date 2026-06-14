@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { dispatchVerificationEmail } from "@/lib/email/auth-links";
 
 // ── Inscription ──────────────────────────────────────────────────────────
 // Crée le compte Supabase. Le trigger SQL handle_new_user() crée alors l'org
@@ -39,8 +40,12 @@ export async function signup(formData: FormData) {
     );
   }
 
-  // Pas de session = confirmation e-mail requise → on invite à confirmer.
+  // Pas de session = confirmation e-mail requise. On délivre nous-mêmes l'e-mail
+  // de vérification via Brevo (pas le SMTP intégré de Supabase). Un échec d'envoi
+  // ne bloque pas l'inscription : le compte existe, l'e-mail est renvoyable
+  // depuis l'écran de connexion (POST /api/auth/confirm).
   if (!data.session) {
+    await dispatchVerificationEmail(email, password, displayName || undefined);
     redirect("/login?message=confirm-email");
   }
 
