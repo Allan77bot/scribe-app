@@ -639,3 +639,48 @@ Vérifs : `tsc --noEmit`, `eslint`, `next build` **verts** (20 routes, dont
 `/dashboard/team`, `/invite/accept`, `/api/invites/{send,pending}`). `check:rls`
 non exécutable ici (`SUPABASE_DB_URL` absent) — `invitations` conforme au patron
 (org_id + RLS + 4 policies), à relancer en CI/sandbox avec `0006` avant merge.
+
+## 2026-06-15 — Migration design : thème sombre → clair « Professional Flow » (branche `prototype`)
+
+### Contexte
+Le design system Scribe vivait en **thème sombre** (marine `ink-*`, blanc cassé
+`cloud-*`, accents cyan/bleu, dégradés). `DESIGN.md` (nouvelle source de vérité,
+spec « Corporate Modern + Soft Minimalism ») tranche pour un **thème clair** :
+fond `#f7fafd`, cartes blanches flottantes rayon 32px, ombres douces teintées
+navy, bleu d'action `#0059bb`, titres Deep Navy `#002b5b`, police **Manrope**.
+Objectif de la session : migration complète, **zéro trace du dark**.
+
+### Tokens (Tailwind v4 — config en CSS, pas de `tailwind.config.ts`)
+- `src/app/globals.css` réécrit : bloc `@theme` portant les tokens **système
+  DESIGN.md §2.2** (surfaces `surface`/`surface-container*`, textes `on-surface*`,
+  `outline*`, `primary`/`primary-container`, `secondary` = Deep Navy pour les
+  titres, `azure` = Soft Azure pour les boutons secondary, famille `error`).
+  Rayons sémantiques `rounded-field` (16px) / `rounded-card` (32px) /
+  `rounded-pill`. Ombres `shadow-card` + `shadow-modal` teintées
+  `rgba(0,43,91,…)`. Suppression de **tous** les tokens dark (ink/cloud/accent/
+  muted/hint/gradient/glow + sémantiques success/warning/danger/prio).
+- `src/app/layout.tsx` : **Manrope** chargée via `next/font/google` (graisses
+  400→800, variable `--font-manrope`), `body` en `bg-surface text-on-surface`,
+  `themeColor` clair `#f7fafd`.
+
+### Composants migrés (28 fichiers UI)
+Landing, nav basse (`DashboardNav` — actif `primary` + barre, fond
+`surface-container`), `dashboard/layout` (conteneur centré **max 1200px**), les
+12 pages dashboard/auth/invite et les 13 composants. Patterns appliqués
+partout : **cartes** blanc `rounded-card p-6 shadow-card` ; **boutons primary**
+pilule 56px (`h-14 rounded-pill bg-primary text-on-primary`) ; **boutons
+secondary** azure sans bordure ; **inputs** sans bordure `bg-surface-container-low
+rounded-field focus:ring-primary` ; **états vides** icône 24px `primary` + message
+`secondary` ; **erreurs** `error` / conteneur `error-container`. Aucune logique
+touchée (server actions, handlers, props intacts). Fan-out via 5 agents
+parallèles sur un mapping de tokens autoritatif unique → cohérence garantie.
+
+### Vérifs
+`tsc --noEmit`, `eslint`, `next build` **verts** (20 routes). Grep word-boundary :
+**zéro** classe dark résiduelle, zéro hex sombre, zéro `var(--gradient-*)` inline.
+Avertissement CSS initial (`*/` parasite dans un commentaire de `globals.css`)
+corrigé → build sans warning.
+
+### Note
+`DESIGN.md` ajouté au repo (source de vérité du design). Le gabarit e-mail
+(`email/send.ts`) reste hors périmètre front → toujours TODO `feat/email-brand`.

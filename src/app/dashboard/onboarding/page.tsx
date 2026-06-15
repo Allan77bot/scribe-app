@@ -24,11 +24,11 @@ export default async function OnboardingPage() {
   if (org?.onboarding_complete) redirect("/dashboard");
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
       <div className="mx-auto w-full max-w-md px-5 pb-10 pt-10">
         <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">Bienvenue dans Scribe</h1>
-          <p className="mt-2 text-sm text-muted">
+          <h1 className="text-2xl font-bold text-secondary">Bienvenue dans Scribe</h1>
+          <p className="mt-2 text-sm text-on-surface-variant">
             Trois étapes pour transformer la parole de votre équipe en
             coordination claire.
           </p>

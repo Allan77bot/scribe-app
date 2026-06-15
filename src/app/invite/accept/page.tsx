@@ -11,12 +11,9 @@ import AcceptInviteForm from "@/components/AcceptInviteForm";
 // Coquille marine commune aux états de cette page (on est « dans » Scribe).
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main
-      className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden px-5 py-10 text-cloud-50"
-      style={{ background: "var(--gradient-veil)" }}
-    >
+    <main className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-surface px-5 py-10 text-on-surface">
       <div className="w-full max-w-sm">
-        <p className="mb-6 text-center text-lg font-bold tracking-tight">Scribe</p>
+        <p className="mb-6 text-center text-lg font-bold tracking-tight text-secondary">Scribe</p>
         {children}
       </div>
     </main>
@@ -25,7 +22,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-ink-600 bg-ink-800 p-6 shadow-card">
+    <div className="rounded-card bg-white p-6 shadow-card">
       {children}
     </div>
   );
@@ -44,23 +41,23 @@ export default async function AcceptInvitePage({
     return (
       <Shell>
         <Card>
-          <h1 className="text-lg font-semibold text-cloud-50">
+          <h1 className="text-lg font-semibold text-secondary">
             Invitation introuvable
           </h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm text-on-surface-variant">
             Ce lien d&apos;invitation n&apos;est plus valide — il a peut-être
             expiré (72 h) ou déjà été utilisé. Demande à l&apos;équipe de
             t&apos;en renvoyer un.
           </p>
           <Link
             href="/signup"
-            className="mt-5 flex min-h-[48px] items-center justify-center rounded-xl text-sm font-semibold text-cloud-50 bg-gradient-brand"
+            className="mt-5 flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
           >
             Créer ma propre équipe
           </Link>
           <Link
             href="/login"
-            className="mt-3 block text-center text-sm font-medium text-accent-cyan"
+            className="mt-3 block text-center text-sm font-medium text-primary"
           >
             J&apos;ai déjà un compte
           </Link>
@@ -79,16 +76,16 @@ export default async function AcceptInvitePage({
     return (
       <Shell>
         <Card>
-          <h1 className="text-lg font-semibold text-cloud-50">
+          <h1 className="text-lg font-semibold text-secondary">
             Tu es déjà connecté
           </h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm text-on-surface-variant">
             Pour rejoindre « {invite.orgName} » avec l&apos;adresse {invite.email},
             déconnecte-toi d&apos;abord, puis rouvre ce lien.
           </p>
           <Link
             href="/dashboard"
-            className="mt-5 flex min-h-[48px] items-center justify-center rounded-xl text-sm font-semibold text-cloud-50 bg-gradient-brand"
+            className="mt-5 flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
           >
             Aller à mon tableau de bord
           </Link>
@@ -100,19 +97,19 @@ export default async function AcceptInvitePage({
   return (
     <Shell>
       <Card>
-        <p className="text-xs font-semibold uppercase tracking-wide text-accent-cyan">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           Invitation
         </p>
-        <h1 className="mt-1 text-xl font-bold text-cloud-50">
+        <h1 className="mt-1 text-xl font-bold text-secondary">
           Rejoins « {invite.orgName} »
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-on-surface-variant">
           Crée ton accès pour coordonner les tâches, les accusés de lecture et la
           passation avec ton équipe.
         </p>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+          <p className="mt-4 rounded-field bg-error-container px-3 py-2 text-sm text-on-error-container">
             {error}
           </p>
         )}

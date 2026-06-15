@@ -80,11 +80,11 @@ export default async function HandoverPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
       <div className="mx-auto w-full max-w-md px-5 pb-10 pt-8">
         <header className="mb-6">
-          <h1 className="text-xl font-semibold">Passation</h1>
-          <p className="mt-1 text-xs text-muted">
+          <h1 className="text-xl font-semibold text-secondary">Passation</h1>
+          <p className="mt-1 text-xs text-on-surface-variant">
             Le relais pour l&apos;équipe qui prend le poste — tâches en cours,
             bloquées, décisions du jour.
           </p>
@@ -103,12 +103,26 @@ export default async function HandoverPage() {
             <GenerateHandoverButton />
           </div>
         ) : (
-          // État vide = onboarding : titre + une phrase + le CTA de génération.
-          <div className="flex flex-col items-center gap-3 rounded-xl bg-ink-700 px-6 py-10 text-center">
-            <h2 className="text-base font-semibold text-cloud-50">
+          // État vide = onboarding : icône + titre + une phrase + le CTA de génération.
+          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
+            <svg
+              className="h-6 w-6 text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="M16 13H8M16 17H8M10 9H8" />
+            </svg>
+            <h2 className="text-base font-semibold text-secondary">
               Pas encore de passation
             </h2>
-            <p className="max-w-xs text-sm text-muted">
+            <p className="max-w-xs text-sm text-on-surface-variant">
               Scribe agrège les tâches en cours, les points bloqués et les
               décisions du jour en un relais prêt à transmettre au shift suivant.
             </p>

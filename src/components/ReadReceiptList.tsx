@@ -44,10 +44,10 @@ export default function ReadReceiptList({
       : null;
 
   return (
-    <div className="rounded-xl bg-ink-800 p-4">
+    <div className="rounded-field bg-surface-container-low p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-cloud-50">Accusés de lecture</h3>
-        <span className="text-xs tabular-nums text-muted">
+        <h3 className="text-sm font-semibold text-secondary">Accusés de lecture</h3>
+        <span className="text-xs tabular-nums text-on-surface-variant">
           {memberCount
             ? `${receipts.length} / ${memberCount} ont lu`
             : `${receipts.length} lecture${receipts.length !== 1 ? "s" : ""}`}
@@ -55,7 +55,7 @@ export default function ReadReceiptList({
       </div>
 
       {receipts.length === 0 ? (
-        <p className="text-xs text-hint">
+        <p className="text-xs text-outline">
           Personne n&apos;a encore ouvert ce rapport.
         </p>
       ) : (
@@ -71,13 +71,13 @@ export default function ReadReceiptList({
                   <span className="flex min-w-0 items-center gap-2">
                     <span
                       aria-hidden
-                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-success"
+                      className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                     />
-                    <span className="truncate text-sm text-cloud-50">
+                    <span className="truncate text-sm text-on-surface">
                       {r.display_name || r.user_id.slice(0, 8) + "…"}
                     </span>
                   </span>
-                  <span className="shrink-0 text-xs tabular-nums text-hint">
+                  <span className="shrink-0 text-xs tabular-nums text-on-surface-variant">
                     {formatDelay(delay)}
                   </span>
                 </li>
@@ -85,9 +85,9 @@ export default function ReadReceiptList({
             })}
           </ul>
           {avgDelay !== null && (
-            <p className="mt-3 border-t border-ink-600 pt-3 text-xs text-muted">
+            <p className="mt-3 border-t border-outline-variant pt-3 text-xs text-on-surface-variant">
               Temps moyen avant lecture :{" "}
-              <span className="tabular-nums text-cloud-50">
+              <span className="tabular-nums text-on-surface">
                 {formatDelay(avgDelay)}
               </span>
             </p>

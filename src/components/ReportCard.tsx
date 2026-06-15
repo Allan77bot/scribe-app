@@ -46,21 +46,21 @@ export default function ReportCard({
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-card bg-white p-6 shadow-card">
       {/* En-tête */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-muted">{dateLabel}</p>
-          <h2 className="text-lg font-semibold text-cloud-50">{kindLabel}</h2>
+          <p className="text-xs text-on-surface-variant">{dateLabel}</p>
+          <h2 className="text-lg font-semibold text-secondary">{kindLabel}</h2>
         </div>
-        <span className="shrink-0 rounded-full bg-accent-blue/15 px-3 py-1 text-xs font-medium text-accent-blue">
+        <span className="shrink-0 rounded-pill bg-azure px-3 py-1 text-xs font-medium text-primary">
           {report.shift_label}
         </span>
       </div>
 
       {/* Contenu HTML sanitizé */}
       <div
-        className="rounded-xl bg-ink-700 px-5 py-4 text-sm leading-relaxed text-cloud-50 [&_h1]:mb-2 [&_h1]:text-base [&_h1]:font-semibold [&_h2]:mt-4 [&_h2]:mb-1.5 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-accent-cyan [&_hr]:my-3 [&_hr]:border-ink-600 [&_li]:ml-4 [&_li]:list-disc [&_p]:mb-2 [&_ul]:space-y-1"
+        className="rounded-field bg-surface-container-low px-5 py-4 text-sm leading-relaxed text-on-surface [&_h1]:mb-2 [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-secondary [&_h2]:mt-4 [&_h2]:mb-1.5 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-primary [&_hr]:my-3 [&_hr]:border-outline-variant [&_li]:ml-4 [&_li]:list-disc [&_p]:mb-2 [&_ul]:space-y-1"
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
 
@@ -76,15 +76,14 @@ export default function ReportCard({
         <button
           onClick={() => startTransition(async () => void (await markRead(report.id)))}
           disabled={isPending}
-          className="min-h-[44px] w-full rounded-xl py-3 text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-50"
-          style={{ background: "var(--gradient-brand)" }}
+          className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-50"
         >
           {isPending ? "…" : "Marquer comme lu"}
         </button>
       )}
       {alreadyRead && (
-        <p className="inline-flex items-center gap-2 text-xs text-success">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+        <p className="inline-flex items-center gap-2 text-xs text-primary">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
           Vous avez marqué ce rapport comme lu
         </p>
       )}

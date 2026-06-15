@@ -52,14 +52,14 @@ export default async function DashboardPage() {
 
     if (!org) {
       return (
-        <main className="flex min-h-screen flex-1 items-center justify-center bg-ink-900 px-6 text-center text-cloud-50">
-          <div className="w-full max-w-sm rounded-2xl border border-ink-600 bg-ink-700 p-6">
-            <h1 className="text-lg font-semibold">Profil introuvable</h1>
-            <p className="mt-2 text-sm text-muted">
+        <main className="flex min-h-screen flex-1 items-center justify-center bg-surface px-6 text-center text-on-surface">
+          <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
+            <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
+            <p className="mt-2 text-sm text-on-surface-variant">
               Erreur lors de la création du profil. Réessaie ou contacte le support.
             </p>
             <form action={logout} className="mt-4">
-              <button type="submit" className="min-h-[44px] w-full rounded-lg px-4 py-2.5 text-base font-medium text-cloud-50 transition-opacity hover:opacity-90" style={{ background: "var(--gradient-brand)" }}>
+              <button type="submit" className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]">
                 Se déconnecter
               </button>
             </form>
@@ -92,18 +92,17 @@ export default async function DashboardPage() {
 
   if (error || !profile) {
     return (
-      <main className="flex min-h-screen flex-1 items-center justify-center bg-ink-900 px-6 text-center text-cloud-50">
-        <div className="w-full max-w-sm rounded-2xl border border-ink-600 bg-ink-700 p-6">
-          <h1 className="text-lg font-semibold">Profil introuvable</h1>
-          <p className="mt-2 text-sm text-muted">
+      <main className="flex min-h-screen flex-1 items-center justify-center bg-surface px-6 text-center text-on-surface">
+        <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
+          <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
+          <p className="mt-2 text-sm text-on-surface-variant">
             Votre compte existe mais son profil d&apos;équipe n&apos;a pas pu être
             chargé. Déconnectez-vous puis reconnectez-vous.
           </p>
           <form action={logout} className="mt-4">
             <button
               type="submit"
-              className="min-h-[44px] w-full rounded-lg px-4 py-2.5 text-base font-medium text-cloud-50 transition-opacity hover:opacity-90"
-              style={{ background: "var(--gradient-brand)" }}
+              className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
             >
               Se déconnecter
             </button>
@@ -151,13 +150,13 @@ export default async function DashboardPage() {
     minutesQuota > 0 ? Math.min((minutesUsed / minutesQuota) * 100, 100) : 0;
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
-      <header className="flex items-center justify-between border-b border-ink-600 px-5 py-4">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
+      <header className="flex items-center justify-between px-5 py-4">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold">
+          <p className="truncate text-base font-semibold text-secondary">
             {org?.name ?? "Mon équipe"}
           </p>
-          <p className="truncate text-xs text-muted">
+          <p className="truncate text-xs text-on-surface-variant">
             {profile.display_name || user.email}
             {profile.role === "admin" ? " · admin" : ""}
           </p>
@@ -165,7 +164,7 @@ export default async function DashboardPage() {
         <form action={logout}>
           <button
             type="submit"
-            className="shrink-0 rounded-lg border border-ink-600 px-3 py-1.5 text-sm font-medium text-cloud-50 transition-colors hover:border-accent-cyan"
+            className="shrink-0 rounded-pill bg-azure px-4 py-2 text-sm font-medium text-primary transition-all hover:brightness-95"
           >
             Se déconnecter
           </button>
@@ -176,12 +175,11 @@ export default async function DashboardPage() {
         {/* Quick capture */}
         <Link
           href="/dashboard/capture"
-          className="flex items-center justify-between rounded-2xl p-5 text-cloud-50 transition-opacity hover:opacity-95"
-          style={{ background: "var(--gradient-brand)" }}
+          className="flex items-center justify-between rounded-card bg-primary p-5 text-on-primary shadow-card transition-all hover:bg-primary-container active:scale-[0.98]"
         >
           <div className="min-w-0">
             <p className="text-base font-semibold">Capturer une note</p>
-            <p className="mt-0.5 text-xs text-cloud-50/80">
+            <p className="mt-0.5 text-xs text-on-primary/80">
               Vocal ou écrit — Scribe en extrait les tâches
             </p>
           </div>
@@ -193,70 +191,70 @@ export default async function DashboardPage() {
 
         {/* Météo des tâches */}
         <Link href="/dashboard/tasks" className="mt-4 block">
-          <section className="rounded-2xl bg-ink-700 p-5">
-            <h2 className="mb-3 text-sm font-medium text-muted">Météo des tâches</h2>
+          <section className="rounded-card bg-white p-6 shadow-card">
+            <h2 className="mb-3 text-sm font-medium text-secondary">Météo des tâches</h2>
             <dl className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <dt className="text-xs text-warning">À confirmer</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums">{toConfirm}</dd>
+                <dt className="text-xs text-on-surface-variant">À confirmer</dt>
+                <dd className="mt-1 text-2xl font-bold tabular-nums text-secondary">{toConfirm}</dd>
               </div>
               <div>
-                <dt className="text-xs text-accent-blue">En cours</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums">{active}</dd>
+                <dt className="text-xs text-on-surface-variant">En cours</dt>
+                <dd className="mt-1 text-2xl font-bold tabular-nums text-primary">{active}</dd>
               </div>
               <div>
-                <dt className="text-xs text-success">Terminées</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums">{done}</dd>
+                <dt className="text-xs text-on-surface-variant">Terminées</dt>
+                <dd className="mt-1 text-2xl font-bold tabular-nums text-on-surface">{done}</dd>
               </div>
             </dl>
           </section>
         </Link>
 
         {/* Quota minutes */}
-        <section className="mt-4 rounded-2xl bg-ink-700 p-5">
+        <section className="mt-4 rounded-card bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-muted">Minutes ce mois</h2>
-            <span className="text-xs tabular-nums text-muted">
-              <strong className="text-cloud-50">{minutesUsed}</strong> / {minutesQuota}
+            <h2 className="text-sm font-medium text-secondary">Minutes ce mois</h2>
+            <span className="text-xs tabular-nums text-on-surface-variant">
+              <strong className="text-on-surface">{minutesUsed}</strong> / {minutesQuota}
             </span>
           </div>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-ink-600">
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-pill bg-surface-container">
             <div
-              className={`h-2.5 rounded-full transition-all ${
-                usagePercent >= 90 ? "bg-danger" : usagePercent >= 75 ? "bg-warning" : "bg-success"
+              className={`h-2.5 rounded-pill transition-all ${
+                usagePercent >= 90 ? "bg-error" : usagePercent >= 75 ? "bg-secondary" : "bg-primary"
               }`}
               style={{ width: `${usagePercent}%` }}
             />
           </div>
-          <p className="mt-1.5 text-xs text-muted">
+          <p className="mt-1.5 text-xs text-on-surface-variant">
             {minutesLeft} minute{minutesLeft !== 1 ? "s" : ""} restante{minutesLeft !== 1 ? "s" : ""}
           </p>
         </section>
 
         {/* Aperçu passation */}
         <Link href="/dashboard/handover" className="mt-4 block">
-          <section className="flex items-center justify-between rounded-2xl bg-ink-700 p-5">
+          <section className="flex items-center justify-between rounded-card bg-white p-6 shadow-card">
             <div className="min-w-0">
-              <h2 className="text-sm font-medium text-muted">Dernière passation</h2>
-              <p className="mt-1 text-sm font-semibold text-cloud-50">
+              <h2 className="text-sm font-medium text-secondary">Dernière passation</h2>
+              <p className="mt-1 text-sm font-semibold text-on-surface">
                 {handover
                   ? `${new Date(handover.report_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ${handover.shift_label}`
                   : "Aucune passation générée"}
               </p>
             </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-accent-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-primary">
               <path d="m9 6 6 6-6 6" />
             </svg>
           </section>
         </Link>
 
         {/* Modules */}
-        <h2 className="mb-3 mt-7 text-sm font-medium text-muted">Tous les modules</h2>
+        <h2 className="mb-3 mt-7 text-sm font-medium text-secondary">Tous les modules</h2>
         <div className="grid grid-cols-2 gap-3">
           {MODULES.map((m) => (
-            <Link key={m.href} href={m.href} className="rounded-2xl bg-ink-700 p-4 transition-opacity hover:opacity-90">
-              <p className="text-sm font-semibold">{m.title}</p>
-              <p className="mt-0.5 text-xs text-muted">{m.desc}</p>
+            <Link key={m.href} href={m.href} className="rounded-card bg-white p-6 shadow-card transition-all hover:brightness-95 active:scale-[0.98]">
+              <p className="text-sm font-semibold text-secondary">{m.title}</p>
+              <p className="mt-0.5 text-xs text-on-surface-variant">{m.desc}</p>
             </Link>
           ))}
         </div>

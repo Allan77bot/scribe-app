@@ -1,5 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope } from "next/font/google";
 import "./globals.css";
+
+// Police unique du design system « Professional Flow » (DESIGN.md §3).
+// Graisses 400 / 500 / 600 / 700 / 800 chargées, exposées en variable CSS.
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Scribe — coordination d'équipe",
@@ -18,7 +28,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  // Fond clair du design system (DESIGN.md §2.2 — surface #f7fafd).
+  themeColor: "#f7fafd",
   width: "device-width",
   initialScale: 1,
   // Mobile-first strict : on évite le zoom involontaire sur les formulaires.
@@ -32,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-slate-50 text-slate-900">
+    <html lang="fr" className={`h-full antialiased ${manrope.variable}`}>
+      <body className="flex min-h-full flex-col bg-surface text-on-surface">
         {children}
       </body>
     </html>

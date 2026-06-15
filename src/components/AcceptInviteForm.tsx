@@ -14,7 +14,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="min-h-[48px] rounded-xl text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-40 bg-gradient-brand"
+      className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
     >
       {pending ? "Création…" : "Rejoindre l'équipe"}
     </button>
@@ -33,7 +33,7 @@ export default function AcceptInviteForm({
       <input type="hidden" name="token" value={token} />
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
           E-mail invité
         </span>
         {/* Verrouillé : informatif, non modifiable. Champ caché pour l'envoi. */}
@@ -42,12 +42,12 @@ export default function AcceptInviteForm({
           value={email}
           readOnly
           aria-readonly="true"
-          className="min-h-[48px] w-full cursor-not-allowed rounded-lg border border-ink-600 bg-ink-900 px-3.5 text-base text-muted outline-none"
+          className="w-full cursor-not-allowed rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface-variant focus:outline-none"
         />
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
           Ton nom
         </span>
         <input
@@ -56,12 +56,12 @@ export default function AcceptInviteForm({
           autoComplete="name"
           maxLength={80}
           placeholder="Ex. Camille"
-          className="min-h-[48px] w-full rounded-lg border border-ink-600 bg-ink-800 px-3.5 text-base text-cloud-50 outline-none transition-colors focus:border-accent-cyan"
+          className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
           Mot de passe
         </span>
         <input
@@ -71,7 +71,7 @@ export default function AcceptInviteForm({
           minLength={8}
           autoComplete="new-password"
           placeholder="8 caractères minimum"
-          className="min-h-[48px] w-full rounded-lg border border-ink-600 bg-ink-800 px-3.5 text-base text-cloud-50 outline-none transition-colors focus:border-accent-cyan"
+          className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
 

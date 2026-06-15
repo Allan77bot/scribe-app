@@ -75,10 +75,10 @@ export default async function TeamPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
-      <header className="border-b border-ink-600 px-5 py-4">
-        <h1 className="text-xl font-bold tracking-tight">Équipe</h1>
-        <p className="mt-0.5 text-xs text-muted">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
+      <header className="border-b border-outline-variant px-5 py-4">
+        <h1 className="text-xl font-bold tracking-tight text-secondary">Équipe</h1>
+        <p className="mt-0.5 text-xs text-on-surface-variant">
           {members.length} membre{members.length !== 1 ? "s" : ""}
           {pending.length > 0
             ? ` · ${pending.length} invitation${pending.length !== 1 ? "s" : ""} en attente`
@@ -95,7 +95,7 @@ export default async function TeamPage() {
         )}
 
         {/* Membres */}
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
           Membres
         </h2>
         <ul className="flex flex-col gap-2">
@@ -104,28 +104,30 @@ export default async function TeamPage() {
             return (
               <li
                 key={m.id}
-                className="flex items-center gap-3 rounded-xl bg-ink-700 p-3"
+                className="flex items-center gap-3 rounded-card bg-white p-3 shadow-card"
               >
                 <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-cloud-50 ${
-                    m.role === "admin" ? "bg-gradient-accent" : "bg-ink-600"
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    m.role === "admin"
+                      ? "bg-primary text-on-primary"
+                      : "bg-azure text-primary"
                   }`}
                   aria-hidden
                 >
                   {initials(m.display_name, m.email)}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-cloud-50">
+                  <p className="truncate text-sm font-semibold text-on-surface">
                     {m.display_name || m.email.split("@")[0]}
-                    {isMe && <span className="text-muted"> · vous</span>}
+                    {isMe && <span className="text-on-surface-variant"> · vous</span>}
                   </p>
-                  <p className="truncate text-xs text-muted">{m.email}</p>
+                  <p className="truncate text-xs text-on-surface-variant">{m.email}</p>
                 </div>
                 <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                  className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
                     m.role === "admin"
-                      ? "bg-accent-cyan/15 text-accent-cyan"
-                      : "bg-ink-600 text-muted"
+                      ? "bg-primary text-on-primary"
+                      : "bg-azure text-primary"
                   }`}
                 >
                   {m.role === "admin" ? "Admin" : "Membre"}
@@ -138,17 +140,17 @@ export default async function TeamPage() {
         {/* Invitations en attente — visibles par l'admin. */}
         {isAdmin && pending.length > 0 && (
           <>
-            <h2 className="mb-3 mt-7 text-xs font-semibold uppercase tracking-wide text-muted">
+            <h2 className="mb-3 mt-7 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
               Invitations en attente
             </h2>
             <ul className="flex flex-col gap-2">
               {pending.map((inv) => (
                 <li
                   key={inv.id}
-                  className="flex items-center gap-3 rounded-xl border border-dashed border-ink-600 bg-ink-800 p-3"
+                  className="flex items-center gap-3 rounded-card border border-dashed border-outline-variant bg-white p-3 shadow-card"
                 >
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink-600 text-accent-cyan"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-azure text-primary"
                     aria-hidden
                   >
                     {/* Signal en transit : enveloppe au trait cyan. */}
@@ -158,10 +160,10 @@ export default async function TeamPage() {
                     </svg>
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-cloud-50">
+                    <p className="truncate text-sm font-medium text-on-surface">
                       {inv.email}
                     </p>
-                    <p className="text-xs text-warning">{expiresIn(inv.expires_at)}</p>
+                    <p className="text-xs text-on-surface-variant">{expiresIn(inv.expires_at)}</p>
                   </div>
                   <RevokeInviteButton invitationId={inv.id} />
                 </li>
@@ -172,7 +174,7 @@ export default async function TeamPage() {
 
         {/* Membre non-admin et seul : on explique sans frustrer. */}
         {!isAdmin && members.length === 1 && (
-          <p className="mt-6 rounded-xl bg-ink-700 p-4 text-sm text-muted">
+          <p className="mt-6 rounded-card bg-white p-4 text-sm text-on-surface-variant shadow-card">
             Seul un administrateur peut inviter de nouveaux coéquipiers.
           </p>
         )}

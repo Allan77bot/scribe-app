@@ -15,18 +15,32 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   // État vide = onboarding (brand guide §5) : titre + une phrase + un CTA.
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl bg-ink-700 px-6 py-12 text-center">
-        <h2 className="text-base font-semibold text-cloud-50">
+      <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          className="text-primary"
+        >
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+        <h2 className="text-base font-semibold text-secondary">
           Aucune tâche pour l&apos;instant
         </h2>
-        <p className="max-w-xs text-sm text-muted">
+        <p className="max-w-xs text-sm text-on-surface-variant">
           Dictez ou collez une note — Scribe en extrait les tâches, vous les
           confirmez d&apos;un tap.
         </p>
         <Link
           href="/dashboard/capture"
-          className="mt-2 min-h-[44px] rounded-xl px-5 py-3 text-sm font-semibold text-cloud-50"
-          style={{ background: "var(--gradient-brand)" }}
+          className="mt-2 flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-sm font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
         >
           Capturer une note
         </Link>
@@ -50,7 +64,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
     <div className="space-y-6">
       {pending.length > 0 && (
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-warning">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-secondary">
             À confirmer ({pending.length})
           </h2>
           {PRIORITY_ORDER.map((priority) => {
@@ -58,7 +72,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             if (group.length === 0) return null;
             return (
               <div key={priority} className="mb-4">
-                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-hint">
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-outline">
                   {PRIORITY_LABELS[priority]}
                 </p>
                 {group.map((task) => (
@@ -75,7 +89,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
       {settled.length > 0 && (
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
             Suivi ({settled.length})
           </h2>
           {settled.map((task) => (

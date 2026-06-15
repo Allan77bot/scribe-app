@@ -49,17 +49,15 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
   };
 
   return (
-    <div className="rounded-2xl bg-ink-700 p-6">
+    <div className="rounded-card bg-white p-6 shadow-card">
       {/* Progression */}
       <div className="mb-6 flex items-center gap-2" aria-hidden>
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <span
             key={i}
-            className="h-1.5 flex-1 rounded-full transition-colors"
-            style={{
-              background:
-                i < step ? "var(--gradient-accent)" : "var(--color-ink-600)",
-            }}
+            className={`h-1.5 flex-1 rounded-pill transition-colors ${
+              i < step ? "bg-primary" : "bg-surface-container"
+            }`}
           />
         ))}
       </div>
@@ -67,13 +65,13 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
       {step === 1 && (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent-cyan">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               Étape 1 / 3
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-cloud-50">
+            <h2 className="mt-1 text-lg font-semibold text-secondary">
               Nommez votre équipe
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-on-surface-variant">
               C&apos;est le nom que verront vos coéquipiers dans Scribe.
             </p>
           </div>
@@ -81,14 +79,13 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
             value={orgName}
             onChange={(e) => setOrgName(e.target.value)}
             placeholder="Ex. Atelier du Port — relais nuit"
-            className="min-h-[48px] w-full rounded-lg border border-ink-600 bg-ink-800 px-3.5 text-base text-cloud-50 outline-none focus:border-accent-cyan"
+            className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
           <button
             onClick={saveName}
             disabled={isPending || !orgName.trim()}
-            className="min-h-[48px] rounded-xl text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-            style={{ background: "var(--gradient-brand)" }}
+            className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
           >
             {isPending ? "…" : "Continuer"}
           </button>
@@ -98,13 +95,13 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
       {step === 2 && (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent-cyan">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               Étape 2 / 3
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-cloud-50">
+            <h2 className="mt-1 text-lg font-semibold text-secondary">
               Invitez un coéquipier
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-on-surface-variant">
               Scribe prend tout son sens à plusieurs : accusés de lecture,
               passation de relais, coordination du shift.
             </p>
@@ -112,20 +109,19 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
           {/* Invitation par jeton signé (jamais de rattachement par org_id brut —
               règle d'or n°2). La feuille envoie un lien e-mail expirant sous 72 h. */}
           <InviteMemberButton label="Inviter par e-mail" />
-          <p className="text-center text-xs text-hint">
+          <p className="text-center text-xs text-outline">
             Optionnel — vous pouvez aussi inviter plus tard depuis l&apos;onglet Équipe.
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setStep(1)}
-              className="min-h-[48px] rounded-xl border border-ink-600 px-4 text-sm font-medium text-cloud-50"
+              className="flex h-14 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95"
             >
               Retour
             </button>
             <button
               onClick={() => setStep(3)}
-              className="min-h-[48px] flex-1 rounded-xl text-sm font-semibold text-cloud-50"
-              style={{ background: "var(--gradient-brand)" }}
+              className="flex h-14 flex-1 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
             >
               Continuer
             </button>
@@ -136,29 +132,28 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
       {step === 3 && (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent-cyan">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               Étape 3 / 3
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-cloud-50">
+            <h2 className="mt-1 text-lg font-semibold text-secondary">
               Capturez votre première note
             </h2>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-on-surface-variant">
               Dictez ou collez un texte. Scribe en extrait les tâches — vous les
               confirmez d&apos;un tap, puis seulement l&apos;équipe prend le relais.
             </p>
           </div>
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
           <button
             onClick={finish}
             disabled={isPending}
-            className="min-h-[48px] rounded-xl text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-            style={{ background: "var(--gradient-brand)" }}
+            className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
           >
             {isPending ? "…" : "Capturer une note"}
           </button>
           <button
             onClick={() => setStep(2)}
-            className="min-h-[44px] text-sm font-medium text-muted"
+            className="min-h-[44px] text-sm font-medium text-on-surface-variant"
           >
             Retour
           </button>
@@ -169,7 +164,7 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
       <button
         onClick={skip}
         disabled={isPending}
-        className="mt-5 w-full text-center text-xs text-hint transition-colors hover:text-muted"
+        className="mt-5 w-full text-center text-xs text-outline transition-colors hover:text-on-surface-variant"
       >
         Passer l&apos;introduction
       </button>

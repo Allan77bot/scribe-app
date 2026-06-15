@@ -10,13 +10,13 @@ export default function CapturePage() {
   const [tab, setTab] = useState<Tab>("vocal");
 
   return (
-    <main className="flex min-h-screen flex-col items-center overflow-x-hidden bg-ink-900 text-cloud-50">
+    <main className="flex min-h-screen flex-col items-center overflow-x-hidden bg-surface text-on-surface">
       <div className="w-full max-w-md px-5 pt-8 pb-10">
-        <h1 className="text-xl font-semibold mb-6">Nouvelle note</h1>
+        <h1 className="text-xl font-semibold mb-6 text-secondary">Nouvelle note</h1>
 
         {/* Sélecteur d'onglets */}
         <div
-          className="mb-8 flex overflow-hidden rounded-xl bg-ink-700"
+          className="mb-8 flex overflow-hidden rounded-pill bg-surface-container p-1"
           role="tablist"
         >
           {(["vocal", "ecrit"] as Tab[]).map((t) => (
@@ -25,12 +25,11 @@ export default function CapturePage() {
               role="tab"
               aria-selected={tab === t}
               onClick={() => setTab(t)}
-              className={`min-h-[44px] flex-1 py-3 text-sm font-medium transition-colors ${
-                tab === t ? "text-cloud-50" : "text-muted"
+              className={`min-h-[44px] flex-1 rounded-pill py-3 text-sm font-medium transition-colors ${
+                tab === t
+                  ? "bg-primary text-on-primary"
+                  : "text-on-surface-variant"
               }`}
-              style={
-                tab === t ? { background: "var(--gradient-accent)" } : undefined
-              }
             >
               {t === "vocal" ? "Vocal" : "Écrit"}
             </button>

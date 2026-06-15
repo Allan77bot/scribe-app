@@ -68,8 +68,9 @@ export default function DashboardNav() {
 
   return (
     <nav
-      // Fond marine translucide + flou (cf. brand guide §5). safe-area iOS.
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-ink-600 bg-ink-900/90 backdrop-blur"
+      // Fond surface-container clair + flou, ombre montante teintée navy.
+      // Jamais de bordure forte (DESIGN.md §6). safe-area iOS.
+      className="fixed inset-x-0 bottom-0 z-50 bg-surface-container/90 shadow-card backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex w-full max-w-md">
@@ -85,10 +86,10 @@ export default function DashboardNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                // Actif = accent cyan + barre de 3 px (jamais l'opacité seule).
+                // Actif = primary + barre de 2 px (jamais l'opacité seule).
                 // Inactif = texte secondaire (contraste AA).
                 className={`relative flex min-h-[56px] flex-col items-center justify-center gap-1 py-2 transition-colors ${
-                  active ? "text-accent-cyan" : "text-muted"
+                  active ? "text-primary" : "text-on-surface-variant"
                 }`}
               >
                 <svg
@@ -108,7 +109,7 @@ export default function DashboardNav() {
                   {item.label}
                 </span>
                 {active && (
-                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-accent-cyan" />
+                  <span className="absolute top-0 h-0.5 w-8 rounded-pill bg-primary" />
                 )}
               </Link>
             </li>

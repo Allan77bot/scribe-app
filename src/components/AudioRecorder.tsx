@@ -113,11 +113,12 @@ export default function AudioRecorder() {
   if (state === "error") {
     return (
       <div className="flex flex-col items-center gap-4 py-8">
-        <p className="text-center text-sm text-danger">{errorMsg}</p>
+        <p className="w-full rounded-field bg-error-container px-4 py-3 text-center text-sm text-on-error-container">
+          {errorMsg}
+        </p>
         <button
           onClick={reset}
-          className="min-h-[44px] rounded-xl px-6 py-3 text-sm font-semibold text-cloud-50"
-          style={{ background: "var(--gradient-brand)" }}
+          className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
         >
           Réessayer
         </button>
@@ -130,10 +131,10 @@ export default function AudioRecorder() {
     return (
       <div className="flex flex-col items-center gap-4 py-12">
         <div
-          className="h-10 w-10 animate-spin rounded-full border-2 border-accent-cyan"
+          className="h-10 w-10 animate-spin rounded-full border-2 border-primary"
           style={{ borderTopColor: "transparent" }}
         />
-        <p className="text-sm text-muted">Envoi en cours…</p>
+        <p className="text-sm text-on-surface-variant">Envoi en cours…</p>
       </div>
     );
   }
@@ -146,14 +147,13 @@ export default function AudioRecorder() {
         <div className="flex w-full gap-3">
           <button
             onClick={reset}
-            className="min-h-[44px] flex-1 rounded-xl border border-ink-600 py-3 text-sm font-medium text-cloud-50 transition-colors hover:border-accent-cyan"
+            className="flex h-14 flex-1 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95 active:scale-[0.98]"
           >
             Recommencer
           </button>
           <button
             onClick={handleUpload}
-            className="min-h-[44px] flex-1 rounded-xl py-3 text-sm font-semibold text-cloud-50"
-            style={{ background: "var(--gradient-brand)" }}
+            className="flex h-14 flex-1 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
           >
             Envoyer
           </button>
@@ -184,7 +184,7 @@ export default function AudioRecorder() {
               {BAR_HEIGHTS.map((h, i) => (
                 <div
                   key={i}
-                  className="w-2 rounded-full bg-accent-cyan"
+                  className="w-2 rounded-full bg-primary"
                   style={{
                     height: `${h * 48}px`,
                     transformOrigin: "bottom",
@@ -193,7 +193,7 @@ export default function AudioRecorder() {
                 />
               ))}
             </div>
-            <p className="font-mono text-2xl tabular-nums text-cloud-50">
+            <p className="font-mono text-2xl tabular-nums text-secondary">
               {fmt(seconds)}
             </p>
           </div>
@@ -202,17 +202,12 @@ export default function AudioRecorder() {
         {/* Bouton principal micro / stop */}
         <button
           onClick={state === "idle" ? startRecording : stopRecording}
-          className="flex items-center justify-center rounded-full text-cloud-50 transition-transform active:scale-95"
-          style={{
-            width: 80,
-            height: 80,
-            minWidth: 80,
-            // Enregistrement = rouge (danger, signal d'arrêt) ; repos = dégradé de marque.
-            background:
-              state === "recording"
-                ? "var(--color-danger)"
-                : "var(--gradient-brand)",
-          }}
+          className={`flex size-16 items-center justify-center rounded-full transition-transform active:scale-95 ${
+            // Enregistrement = error (signal d'arrêt) ; repos = primary.
+            state === "recording"
+              ? "bg-error text-on-error"
+              : "bg-primary text-on-primary"
+          }`}
           aria-label={
             state === "idle"
               ? "Commencer l'enregistrement"
@@ -242,7 +237,7 @@ export default function AudioRecorder() {
           )}
         </button>
 
-        <p className="text-sm text-muted">
+        <p className="text-sm text-on-surface-variant">
           {state === "idle"
             ? "Appuyer pour enregistrer"
             : "Appuyer pour arrêter"}

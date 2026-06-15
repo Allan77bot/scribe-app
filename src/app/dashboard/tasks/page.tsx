@@ -52,11 +52,11 @@ export default async function TasksPage({
   });
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
       <div className="w-full max-w-md mx-auto px-5 pt-8 pb-10">
         <header className="mb-6">
-          <h1 className="text-xl font-semibold">Tâches extraites</h1>
-          <p className="mt-1 text-xs text-muted">
+          <h1 className="text-xl font-semibold text-secondary">Tâches extraites</h1>
+          <p className="mt-1 text-xs text-on-surface-variant">
             Scribe propose, vous confirmez — l&apos;escalade ne démarre qu&apos;après
             validation.
           </p>
@@ -65,16 +65,16 @@ export default async function TasksPage({
         {/* Machine à états lisible : la capture vient d'être envoyée, le pipeline
             tourne en arrière-plan (audit UX §2 — indicateur de traitement). */}
         {processing && (
-          <div className="mb-5 flex items-start gap-3 rounded-xl border border-accent-cyan/30 bg-accent-cyan/5 p-4">
+          <div className="mb-5 flex items-start gap-3 rounded-field bg-azure p-4">
             <span
               aria-hidden
-              className="mt-0.5 h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-accent-cyan"
+              className="mt-0.5 h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-primary"
             />
             <div className="min-w-0">
-              <p className="text-sm font-medium text-cloud-50">
+              <p className="text-sm font-medium text-secondary">
                 Transcription en cours…
               </p>
-              <p className="mt-0.5 text-xs text-muted">
+              <p className="mt-0.5 text-xs text-on-surface-variant">
                 Scribe extrait les tâches de votre note. Rechargez dans quelques
                 secondes pour les voir apparaître.
               </p>

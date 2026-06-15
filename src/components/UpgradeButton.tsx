@@ -35,13 +35,12 @@ export default function UpgradeButton({
       <button
         onClick={handleClick}
         disabled={isPending}
-        className="min-h-[44px] w-full rounded-xl py-3 text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-50"
-        style={{ background: "var(--gradient-brand)" }}
+        className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-50"
       >
         {isPending ? "Redirection…" : `Passer à ${targetPlanName} — ${price}`}
       </button>
       {error && (
-        <p className="text-center text-xs text-danger">Erreur : {error}</p>
+        <p className="text-center text-xs text-error">Erreur : {error}</p>
       )}
     </div>
   );

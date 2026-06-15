@@ -12,6 +12,16 @@
 
 **TL;DR (pour Discord)**
 
+**Le front passe en clair — design « Professional Flow ».** Migration complète
+du thème **sombre → clair** (source de vérité `DESIGN.md`) : police **Manrope**,
+fond `#f7fafd`, **cartes blanches** rayon 32px + ombres douces navy, **boutons
+primary pilule 56px** (`#0059bb`), **inputs sans bordure** rayon 16px, **titres
+Deep Navy** `#002b5b`. Tokens redéfinis dans `globals.css` (`@theme` Tailwind v4,
+pas de `tailwind.config.ts`) ; **28 fichiers UI** migrés (landing, nav, layout
+1200px, 12 pages, 13 composants) ; **zéro trace du dark**. `tsc`/`eslint`/`next
+build` verts (20 routes). Pas de PR (attente accord).
+
+_Session précédente :_
 **Les invitations d'équipe sont vivantes.** Au-dessus de la boucle de coordination,
 on branche les **acteurs** : table `invitations` à **jeton signé** (UUID v4 +
 e-mail + expiration 72 h, jamais de rattachement par `org_id` brut — règle d'or
@@ -33,6 +43,14 @@ minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ## Fait
 
+- [x] **Migration design dark → clair « Professional Flow » (2026-06-15, `prototype`)** :
+  refonte complète du design system selon `DESIGN.md`. `globals.css` réécrit
+  (`@theme` Tailwind v4 : surfaces/on-surface/primary/secondary navy/azure/error,
+  rayons `rounded-field`/`rounded-card`/`rounded-pill`, ombres navy `shadow-card`/
+  `shadow-modal`) ; **Manrope** via `next/font` ; 28 fichiers UI migrés (cartes
+  blanches 32px, boutons primary pilule 56px, inputs sans bordure, layout 1200px,
+  nav active `primary`). Zéro token dark résiduel. `tsc`/`eslint`/`build` verts
+  (20 routes). `DESIGN.md` ajouté au repo. Détail dans `historique.md`.
 - [x] **Invitations d'équipe + page Équipe + nav (2026-06-15, `prototype`)** : table
   `invitations` à jeton signé (migration `0007` : org_id + RLS 4 policies admin),
   `handle_new_user()` étendu (jeton valide → rejoint l'org en `member`, sinon org

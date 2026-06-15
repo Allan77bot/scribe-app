@@ -90,8 +90,8 @@ export default function InviteMemberButton({
 
   const triggerClass =
     variant === "primary"
-      ? "inline-flex min-h-[48px] w-full items-center justify-center rounded-xl px-4 text-sm font-semibold text-cloud-50 transition-opacity hover:opacity-95 bg-gradient-brand"
-      : "inline-flex min-h-[44px] items-center justify-center text-sm font-semibold text-accent-cyan";
+      ? "flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
+      : "inline-flex min-h-[44px] items-center justify-center text-sm font-semibold text-primary";
 
   return (
     <>
@@ -111,32 +111,32 @@ export default function InviteMemberButton({
             type="button"
             aria-label="Fermer"
             onClick={close}
-            className="absolute inset-0 bg-ink-900/60"
+            className="absolute inset-0 bg-secondary/40"
             style={{ backdropFilter: "blur(2px)" }}
           />
 
           {/* Feuille */}
           <div
-            className="relative w-full max-w-md rounded-t-2xl border-t border-ink-600 bg-ink-800 px-5 pb-8 pt-3"
+            className="relative w-full max-w-md rounded-t-card bg-white px-5 pb-8 pt-3 shadow-modal"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}
           >
             {/* Poignée */}
-            <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-ink-600" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-outline-variant" aria-hidden />
 
             {!sent ? (
               <form onSubmit={submit} className="flex flex-col gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-cloud-50">
+                  <h2 className="text-lg font-semibold text-secondary">
                     Inviter un coéquipier
                   </h2>
-                  <p className="mt-1 text-sm text-muted">
+                  <p className="mt-1 text-sm text-on-surface-variant">
                     Scribe envoie un lien d&apos;invitation. Il rejoint ton équipe
                     en quelques secondes — le lien expire sous 72 h.
                   </p>
                 </div>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
                     Adresse e-mail
                   </span>
                   <input
@@ -148,12 +148,12 @@ export default function InviteMemberButton({
                     autoComplete="off"
                     inputMode="email"
                     placeholder="prenom@equipe.fr"
-                    className="min-h-[48px] w-full rounded-lg border border-ink-600 bg-ink-900 px-3.5 text-base text-cloud-50 outline-none transition-colors focus:border-accent-cyan"
+                    className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </label>
 
                 {error && (
-                  <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+                  <p className="rounded-field bg-error-container px-3 py-2 text-sm text-on-error-container">
                     {error}
                   </p>
                 )}
@@ -161,14 +161,14 @@ export default function InviteMemberButton({
                 <button
                   type="submit"
                   disabled={pending || !email.trim()}
-                  className="min-h-[48px] rounded-xl text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-40 bg-gradient-brand"
+                  className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
                 >
                   {pending ? "Envoi…" : "Envoyer l'invitation"}
                 </button>
                 <button
                   type="button"
                   onClick={close}
-                  className="min-h-[44px] text-sm font-medium text-muted"
+                  className="min-h-[44px] text-sm font-medium text-on-surface-variant"
                 >
                   Annuler
                 </button>
@@ -176,10 +176,10 @@ export default function InviteMemberButton({
             ) : (
               <div className="flex flex-col gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-cloud-50">
+                  <h2 className="text-lg font-semibold text-secondary">
                     Invitation prête
                   </h2>
-                  <p className="mt-1 text-sm text-muted">
+                  <p className="mt-1 text-sm text-on-surface-variant">
                     {sent.emailSent
                       ? `Scribe a envoyé le lien à ${sent.email}.`
                       : `On n'a pas pu envoyer l'e-mail à ${sent.email}. Copie le lien et transmets-le toi-même.`}
@@ -187,14 +187,14 @@ export default function InviteMemberButton({
                 </div>
 
                 {/* Lien copiable — toujours visible, même si l'e-mail est parti. */}
-                <div className="flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-900 p-2.5">
-                  <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted">
+                <div className="flex items-center gap-2 rounded-field bg-surface-container-low p-2.5">
+                  <span className="min-w-0 flex-1 truncate font-mono text-xs text-on-surface-variant">
                     {sent.link}
                   </span>
                   <button
                     type="button"
                     onClick={copyLink}
-                    className="shrink-0 rounded-md border border-ink-600 px-2.5 py-1.5 text-xs font-semibold text-accent-cyan transition-colors hover:border-accent-cyan"
+                    className="shrink-0 rounded-pill bg-azure px-3 py-1.5 text-xs font-semibold text-primary transition-all hover:brightness-95"
                   >
                     {copied ? "Copié" : "Copier"}
                   </button>
@@ -206,14 +206,14 @@ export default function InviteMemberButton({
                     setSent(null);
                     setEmail("");
                   }}
-                  className="min-h-[48px] rounded-xl border border-ink-600 text-sm font-semibold text-cloud-50"
+                  className="flex h-14 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95"
                 >
                   Inviter quelqu&apos;un d&apos;autre
                 </button>
                 <button
                   type="button"
                   onClick={close}
-                  className="min-h-[44px] text-sm font-medium text-muted"
+                  className="min-h-[44px] text-sm font-medium text-on-surface-variant"
                 >
                   Terminé
                 </button>

@@ -20,9 +20,9 @@ export type Task = {
 
 // Pastille de priorité — couleur + libellé (jamais la couleur seule, brand guide §7).
 const PRIORITY_STYLE: Record<Task["priority"], { dot: string; label: string }> = {
-  haute: { dot: "bg-prio-high", label: "Haute" },
-  moyenne: { dot: "bg-prio-med", label: "Moyenne" },
-  basse: { dot: "bg-prio-low", label: "Basse" },
+  haute: { dot: "bg-error", label: "Haute" },
+  moyenne: { dot: "bg-secondary", label: "Moyenne" },
+  basse: { dot: "bg-primary", label: "Basse" },
 };
 
 // Carte de validation humaine (règle d'or n°4). L'IA propose une tâche ; un humain
@@ -65,16 +65,16 @@ export default function TaskValidationCard({ task }: { task: Task }) {
 
   // Badge de statut : forme pilule + mot + couleur (brand guide §5).
   const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-    proposed: { label: "À confirmer", cls: "bg-warning/15 text-warning" },
-    validated: { label: "Active", cls: "bg-accent-blue/15 text-accent-blue" },
-    done: { label: "Terminé", cls: "bg-success/15 text-success" },
-    rejected: { label: "Rejetée", cls: "bg-ink-600 text-hint" },
+    proposed: { label: "À confirmer", cls: "bg-azure text-secondary" },
+    validated: { label: "Active", cls: "bg-azure text-primary" },
+    done: { label: "Terminé", cls: "bg-surface-container text-on-surface-variant" },
+    rejected: { label: "Rejetée", cls: "bg-surface-container text-outline" },
   };
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.proposed;
 
   return (
     <div
-      className={`mb-3 overflow-hidden rounded-xl bg-ink-700 ${
+      className={`mb-3 overflow-hidden rounded-card bg-white shadow-card ${
         isDone || isRejected ? "opacity-60" : ""
       }`}
     >
@@ -82,15 +82,12 @@ export default function TaskValidationCard({ task }: { task: Task }) {
       <div className="flex">
         <span
           aria-hidden
-          className="w-[3px] shrink-0"
-          style={{
-            background: isProposed ? "var(--gradient-accent)" : "transparent",
-          }}
+          className={`w-[3px] shrink-0 ${isProposed ? "bg-primary" : "bg-transparent"}`}
         />
-        <div className="min-w-0 flex-1 p-4">
+        <div className="min-w-0 flex-1 p-6">
           {/* En-tête : priorité + statut */}
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-ink-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-cloud-50">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-surface-container px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-on-surface">
               <span className={`h-2 w-2 rounded-full ${style.dot}`} aria-hidden />
               {style.label}
             </span>
@@ -108,12 +105,11 @@ export default function TaskValidationCard({ task }: { task: Task }) {
               onChange={(e) => setDraft(e.target.value)}
               rows={2}
               autoFocus
-              className="w-full resize-none rounded-lg border border-ink-600 bg-ink-800 p-2.5 text-sm text-cloud-50 outline-none focus:border-accent-cyan"
-              style={{ boxShadow: "var(--shadow-glow)" }}
+              className="w-full resize-none rounded-field bg-surface-container-low p-2.5 text-sm text-on-surface outline-none ring-1 ring-outline-variant focus:ring-2 focus:ring-primary"
             />
           ) : (
             <p
-              className={`text-sm font-medium leading-snug text-cloud-50 ${
+              className={`text-sm font-medium leading-snug text-on-surface ${
                 isDone ? "line-through" : ""
               }`}
             >
@@ -125,17 +121,21 @@ export default function TaskValidationCard({ task }: { task: Task }) {
           {(task.assignee_suggestion || task.deadline_suggestion) && (
             <div className="mt-2 flex flex-wrap gap-4">
               {task.assignee_suggestion && (
-                <p className="text-xs text-accent-cyan">
+                <p className="text-xs text-primary">
                   → {task.assignee ?? task.assignee_suggestion}
                 </p>
               )}
               {task.deadline_suggestion && (
-                <p className="text-xs text-hint">{task.deadline_suggestion}</p>
+                <p className="text-xs text-outline">{task.deadline_suggestion}</p>
               )}
             </div>
           )}
 
-          {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+          {error && (
+            <p className="mt-2 rounded-field bg-error-container px-3 py-2 text-xs text-on-error-container">
+              {error}
+            </p>
+          )}
 
           {/* Actions selon l'état */}
           <div className="mt-3 flex flex-wrap gap-2">
@@ -144,8 +144,7 @@ export default function TaskValidationCard({ task }: { task: Task }) {
                 <button
                   onClick={saveEdit}
                   disabled={isPending || !draft.trim()}
-                  className="min-h-[36px] flex-1 rounded-lg py-2 text-xs font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-                  style={{ background: "var(--gradient-brand)" }}
+                  className="flex min-h-[36px] flex-1 items-center justify-center rounded-pill bg-primary py-2 text-xs font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
                 >
                   {isPending ? "…" : "Enregistrer et valider"}
                 </button>
@@ -155,7 +154,7 @@ export default function TaskValidationCard({ task }: { task: Task }) {
                     setDraft(task.title);
                   }}
                   disabled={isPending}
-                  className="min-h-[36px] rounded-lg border border-ink-600 px-3 py-2 text-xs font-medium text-cloud-50 disabled:opacity-40"
+                  className="min-h-[36px] rounded-pill bg-azure px-3 py-2 text-xs font-medium text-primary transition-all hover:brightness-95 disabled:opacity-40"
                 >
                   Annuler
                 </button>
@@ -165,22 +164,21 @@ export default function TaskValidationCard({ task }: { task: Task }) {
                 <button
                   onClick={accept}
                   disabled={isPending}
-                  className="min-h-[36px] flex-1 rounded-lg py-2 text-xs font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-                  style={{ background: "var(--gradient-brand)" }}
+                  className="flex min-h-[36px] flex-1 items-center justify-center rounded-pill bg-primary py-2 text-xs font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
                 >
                   {isPending ? "…" : "Accepter"}
                 </button>
                 <button
                   onClick={() => setEditing(true)}
                   disabled={isPending}
-                  className="min-h-[36px] rounded-lg border border-ink-600 px-3 py-2 text-xs font-medium text-cloud-50 transition-colors hover:border-accent-cyan disabled:opacity-40"
+                  className="min-h-[36px] rounded-pill bg-azure px-3 py-2 text-xs font-medium text-primary transition-all hover:brightness-95 disabled:opacity-40"
                 >
                   Modifier
                 </button>
                 <button
                   onClick={reject}
                   disabled={isPending}
-                  className="min-h-[36px] rounded-lg px-3 py-2 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-40"
+                  className="min-h-[36px] rounded-pill px-3 py-2 text-xs font-medium text-error transition-colors hover:bg-error-container disabled:opacity-40"
                 >
                   Rejeter
                 </button>
@@ -189,8 +187,7 @@ export default function TaskValidationCard({ task }: { task: Task }) {
               <button
                 onClick={complete}
                 disabled={isPending}
-                className="min-h-[36px] flex-1 rounded-lg py-2 text-xs font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-                style={{ background: "var(--gradient-accent)" }}
+                className="flex min-h-[36px] flex-1 items-center justify-center rounded-pill bg-primary py-2 text-xs font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
               >
                 {isPending ? "…" : "Marquer comme terminé"}
               </button>
@@ -198,7 +195,7 @@ export default function TaskValidationCard({ task }: { task: Task }) {
               <button
                 onClick={accept}
                 disabled={isPending}
-                className="min-h-[36px] rounded-lg border border-ink-600 px-3 py-2 text-xs font-medium text-cloud-50 transition-colors hover:border-accent-cyan disabled:opacity-40"
+                className="min-h-[36px] rounded-pill bg-azure px-3 py-2 text-xs font-medium text-primary transition-all hover:brightness-95 disabled:opacity-40"
               >
                 {isPending ? "…" : "Rétablir"}
               </button>

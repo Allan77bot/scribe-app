@@ -37,14 +37,17 @@ export default function NoteInput() {
         onChange={(e) => setText(e.target.value)}
         placeholder="Écrivez votre note ici — Scribe en extrait les tâches…"
         disabled={loading}
-        className="min-h-[120px] w-full resize-none rounded-lg border border-ink-600 bg-ink-800 p-3.5 text-base text-cloud-50 outline-none transition-colors placeholder:text-hint focus:border-accent-cyan disabled:opacity-50"
+        className="min-h-[120px] w-full resize-none rounded-field bg-surface-container-low p-3.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
       />
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && (
+        <p className="rounded-field bg-error-container px-4 py-3 text-sm text-on-error-container">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={!text.trim() || loading}
-        className="min-h-[44px] rounded-xl py-3 text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-40"
-        style={{ background: "var(--gradient-brand)" }}
+        className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-primary"
       >
         {loading ? "Envoi…" : "Envoyer"}
       </button>
