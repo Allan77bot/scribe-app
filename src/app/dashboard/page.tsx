@@ -17,6 +17,7 @@ const MODULES = [
   { href: "/dashboard/capture", title: "Capturer", desc: "Vocal ou écrit" },
   { href: "/dashboard/tasks", title: "Tâches", desc: "Valider, suivre" },
   { href: "/dashboard/handover", title: "Passation", desc: "Relais d'équipe" },
+  { href: "/dashboard/team", title: "Équipe", desc: "Membres & invitations" },
   { href: "/dashboard/report", title: "Rapport", desc: "Synthèse du soir" },
   { href: "/dashboard/billing", title: "Facturation", desc: "Plan & quotas" },
 ];
@@ -112,7 +113,7 @@ export default async function DashboardPage() {
     );
   }
 
-  const org = (profile as any).organizations as Org | undefined;
+  const org = (profile as unknown as { organizations?: Org }).organizations;
 
   // Météo des tâches — aggrégation depuis les entrées (RLS).
   const { data: entries } = await supabase

@@ -586,3 +586,56 @@ lecture, passation 3×8, onboarding, refonte dashboard, quota réel.
 Vérifs : `tsc --noEmit`, `eslint`, `next build` propres (16 routes). `check:rls`
 non exécutable sur ce poste (`SUPABASE_DB_URL` absent) — migration conforme au
 patron canonique (org_id + RLS + 4 policies), à relancer en CI/sandbox avant merge.
+
+## 2026-06-15 — Invitations d'équipe + page Équipe + nav nettoyée (branche `prototype`)
+
+Activation réelle de l'étape 2 de l'onboarding : on peut désormais inviter des
+coéquipiers par **jeton signé** (jamais de rattachement par `org_id` brut —
+règle d'or n°1/n°2). Le centre de gravité « coordination » gagne ses acteurs.
+
+**Base**
+- **Migration `0007_invitations.sql`** (via patron `/nouvelle-table`) : table
+  `invitations` (`org_id`, `email`, `token` UUID v4 unique, `created_by`,
+  `status` pending/accepted/revoked, `expires_at` défaut +72 h, `accepted_at`),
+  RLS activée + 4 policies cloisonnées `current_org_id()` ; émission/gestion
+  **réservées aux admins** (policy `exists(... role='admin')`). Index `org_id` +
+  `(org_id, lower(email))`.
+- **`handle_new_user()` étendu** (remplace la version 0001) : si le signup porte
+  un `invitation_token` valide (pending, non expiré, e-mail identique), l'inscrit
+  rejoint l'org du jeton en rôle **`member`** et l'invitation passe `accepted` ;
+  sinon repli sur l'inscription normale (org neuve, rôle `admin`). L'org est relue
+  depuis `invitations`, **jamais** depuis un `org_id` client.
+
+**API & flux**
+- **`POST /api/invites/send`** (admin only) : crée l'invitation par SESSION (RLS
+  insert admin → `created_by=auth.uid()` imposé), envoie l'e-mail Brevo
+  (`sendInvitationEmail`, non bloquant) et **retourne le lien** (copiable même si
+  l'e-mail échoue). Réémet le lien existant si une invitation en attente existe.
+- **`GET /api/invites/pending`** (admin only) : invitations en attente non expirées
+  de l'org (RLS).
+- **`/invite/accept?token=xxx`** : page publique ; valide le jeton côté serveur
+  (`service_role`, hors RLS car non-membre), **e-mail verrouillé** sur celui de
+  l'invitation, signup → trigger → org auto. Action `acceptInvitation` revalide le
+  jeton (défense en profondeur) ; e-mail de confirmation délivré via Brevo comme au
+  signup normal.
+
+**Front**
+- **`/dashboard/team`** : membres (monogramme, badge rôle, « vous ») + invitations
+  en attente (admin, échéance relative + révocation en 2 temps) + `InviteMemberButton`.
+- **`InviteMemberButton.tsx`** : feuille remontante (bottom sheet) Scribe (poignée,
+  voile, action en bas) ; `AcceptInviteForm.tsx` (e-mail lecté, `useFormStatus`) ;
+  `RevokeInviteButton.tsx`.
+- **Nav réduite** : `Rapport` sort de la barre basse → `Accueil · Capturer · Tâches ·
+  Passation · Équipe`. Rapport reste accessible depuis le hub (module ajouté + Équipe).
+- **Onboarding étape 2 active** : le placeholder « bientôt » est remplacé par
+  l'`InviteMemberButton` réel.
+
+**Limite connue** : un e-mail déjà inscrit sur Scribe ne peut pas accepter une
+invitation (signup refusé) → multi-org pour un même compte = TODO post-MVP.
+Le gabarit e-mail (`email/send.ts`) reste en palette Atelier Klar → migration
+charte Scribe à faire dans une branche `feat/email-brand` dédiée.
+
+Vérifs : `tsc --noEmit`, `eslint`, `next build` **verts** (20 routes, dont
+`/dashboard/team`, `/invite/accept`, `/api/invites/{send,pending}`). `check:rls`
+non exécutable ici (`SUPABASE_DB_URL` absent) — `invitations` conforme au patron
+(org_id + RLS + 4 policies), à relancer en CI/sandbox avec `0006` avant merge.

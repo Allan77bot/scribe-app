@@ -51,12 +51,13 @@ const ITEMS: Item[] = [
     ),
   },
   {
-    href: "/dashboard/report",
-    label: "Rapport",
+    href: "/dashboard/team",
+    label: "Équipe",
     icon: (
       <>
-        <path d="M6 2.5h8l4 4V21a.5.5 0 0 1-.5.5h-11A.5.5 0 0 1 6 21V2.5Z" />
-        <path d="M14 2.5v4h4M9 13h6M9 17h6" />
+        <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19" />
+        <circle cx="10" cy="7.5" r="3" />
+        <path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M15.5 4.7a3 3 0 0 1 0 5.6" />
       </>
     ),
   },

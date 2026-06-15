@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateOrgName, completeOnboarding } from "@/lib/onboarding/actions";
+import InviteMemberButton from "@/components/InviteMemberButton";
 
 type Props = {
   initialOrgName: string;
@@ -108,17 +109,12 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
               passation de relais, coordination du shift.
             </p>
           </div>
-          {/* Honnêteté : les invitations par e-mail à jeton signé arrivent dans une
-              prochaine version (jamais de rattachement par org_id brut — règle d'or n°2). */}
-          <div className="rounded-lg border border-ink-600 bg-ink-800 p-4">
-            <p className="text-sm text-cloud-50">
-              Les invitations par e-mail arrivent très bientôt.
-            </p>
-            <p className="mt-1 text-xs text-muted">
-              En attendant, vous pouvez déjà capturer vos premières notes — vos
-              coéquipiers les retrouveront dès leur arrivée.
-            </p>
-          </div>
+          {/* Invitation par jeton signé (jamais de rattachement par org_id brut —
+              règle d'or n°2). La feuille envoie un lien e-mail expirant sous 72 h. */}
+          <InviteMemberButton label="Inviter par e-mail" />
+          <p className="text-center text-xs text-hint">
+            Optionnel — vous pouvez aussi inviter plus tard depuis l&apos;onglet Équipe.
+          </p>
           <div className="flex gap-2">
             <button
               onClick={() => setStep(1)}

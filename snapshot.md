@@ -12,23 +12,35 @@
 
 **TL;DR (pour Discord)**
 
-**La boucle de coordination est complète.** Au-dessus des 3 bugs + quick wins,
-on a posé le cœur produit : **pipeline asynchrone** (la capture ne fait plus
-attendre l'utilisateur — `after()` lance Whisper+Haiku en arrière-plan),
-**validation humaine Accepter/Modifier/Rejeter** sur chaque tâche (trace attribuée
-dans `task_validations` — règle d'or n°4), **accusés de lecture chiffrés**
-(qui/quand/délai moyen), **passation 3×8** (`/dashboard/handover`, synthèse Sonnet
-4.6), **onboarding wizard** 3 étapes, **dashboard refondu** (quick capture, météo
-des tâches, quota réel, aperçu passation) et **quota minutes réellement décompté**.
-Au passage : règle d'or n°5 réparée (synthèse Sonnet 4.6, extraction Haiku 4.5),
-XSS du rapport fermé (sanitizer liste blanche), dernier Atelier Klar éliminé du
-dashboard. Migration `0006` (`task_validations` + RLS, `onboarding_complete`,
-`reports.kind`). `tsc`/`eslint`/`next build` verts (16 routes). Pas de PR (attente accord).
+**Les invitations d'équipe sont vivantes.** Au-dessus de la boucle de coordination,
+on branche les **acteurs** : table `invitations` à **jeton signé** (UUID v4 +
+e-mail + expiration 72 h, jamais de rattachement par `org_id` brut — règle d'or
+n°1/n°2), **`POST /api/invites/send`** (admin, e-mail Brevo, retourne le lien),
+**`GET /api/invites/pending`** (admin), page publique **`/invite/accept?token=`**
+(jeton validé serveur, e-mail verrouillé, signup → trigger → org auto en rôle
+`member`), page **`/dashboard/team`** (membres + invitations en attente +
+révocation) et feuille **InviteMemberButton**. Nav réduite à **Accueil · Capturer ·
+Tâches · Passation · Équipe** (Rapport passe au hub). **Onboarding étape 2 activée**.
+Migration `0007` (`invitations` + RLS 4 policies + `handle_new_user` étendu).
+`tsc`/`eslint`/`next build` verts (20 routes). Pas de PR (attente accord).
+
+_Rappel boucle de coordination (sessions précédentes) : pipeline asynchrone,
+validation humaine Accepter/Modifier/Rejeter (`task_validations`), accusés de
+lecture chiffrés, passation 3×8, onboarding wizard, dashboard refondu, quota
+minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ---
 
 ## Fait
 
+- [x] **Invitations d'équipe + page Équipe + nav (2026-06-15, `prototype`)** : table
+  `invitations` à jeton signé (migration `0007` : org_id + RLS 4 policies admin),
+  `handle_new_user()` étendu (jeton valide → rejoint l'org en `member`, sinon org
+  neuve admin), `POST /api/invites/send` + `GET /api/invites/pending` (admin only),
+  page publique `/invite/accept` (e-mail verrouillé), `/dashboard/team`,
+  `InviteMemberButton` (bottom sheet) + `AcceptInviteForm` + `RevokeInviteButton`.
+  Nav : Rapport → Équipe (Rapport au hub). Onboarding étape 2 réellement active.
+  Build/lint/tsc verts (20 routes). Détail dans `historique.md`.
 - [x] **Niveau 2 + niveau 3 (2026-06-15, `prototype`)** : pipeline async (`after()`),
   boucle de validation humaine + table `task_validations` (audit attribué, règle
   d'or n°4), accusés de lecture chiffrés (`ReadReceiptList`), passation 3×8
@@ -54,11 +66,14 @@ dashboard. Migration `0006` (`task_validations` + RLS, `onboarding_complete`,
 
 ## En cours / bloqué
 
-- **Migration `0006` à appliquer** : `npm run db:apply` puis `npm run check:rls`
-  (vert) sur le sandbox/CI — non exécutable ici (`SUPABASE_DB_URL` absent).
-- **Système d'invitations (`feat/invites`)** : l'étape 2 de l'onboarding est
-  honnête mais inactive — invitations par jeton signé encore à construire (jamais
-  de rattachement par `org_id` brut, règle d'or n°2).
+- **Migrations `0006` + `0007` à appliquer** : `npm run db:apply` puis
+  `npm run check:rls` (vert) sur le sandbox/CI — non exécutable ici
+  (`SUPABASE_DB_URL` absent). `invitations` conforme au patron (org_id + RLS + 4
+  policies) ; `0007` remplace `handle_new_user()` (gestion du jeton d'invitation).
+- **Limite invitations** : un e-mail déjà inscrit sur Scribe ne peut pas accepter
+  une invitation (signup refusé) → multi-org par compte = TODO post-MVP.
+- **Gabarit e-mail encore en charte Atelier Klar** (`email/send.ts`) : migrer aux
+  tokens Scribe dans une branche `feat/email-brand` dédiée.
 - **Reset périodique du quota** : `minutes_used_this_period` est maintenant
   incrémenté, mais pas remis à zéro en début de période (à brancher sur Stripe).
 - **Stripe à configurer (Allan)** : produits/prix mode TEST, `STRIPE_*` dans
@@ -67,10 +82,9 @@ dashboard. Migration `0006` (`task_validations` + RLS, `onboarding_complete`,
 
 ## Prochaines étapes (par ordre)
 
-1. Appliquer la migration `0006` + `check:rls` vert (sandbox/CI).
-2. Revue + PR `prototype` (niveau 2/3) → merge selon accord Allan/Alphime.
-3. Construire `feat/invites` (table `invitations` jeton+email+expiration) pour
-   activer réellement l'étape 2 de l'onboarding.
+1. Appliquer les migrations `0006` + `0007` + `check:rls` vert (sandbox/CI).
+2. Revue + PR `prototype` → merge selon accord Allan/Alphime.
+3. Migrer le gabarit e-mail aux tokens Scribe (`feat/email-brand`).
 4. Reset périodique de `minutes_used_this_period` (webhook Stripe / cron).
 5. Avant prod : confirmation e-mail + SMTP (Brevo) + Stripe en mode live.
 
