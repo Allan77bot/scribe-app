@@ -33,6 +33,13 @@
   /* Texte sur fond sombre */
   --color-muted: #a8aec8; /* secondaire */
   --color-hint: #6b708c; /* désactivé / hint */
+  /* Dégradés — suffixe -gradient donne les utilitaires bg-gradient-* */
+  --background-image-gradient-accent: linear-gradient(90deg, #3b82f6 0%, #22d3ee 100%);
+  --background-image-gradient-brand: linear-gradient(135deg, #1a1a2e 0%, #3b82f6 60%, #22d3ee 100%);
+  --background-image-gradient-veil: radial-gradient(120% 100% at 50% 0%, #222348 0%, #12132a 70%);
+  /* Ombres */
+  --shadow-card: 0 1px 2px rgba(18, 19, 42, 0.06), 0 8px 24px rgba(18, 19, 42, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(34, 211, 238, 0.4), 0 8px 24px rgba(34, 211, 238, 0.15);
 }
 
 :root {
@@ -41,13 +48,6 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 999px;
-  /* Ombres */
-  --shadow-card: 0 1px 2px rgba(18, 19, 42, 0.06), 0 8px 24px rgba(18, 19, 42, 0.08);
-  --shadow-glow: 0 0 0 1px rgba(34, 211, 238, 0.4), 0 8px 24px rgba(34, 211, 238, 0.15);
-  /* Dégradés signature */
-  --gradient-brand: linear-gradient(135deg, #1a1a2e 0%, #3b82f6 60%, #22d3ee 100%);
-  --gradient-accent: linear-gradient(90deg, #3b82f6 0%, #22d3ee 100%);
-  --gradient-veil: radial-gradient(120% 100% at 50% 0%, #222348 0%, #12132a 70%);
 }
 
 /* Mobile-first strict : rien ne dépasse jamais en largeur. */
