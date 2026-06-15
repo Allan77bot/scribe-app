@@ -28,13 +28,66 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Lecture profil + org — sans onboarding_complete pour éviter l'erreur si
-  // la migration 0006 n'est pas encore appliquée sur le sandbox.
-  const { data: profile, error } = await supabase
+  // Lecture profil + org.
+  let { data: profile, error } = await supabase
     .from("users")
     .select("display_name, role, organizations(name, plan, minutes_quota, minutes_used_this_period)")
     .eq("id", user.id)
     .maybeSingle();
+
+  // Auto-réparation : si le user existe dans auth.users sans profil public
+  // (trigger handle_new_user manquant ou migrations non appliquées), on crée
+  // le profil + l'org à la volée avec le client service_role.
+  if (error || !profile) {
+    const { createClient: createServiceClient } = await import("@/lib/supabase/service");
+    const service = await createServiceClient();
+    const orgName = user.email?.split("@")[0] ?? "Mon équipe";
+
+    const { data: org } = await service
+      .from("organizations")
+      .insert({ name: orgName + " — équipe", plan: "free", minutes_quota: 600 })
+      .select("id")
+      .single();
+
+    if (!org) {
+      return (
+        <main className="flex min-h-screen flex-1 items-center justify-center bg-ink-900 px-6 text-center text-cloud-50">
+          <div className="w-full max-w-sm rounded-2xl border border-ink-600 bg-ink-700 p-6">
+            <h1 className="text-lg font-semibold">Profil introuvable</h1>
+            <p className="mt-2 text-sm text-muted">
+              Erreur lors de la création du profil. Réessaie ou contacte le support.
+            </p>
+            <form action={logout} className="mt-4">
+              <button type="submit" className="min-h-[44px] w-full rounded-lg px-4 py-2.5 text-base font-medium text-cloud-50 transition-opacity hover:opacity-90" style={{ background: "var(--gradient-brand)" }}>
+                Se déconnecter
+              </button>
+            </form>
+          </div>
+        </main>
+      );
+    }
+
+    await service.from("users").insert({
+      id: user.id,
+      org_id: org.id,
+      email: user.email,
+      display_name: user.email?.split("@")[0] ?? "Membre",
+      role: "admin",
+    });
+
+    // Re-query après création
+    const result = await supabase
+      .from("users")
+      .select("display_name, role, organizations(name, plan, minutes_quota, minutes_used_this_period)")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (result.error || !result.data) {
+      redirect("/login?message=profile-created");
+    }
+    profile = result.data;
+    error = null;
+  }
 
   if (error || !profile) {
     return (
