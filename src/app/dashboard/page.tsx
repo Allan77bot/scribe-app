@@ -8,13 +8,11 @@ type Org = {
   plan: string;
   minutes_quota: number;
   minutes_used_this_period: number;
-  onboarding_complete: boolean;
+  onboarding_complete?: boolean;
 };
 
 type RawTask = { status?: string };
 
-// Raccourcis vers les modules — accès direct depuis le hub (la nav basse couvre
-// l'essentiel ; la facturation vit ici plutôt que dans la barre).
 const MODULES = [
   { href: "/dashboard/capture", title: "Capturer", desc: "Vocal ou écrit" },
   { href: "/dashboard/tasks", title: "Tâches", desc: "Valider, suivre" },
@@ -30,12 +28,11 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // RLS garantit qu'on ne lit QUE son propre profil et sa propre org.
+  // Lecture profil + org — sans onboarding_complete pour éviter l'erreur si
+  // la migration 0006 n'est pas encore appliquée sur le sandbox.
   const { data: profile, error } = await supabase
     .from("users")
-    .select(
-      "display_name, role, organizations(name, plan, minutes_quota, minutes_used_this_period, onboarding_complete)",
-    )
+    .select("display_name, role, organizations(name, plan, minutes_quota, minutes_used_this_period)")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -62,12 +59,9 @@ export default async function DashboardPage() {
     );
   }
 
-  const org = profile.organizations as unknown as Org | undefined;
+  const org = (profile as any).organizations as Org | undefined;
 
-  // Onboarding non terminé → on amène l'utilisateur au wizard (aha moment).
-  if (org && !org.onboarding_complete) redirect("/dashboard/onboarding");
-
-  // Météo des tâches : on agrège les statuts de toutes les entrées de l'org (RLS).
+  // Météo des tâches — aggrégation depuis les entrées (RLS).
   const { data: entries } = await supabase
     .from("entries")
     .select("extracted_tasks_json");
@@ -86,7 +80,7 @@ export default async function DashboardPage() {
     }
   }
 
-  // Dernière passation (preview) — lecture RLS-safe (reports_select_same_org).
+  // Dernière passation (preview)
   const { data: handover } = await supabase
     .from("reports")
     .select("id, report_date, shift_label, created_at")
@@ -95,7 +89,7 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  // Quota minutes RÉEL (le compteur est désormais alimenté par le pipeline).
+  // Quota minutes réel
   const minutesQuota = org?.minutes_quota ?? 0;
   const minutesUsed = org?.minutes_used_this_period ?? 0;
   const minutesLeft = Math.max(minutesQuota - minutesUsed, 0);
@@ -125,7 +119,7 @@ export default async function DashboardPage() {
       </header>
 
       <div className="mx-auto w-full max-w-md px-5 py-6">
-        {/* Quick capture — l'action centrale, mise en avant */}
+        {/* Quick capture */}
         <Link
           href="/dashboard/capture"
           className="flex items-center justify-between rounded-2xl p-5 text-cloud-50 transition-opacity hover:opacity-95"
@@ -137,17 +131,7 @@ export default async function DashboardPage() {
               Vocal ou écrit — Scribe en extrait les tâches
             </p>
           </div>
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <rect x="9" y="2.5" width="6" height="11" rx="3" />
             <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
           </svg>
@@ -156,15 +140,11 @@ export default async function DashboardPage() {
         {/* Météo des tâches */}
         <Link href="/dashboard/tasks" className="mt-4 block">
           <section className="rounded-2xl bg-ink-700 p-5">
-            <h2 className="mb-3 text-sm font-medium text-muted">
-              Météo des tâches
-            </h2>
+            <h2 className="mb-3 text-sm font-medium text-muted">Météo des tâches</h2>
             <dl className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <dt className="text-xs text-warning">À confirmer</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums">
-                  {toConfirm}
-                </dd>
+                <dd className="mt-1 text-2xl font-bold tabular-nums">{toConfirm}</dd>
               </div>
               <div>
                 <dt className="text-xs text-accent-blue">En cours</dt>
@@ -178,30 +158,24 @@ export default async function DashboardPage() {
           </section>
         </Link>
 
-        {/* Quota minutes réel */}
+        {/* Quota minutes */}
         <section className="mt-4 rounded-2xl bg-ink-700 p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-muted">Minutes ce mois</h2>
             <span className="text-xs tabular-nums text-muted">
-              <strong className="text-cloud-50">{minutesUsed}</strong> /{" "}
-              {minutesQuota}
+              <strong className="text-cloud-50">{minutesUsed}</strong> / {minutesQuota}
             </span>
           </div>
           <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-ink-600">
             <div
               className={`h-2.5 rounded-full transition-all ${
-                usagePercent >= 90
-                  ? "bg-danger"
-                  : usagePercent >= 75
-                    ? "bg-warning"
-                    : "bg-success"
+                usagePercent >= 90 ? "bg-danger" : usagePercent >= 75 ? "bg-warning" : "bg-success"
               }`}
               style={{ width: `${usagePercent}%` }}
             />
           </div>
           <p className="mt-1.5 text-xs text-muted">
-            {minutesLeft} minute{minutesLeft !== 1 ? "s" : ""} restante
-            {minutesLeft !== 1 ? "s" : ""}
+            {minutesLeft} minute{minutesLeft !== 1 ? "s" : ""} restante{minutesLeft !== 1 ? "s" : ""}
           </p>
         </section>
 
@@ -209,46 +183,24 @@ export default async function DashboardPage() {
         <Link href="/dashboard/handover" className="mt-4 block">
           <section className="flex items-center justify-between rounded-2xl bg-ink-700 p-5">
             <div className="min-w-0">
-              <h2 className="text-sm font-medium text-muted">
-                Dernière passation
-              </h2>
+              <h2 className="text-sm font-medium text-muted">Dernière passation</h2>
               <p className="mt-1 text-sm font-semibold text-cloud-50">
                 {handover
-                  ? `${new Date(handover.report_date).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "long",
-                    })} · ${handover.shift_label}`
+                  ? `${new Date(handover.report_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ${handover.shift_label}`
                   : "Aucune passation générée"}
               </p>
             </div>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-              className="shrink-0 text-accent-cyan"
-            >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-accent-cyan">
               <path d="m9 6 6 6-6 6" />
             </svg>
           </section>
         </Link>
 
-        {/* Accès rapide aux modules */}
-        <h2 className="mb-3 mt-7 text-sm font-medium text-muted">
-          Tous les modules
-        </h2>
+        {/* Modules */}
+        <h2 className="mb-3 mt-7 text-sm font-medium text-muted">Tous les modules</h2>
         <div className="grid grid-cols-2 gap-3">
           {MODULES.map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              className="rounded-2xl bg-ink-700 p-4 transition-opacity hover:opacity-90"
-            >
+            <Link key={m.href} href={m.href} className="rounded-2xl bg-ink-700 p-4 transition-opacity hover:opacity-90">
               <p className="text-sm font-semibold">{m.title}</p>
               <p className="mt-0.5 text-xs text-muted">{m.desc}</p>
             </Link>
