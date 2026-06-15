@@ -1,5 +1,7 @@
 import Link from "next/link";
-import TaskCard, { type Task } from "@/components/TaskCard";
+import TaskValidationCard, {
+  type Task,
+} from "@/components/TaskValidationCard";
 
 const PRIORITY_ORDER: Task["priority"][] = ["haute", "moyenne", "basse"];
 
@@ -10,7 +12,7 @@ const PRIORITY_LABELS: Record<Task["priority"], string> = {
 };
 
 export default function TaskList({ tasks }: { tasks: Task[] }) {
-  // État vide = onboarding (cf. brand guide §5) : titre + une phrase + un CTA.
+  // État vide = onboarding (brand guide §5) : titre + une phrase + un CTA.
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl bg-ink-700 px-6 py-12 text-center">
@@ -18,8 +20,8 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           Aucune tâche pour l&apos;instant
         </h2>
         <p className="max-w-xs text-sm text-muted">
-          Dictez ou collez une note — Scribe en extrait les tâches
-          automatiquement.
+          Dictez ou collez une note — Scribe en extrait les tâches, vous les
+          confirmez d&apos;un tap.
         </p>
         <Link
           href="/dashboard/capture"
@@ -32,9 +34,13 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
     );
   }
 
+  // À confirmer remonte en tête : c'est l'action attendue de l'utilisateur.
+  const pending = tasks.filter((t) => (t.status ?? "proposed") === "proposed");
+  const settled = tasks.filter((t) => (t.status ?? "proposed") !== "proposed");
+
   const grouped = PRIORITY_ORDER.reduce<Record<Task["priority"], Task[]>>(
     (acc, p) => {
-      acc[p] = tasks.filter((t) => t.priority === p);
+      acc[p] = pending.filter((t) => t.priority === p);
       return acc;
     },
     { haute: [], moyenne: [], basse: [] },
@@ -42,20 +48,44 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-6">
-      {PRIORITY_ORDER.map((priority) => {
-        const group = grouped[priority];
-        if (group.length === 0) return null;
-        return (
-          <section key={priority}>
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-              {PRIORITY_LABELS[priority]}
-            </h2>
-            {group.map((task) => (
-              <TaskCard key={`${task.entryId}-${task.taskIndex}`} task={task} />
-            ))}
-          </section>
-        );
-      })}
+      {pending.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-warning">
+            À confirmer ({pending.length})
+          </h2>
+          {PRIORITY_ORDER.map((priority) => {
+            const group = grouped[priority];
+            if (group.length === 0) return null;
+            return (
+              <div key={priority} className="mb-4">
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-hint">
+                  {PRIORITY_LABELS[priority]}
+                </p>
+                {group.map((task) => (
+                  <TaskValidationCard
+                    key={`${task.entryId}-${task.taskIndex}`}
+                    task={task}
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </section>
+      )}
+
+      {settled.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+            Suivi ({settled.length})
+          </h2>
+          {settled.map((task) => (
+            <TaskValidationCard
+              key={`${task.entryId}-${task.taskIndex}`}
+              task={task}
+            />
+          ))}
+        </section>
+      )}
     </div>
   );
 }

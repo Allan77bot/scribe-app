@@ -1,16 +1,16 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { generateReport } from "@/lib/reports/actions";
+import { generateHandover } from "@/lib/handover/actions";
 
-export default function GenerateReportButton() {
+export default function GenerateHandoverButton() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handleClick = () => {
     setError(null);
     startTransition(async () => {
-      const result = await generateReport();
+      const result = await generateHandover();
       if (result.error) setError(result.error);
     });
   };
@@ -23,7 +23,7 @@ export default function GenerateReportButton() {
         className="min-h-[44px] w-full rounded-xl py-3 text-sm font-semibold text-cloud-50 transition-opacity disabled:opacity-50"
         style={{ background: "var(--gradient-brand)" }}
       >
-        {isPending ? "Génération en cours…" : "Générer le rapport"}
+        {isPending ? "Génération en cours…" : "Générer la passation"}
       </button>
       {error && <p className="text-center text-xs text-danger">Erreur : {error}</p>}
     </div>

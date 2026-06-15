@@ -5,23 +5,37 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-15
-**Phase :** Prototype — 3 bugs critiques corrigés + quick wins UX (design system Scribe)
+**Phase :** Prototype — niveau 2 (structurel) + niveau 3 (vision) construits
 **Branche active :** `prototype`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Les modules sont enfin reliés.** Jusqu'ici `capture` / `tasks` / `report` /
-`billing` existaient en îlots isolés, sans aucun lien, et l'accueil pointait
-vers rien. Construit sur `feat/capture-audio` :
-`src/components/DashboardNav.tsx` (barre basse fixe mobile-first, route active via `usePathname`, icônes SVG inline, safe-area iOS), `src/app/dashboard/layout.tsx` (fond sombre du design system + espace réservé sous la nav, appliqué aux 5 pages), `src/app/dashboard/page.tsx` (l'accueil devient un hub sombre avec cartes d'accès rapide + synthèse org). Bonus : 2 erreurs lint pré-existantes de Phase 4 corrigées (`reports/actions.ts`) pour garder la CI verte.
-Build OK, lint propre. `check:rls` non exécutable sur ce poste (pas de `SUPABASE_DB_URL`) mais sans objet : module 100 % front, zéro migration. Poussé sur origin, pas de PR (attente accord).
+**La boucle de coordination est complète.** Au-dessus des 3 bugs + quick wins,
+on a posé le cœur produit : **pipeline asynchrone** (la capture ne fait plus
+attendre l'utilisateur — `after()` lance Whisper+Haiku en arrière-plan),
+**validation humaine Accepter/Modifier/Rejeter** sur chaque tâche (trace attribuée
+dans `task_validations` — règle d'or n°4), **accusés de lecture chiffrés**
+(qui/quand/délai moyen), **passation 3×8** (`/dashboard/handover`, synthèse Sonnet
+4.6), **onboarding wizard** 3 étapes, **dashboard refondu** (quick capture, météo
+des tâches, quota réel, aperçu passation) et **quota minutes réellement décompté**.
+Au passage : règle d'or n°5 réparée (synthèse Sonnet 4.6, extraction Haiku 4.5),
+XSS du rapport fermé (sanitizer liste blanche), dernier Atelier Klar éliminé du
+dashboard. Migration `0006` (`task_validations` + RLS, `onboarding_complete`,
+`reports.kind`). `tsc`/`eslint`/`next build` verts (16 routes). Pas de PR (attente accord).
 
 ---
 
 ## Fait
 
+- [x] **Niveau 2 + niveau 3 (2026-06-15, `prototype`)** : pipeline async (`after()`),
+  boucle de validation humaine + table `task_validations` (audit attribué, règle
+  d'or n°4), accusés de lecture chiffrés (`ReadReceiptList`), passation 3×8
+  (`/dashboard/handover`), onboarding wizard (`/dashboard/onboarding` + `onboarding_complete`),
+  refonte dashboard à widgets, quota minutes réel. Fond : règle d'or n°5 (Sonnet 4.6
+  synthèse / Haiku 4.5 extraction), sanitizer anti-XSS, fin de l'Atelier Klar sur le
+  dashboard. Migration `0006`. Build/lint/tsc verts. Détail dans `historique.md`.
 - [x] **Bugs critiques + quick wins UX (2026-06-15, `prototype`)** : (1) `updateTask` ne fuit plus cross-org — client admin conservé pour la coordination mais refiltré strictement sur l'`org_id` de la session ; (2) statut harmonisé `done` partout (le rapport comptait `"fait"`, jamais écrit par l'UI) ; (3) les notes écrites passent enfin dans le pipeline (`processEntry` pour audio **et** texte). UX : design system Scribe tokenisé dans `globals.css` (`@theme` Tailwind v4 — marine/cloud/cyan/blue), rupture avec Atelier Klar sur tout le dashboard ; nav basse à contraste réel (cyan actif + barre, slate inactif) ; empty states utiles (Tâches, Rapport) ; marqueurs `PHASE x DONE` et emojis billing supprimés. tsc + eslint propres. Détail dans `historique.md`.
 - [x] **Navigation + dashboard-hub (2026-06-14)** : `DashboardNav.tsx` (barre basse fixe, route active) + `dashboard/layout.tsx` (thème sombre commun + nav sur les 5 pages) + accueil refait en hub avec cartes d'accès rapide. Les modules sont reliés. Lint propre, build OK. Détail dans `historique.md`.
 - [x] **Phase 5 Billing (2026-06-13)** : webhook Stripe + `createCheckoutSession` + page billing + migration 0005. Build OK. check:rls vert. `/dashboard/billing` protégé par `proxy.ts`. Stripe en mode TEST, prix en placeholder via env. Détail + bugs corrigés dans `historique.md`.
@@ -40,16 +54,25 @@ Build OK, lint propre. `check:rls` non exécutable sur ce poste (pas de `SUPABAS
 
 ## En cours / bloqué
 
-- **feat/billing construite** — en attente de push + PR pour revue Allan/Alphime.
-- **Stripe à configurer (Allan)** : créer les produits/prix en mode TEST, renseigner `STRIPE_*` dans `.env.local`, déclarer le webhook `POST /api/stripe/webhook` (récupérer `STRIPE_WEBHOOK_SECRET`).
+- **Migration `0006` à appliquer** : `npm run db:apply` puis `npm run check:rls`
+  (vert) sur le sandbox/CI — non exécutable ici (`SUPABASE_DB_URL` absent).
+- **Système d'invitations (`feat/invites`)** : l'étape 2 de l'onboarding est
+  honnête mais inactive — invitations par jeton signé encore à construire (jamais
+  de rattachement par `org_id` brut, règle d'or n°2).
+- **Reset périodique du quota** : `minutes_used_this_period` est maintenant
+  incrémenté, mais pas remis à zéro en début de période (à brancher sur Stripe).
+- **Stripe à configurer (Allan)** : produits/prix mode TEST, `STRIPE_*` dans
+  `.env.local`, webhook `POST /api/stripe/webhook`.
 - **Attente GitHub Pro** pour protection de main (optionnel tant que pas de Vercel).
 
 ## Prochaines étapes (par ordre)
 
-1. Push `feat/billing` → PR → revue → merge `main`.
-2. Allan : configurer Stripe (produits, prix, webhook) en mode TEST puis tester un upgrade de bout en bout.
-3. Brancher la consommation réelle (`minutes_used_this_period`) sur le pipeline transcription + reset périodique.
-4. Avant prod : réactiver la confirmation e-mail + SMTP (Brevo) + bascule Stripe en mode live.
+1. Appliquer la migration `0006` + `check:rls` vert (sandbox/CI).
+2. Revue + PR `prototype` (niveau 2/3) → merge selon accord Allan/Alphime.
+3. Construire `feat/invites` (table `invitations` jeton+email+expiration) pour
+   activer réellement l'étape 2 de l'onboarding.
+4. Reset périodique de `minutes_used_this_period` (webhook Stripe / cron).
+5. Avant prod : confirmation e-mail + SMTP (Brevo) + Stripe en mode live.
 
 ## Comment lancer (mémo équipe)
 

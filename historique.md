@@ -535,3 +535,54 @@ Sur la base de `docs/audit-ux-scribe.md` et `docs/brand-guide-scribe.md`.
   (✅⚠️🚨💡⏱️) remplacés par des états colorés sobres.
 
 Vérifs : `tsc --noEmit` et `eslint` propres. Pas de migration SQL (check:rls sans objet).
+
+## 2026-06-15 — Niveau 2 (structurel) + Niveau 3 (vision) (branche `prototype`)
+
+Suite de l'audit UX. Objectif : pipeline async + validation humaine, accusés de
+lecture, passation 3×8, onboarding, refonte dashboard, quota réel.
+
+**Migration `0006_validations_onboarding.sql`** (via `/nouvelle-table`)
+- `task_validations` (org_id + RLS + 4 policies `current_org_id()`) : trace la
+  décision humaine (qui/quand/quoi) — matérialise la règle d'or n°4. La tâche n'a
+  pas de PK (JSONB), donc identifiée par `(entry_id, task_index)`, upsert.
+- `organizations.onboarding_complete` (bool) ; `reports.kind` (`report|handover`).
+- Divergence assumée vs la consigne : pas de table `read_receipts` créée —
+  `report_reads` (migr. 0004) couvre déjà l'accusé de lecture, on ne duplique pas ;
+  les receipts sur tâche n'ont pas de sens (pas de PK tâche). UI bâtie dessus.
+
+**Structurel**
+- **Pipeline asynchrone** (`lib/entries/actions.ts`) : `after()` sort Whisper+Haiku
+  du chemin critique → l'utilisateur ne subit plus la latence ; redirect immédiat
+  vers `tasks?processing=1` avec indicateur d'état lisible.
+- **Boucle de validation Accepter/Modifier/Rejeter** (`TaskValidationCard.tsx`,
+  `lib/tasks/actions.ts`) : `validateTask`/`rejectTask`/`completeTask` écrivent le
+  statut JSON (affichage) ET tracent dans `task_validations` (attribution non
+  falsifiable, `validated_by=auth.uid()` imposé par RLS). « À confirmer » remonte
+  en tête de liste.
+- **Accusés de lecture chiffrés** (`ReadReceiptList.tsx`) : qui a lu, quand, délai,
+  temps moyen avant lecture ; widget sur le dashboard + sur rapport/passation.
+- **Passation 3×8** (`/dashboard/handover`, `lib/handover/actions.ts`) : synthèse du
+  shift suivant (en cours / à confirmer / décisions du jour) via Sonnet 4.6, stockée
+  en `reports` `kind='handover'`, partage des accusés de lecture.
+
+**Vision**
+- **Onboarding wizard** (`OnboardingWizard.tsx`, `/dashboard/onboarding`) : 3 étapes
+  (nommer l'org → inviter → 1er vocal) ; `onboarding_complete` ; le hub y redirige
+  tant que non terminé. Étape « inviter » honnête (invites à jeton à venir, jamais
+  de rattachement par org_id brut — règle d'or n°2).
+- **Refonte dashboard** (`dashboard/page.tsx`) : quick capture, météo des tâches,
+  quota minutes, aperçu passation, grille modules — 100 % tokens Scribe.
+- **Quota minutes réel** : le pipeline décompte `minutes_used_this_period` (durée
+  Whisper `verbose_json`) — le compteur n'est plus décoratif.
+
+**Corrections de fond**
+- **Règle d'or n°5** : synthèse rapport+passation passée de Haiku à **Sonnet 4.6** ;
+  extraction passée à **Haiku 4.5** (IDs de modèle à jour).
+- **XSS** : sanitizer par liste blanche (`lib/sanitize.ts`) sur le HTML LLM avant
+  `dangerouslySetInnerHTML` (rapport + passation).
+- **Reste d'Atelier Klar éliminé** du dashboard : `ReportCard`, `NoteInput`,
+  `AudioRecorder`, `UpgradeButton`, `GenerateReportButton` migrés aux tokens.
+
+Vérifs : `tsc --noEmit`, `eslint`, `next build` propres (16 routes). `check:rls`
+non exécutable sur ce poste (`SUPABASE_DB_URL` absent) — migration conforme au
+patron canonique (org_id + RLS + 4 policies), à relancer en CI/sandbox avant merge.

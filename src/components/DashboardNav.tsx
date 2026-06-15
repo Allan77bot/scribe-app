@@ -42,22 +42,21 @@ const ITEMS: Item[] = [
     ),
   },
   {
+    href: "/dashboard/handover",
+    label: "Passation",
+    icon: (
+      <>
+        <path d="M3 8h13l-3-3M21 16H8l3 3" />
+      </>
+    ),
+  },
+  {
     href: "/dashboard/report",
     label: "Rapport",
     icon: (
       <>
         <path d="M6 2.5h8l4 4V21a.5.5 0 0 1-.5.5h-11A.5.5 0 0 1 6 21V2.5Z" />
         <path d="M14 2.5v4h4M9 13h6M9 17h6" />
-      </>
-    ),
-  },
-  {
-    href: "/dashboard/billing",
-    label: "Facturation",
-    icon: (
-      <>
-        <rect x="2.5" y="5" width="19" height="14" rx="2" />
-        <path d="M2.5 9.5h19" />
       </>
     ),
   },

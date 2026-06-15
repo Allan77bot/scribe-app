@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
 import { createClient as createAdminSupabase } from "@supabase/supabase-js";
 import { processEntry } from "@/lib/pipeline/actions";
@@ -80,20 +81,26 @@ export async function createEntry(formData: FormData) {
     redirect("/dashboard?error=create-failed");
   }
 
-  // Pipeline IA pour TOUTES les entrées : audio (transcription + extraction) ET
-  // texte (extraction directe). Sans ça, les notes écrites n'apparaissent jamais
-  // dans Tâches (entrées fantômes).
-  // TODO (audit UX niveau 2) : rendre ce pipeline asynchrone pour ne pas faire
-  // attendre l'utilisateur (Whisper + Haiku) avant le redirect.
-  try {
-    const result = await processEntry(entry.id);
-    if (result.error) {
-      console.error("[entries:createEntry] pipeline:", result.error);
+  // Pipeline IA ASYNCHRONE (audit UX niveau 2). On sort Whisper + Haiku du chemin
+  // critique : l'entrée est créée avec processed_at=null, on rend la main tout de
+  // suite, et `after()` lance le traitement APRÈS l'envoi de la réponse. L'utilisateur
+  // ne subit plus la latence de transcription/extraction (ni les timeouts Vercel).
+  // Vaut pour TOUTES les entrées : audio ET texte (sinon les notes écrites
+  // n'apparaîtraient jamais dans Tâches → entrées fantômes).
+  const entryId = entry.id as string;
+  after(async () => {
+    try {
+      const result = await processEntry(entryId);
+      if (result.error) {
+        console.error("[entries:createEntry] pipeline:", result.error);
+      }
+    } catch (err) {
+      console.error("[entries:createEntry] pipeline unexpected:", err);
     }
-  } catch (err) {
-    console.error("[entries:createEntry] pipeline unexpected:", err);
-  }
+  });
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  // On renvoie vers Tâches : l'utilisateur voit l'état « traitement en cours » se
+  // résoudre en tâches proposées (machine à états lisible — brand guide §5).
+  redirect("/dashboard/tasks?processing=1");
 }

@@ -56,8 +56,10 @@ export async function generateReport(): Promise<{ id?: string; error?: string }>
     for (const e of entries) {
       const tasks = (e.extracted_tasks_json as ExtractedTask[]) || [];
       for (const t of tasks) {
+        // On ignore les tâches rejetées par un humain : elles ne sont pas du travail.
+        if (t.status === "rejected") continue;
         const line = `- ${t.title || "Sans titre"} (priorité: ${t.priority || "—"}, assigné: ${t.assignee_suggestion || "—"})`;
-        // Statut harmonisé avec l'UI (TaskCard écrit "validated"/"done").
+        // Statut harmonisé avec la boucle de validation (validated/done/rejected).
         if (t.status === "done") {
           tasksDone.push(line);
         } else {
@@ -83,9 +85,11 @@ ${tasksPending.length ? tasksPending.join("\n") : "  Aucune"}
 
 Génère le HTML maintenant.`;
 
+    // Synthèse du soir = modèle MOYEN (règle d'or n°5). Haiku transcrit/extrait ;
+    // Sonnet 4.6 fait la synthèse 1×/jour. L'audit avait relevé la violation (Haiku ici).
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: prompt,
       messages: [{ role: "user", content: "Génère le rapport HTML." }],
@@ -99,6 +103,7 @@ Génère le HTML maintenant.`;
         org_id: profile.org_id,
         report_date: today,
         shift_label: "jour",
+        kind: "report",
         html,
         generated_by: user.id,
       })
