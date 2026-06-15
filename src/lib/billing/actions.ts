@@ -3,9 +3,20 @@
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-05-27.dahlia",
-});
+let _stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY non configurée");
+    }
+    _stripe = new Stripe(key, {
+      apiVersion: "2026-05-27.dahlia",
+    });
+  }
+  return _stripe;
+}
 
 export async function createCheckoutSession(plan: string): Promise<{url?: string, error?: string}> {
   const supabase = await createClient();
@@ -60,7 +71,7 @@ export async function createCheckoutSession(plan: string): Promise<{url?: string
 
     // Crée un client Stripe si nécessaire
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: user.email!,
         metadata: {
           org_id: org.id,
@@ -76,7 +87,7 @@ export async function createCheckoutSession(plan: string): Promise<{url?: string
     }
 
     // Crée la session de checkout
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       payment_method_types: ["card"],
