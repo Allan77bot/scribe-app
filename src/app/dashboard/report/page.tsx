@@ -88,47 +88,34 @@ export default async function ReportPage() {
     : null;
 
   return (
-    <main
-      className="min-h-screen flex flex-col overflow-x-hidden"
-      style={{ background: "#0A0708", color: "#F0E8D6" }}
-    >
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
       <div className="w-full max-w-md mx-auto px-5 pt-8 pb-10">
         <header className="mb-6">
           <h1 className="text-xl font-semibold">Rapport du soir</h1>
           {dateLabel && (
-            <p className="mt-1 text-xs" style={{ color: "#A8804D" }}>
+            <p className="mt-1 text-xs text-muted">
               {dateLabel} · {report!.shift_label}
             </p>
           )}
         </header>
 
         {report ? (
-          <ReportCard
-            report={report}
-            reads={reads}
-            currentUserId={user.id}
-          />
+          <ReportCard report={report} reads={reads} currentUserId={user.id} />
         ) : (
-          <div
-            className="rounded-xl p-6 flex flex-col gap-4"
-            style={{ background: "#1A1214" }}
-          >
-            <p
-              className="text-sm text-center"
-              style={{ color: "#F0E8D6", opacity: 0.6 }}
-            >
-              Aucun rapport. Génère ton premier rapport du soir.
+          // État vide = onboarding : titre + une phrase + le CTA de génération.
+          <div className="flex flex-col items-center gap-3 rounded-xl bg-ink-700 px-6 py-10 text-center">
+            <h2 className="text-base font-semibold text-cloud-50">
+              Pas encore de rapport
+            </h2>
+            <p className="max-w-xs text-sm text-muted">
+              Scribe agrège les tâches et décisions du jour en une passation
+              prête à partager. Lancez la génération du premier rapport.
             </p>
-            <GenerateReportButton />
+            <div className="mt-2">
+              <GenerateReportButton />
+            </div>
           </div>
         )}
-
-        <p
-          className="mt-10 text-center text-xs font-mono"
-          style={{ color: "#6E1F2C" }}
-        >
-          PHASE 4 DONE
-        </p>
       </div>
     </main>
   );

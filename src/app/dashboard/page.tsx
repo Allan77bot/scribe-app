@@ -57,13 +57,10 @@ export default async function DashboardPage() {
   // boucle avec le proxy qui renvoie les connectés hors de /login).
   if (error || !profile) {
     return (
-      <main className="flex min-h-screen flex-1 items-center justify-center px-6 text-center">
-        <div
-          className="w-full max-w-sm rounded-2xl p-6"
-          style={{ background: "#1A1214", color: "#F0E8D6" }}
-        >
+      <main className="flex min-h-screen flex-1 items-center justify-center bg-ink-900 px-6 text-center text-cloud-50">
+        <div className="w-full max-w-sm rounded-2xl border border-ink-600 bg-ink-700 p-6">
           <h1 className="text-lg font-semibold">Profil introuvable</h1>
-          <p className="mt-2 text-sm" style={{ color: "#A8804D" }}>
+          <p className="mt-2 text-sm text-muted">
             Ton compte existe mais son profil d&apos;équipe n&apos;a pas pu être
             chargé. Déconnecte-toi puis reconnecte-toi. Si ça persiste, contacte
             le support.
@@ -71,8 +68,8 @@ export default async function DashboardPage() {
           <form action={logout} className="mt-4">
             <button
               type="submit"
-              className="w-full rounded-lg px-4 py-2.5 text-base font-medium transition-opacity hover:opacity-90"
-              style={{ background: "#6E1F2C", color: "#F0E8D6" }}
+              className="min-h-[44px] w-full rounded-lg px-4 py-2.5 text-base font-medium text-cloud-50 transition-opacity hover:opacity-90"
+              style={{ background: "var(--gradient-brand)" }}
             >
               Se déconnecter
             </button>
@@ -90,19 +87,13 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <main
-      className="flex min-h-screen flex-col overflow-x-hidden"
-      style={{ background: "#0A0708", color: "#F0E8D6" }}
-    >
-      <header
-        className="flex items-center justify-between border-b px-5 py-4"
-        style={{ borderColor: "rgba(240,232,214,0.08)" }}
-      >
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
+      <header className="flex items-center justify-between border-b border-ink-600 px-5 py-4">
         <div className="min-w-0">
           <p className="truncate text-base font-semibold">
             {org?.name ?? "Mon équipe"}
           </p>
-          <p className="truncate text-xs" style={{ color: "#A8804D" }}>
+          <p className="truncate text-xs text-muted">
             {profile?.display_name || user.email}
             {profile?.role === "admin" ? " · admin" : ""}
           </p>
@@ -110,8 +101,7 @@ export default async function DashboardPage() {
         <form action={logout}>
           <button
             type="submit"
-            className="shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
-            style={{ borderColor: "rgba(240,232,214,0.2)", color: "#F0E8D6" }}
+            className="shrink-0 rounded-lg border border-ink-600 px-3 py-1.5 text-sm font-medium text-cloud-50 transition-colors hover:border-accent-cyan"
           >
             Se déconnecter
           </button>
@@ -120,46 +110,33 @@ export default async function DashboardPage() {
 
       <div className="mx-auto w-full max-w-md px-5 py-6">
         {/* Synthèse organisation */}
-        <section
-          className="rounded-2xl p-5"
-          style={{ background: "#1A1214" }}
-        >
-          <h2 className="text-sm font-medium" style={{ color: "#A8804D" }}>
-            Ton organisation
-          </h2>
+        <section className="rounded-2xl bg-ink-700 p-5">
+          <h2 className="text-sm font-medium text-muted">Ton organisation</h2>
           <dl className="mt-3 grid grid-cols-2 gap-4">
             <div>
-              <dt className="text-xs" style={{ color: "#A8804D" }}>
-                Plan
-              </dt>
+              <dt className="text-xs text-muted">Plan</dt>
               <dd className="text-base font-semibold capitalize">
                 {org?.plan ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs" style={{ color: "#A8804D" }}>
-                Minutes restantes
-              </dt>
+              <dt className="text-xs text-muted">Minutes restantes</dt>
               <dd className="text-base font-semibold">
                 {minutesLeft}
-                <span className="text-sm font-normal" style={{ opacity: 0.5 }}>
+                <span className="text-sm font-normal text-hint">
                   {" "}
                   / {org?.minutes_quota ?? 0}
                 </span>
               </dd>
             </div>
             <div>
-              <dt className="text-xs" style={{ color: "#A8804D" }}>
-                Rétention
-              </dt>
+              <dt className="text-xs text-muted">Rétention</dt>
               <dd className="text-base font-semibold">
                 {org?.retention_days ?? 0} j
               </dd>
             </div>
             <div>
-              <dt className="text-xs" style={{ color: "#A8804D" }}>
-                Ton rôle
-              </dt>
+              <dt className="text-xs text-muted">Ton rôle</dt>
               <dd className="text-base font-semibold capitalize">
                 {profile?.role ?? "—"}
               </dd>
@@ -168,10 +145,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Accès rapide aux modules */}
-        <h2
-          className="mt-7 mb-3 text-sm font-medium"
-          style={{ color: "#A8804D" }}
-        >
+        <h2 className="mt-7 mb-3 text-sm font-medium text-muted">
           Que veux-tu faire ?
         </h2>
         <div className="grid grid-cols-1 gap-3">
@@ -179,14 +153,11 @@ export default async function DashboardPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="flex items-center justify-between rounded-2xl p-4 transition-opacity hover:opacity-90"
-              style={{ background: "#1A1214" }}
+              className="flex items-center justify-between rounded-2xl bg-ink-700 p-4 transition-opacity hover:opacity-90"
             >
               <div className="min-w-0">
                 <p className="text-base font-semibold">{m.title}</p>
-                <p className="mt-0.5 text-xs" style={{ color: "#A8804D" }}>
-                  {m.desc}
-                </p>
+                <p className="mt-0.5 text-xs text-muted">{m.desc}</p>
               </div>
               <svg
                 width="20"
@@ -198,8 +169,7 @@ export default async function DashboardPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
-                style={{ color: "#6E1F2C" }}
-                className="shrink-0"
+                className="shrink-0 text-accent-cyan"
               >
                 <path d="m9 6 6 6-6 6" />
               </svg>

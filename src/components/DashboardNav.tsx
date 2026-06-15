@@ -68,13 +68,9 @@ export default function DashboardNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t"
-      style={{
-        background: "#1A1214",
-        borderColor: "rgba(240,232,214,0.08)",
-        // Respecte l'encoche / barre gestuelle iOS.
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
+      // Fond marine translucide + flou (cf. brand guide §5). safe-area iOS.
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-ink-600 bg-ink-900/90 backdrop-blur"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex w-full max-w-md">
         {ITEMS.map((item) => {
@@ -89,11 +85,11 @@ export default function DashboardNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="relative flex min-h-[56px] flex-col items-center justify-center gap-1 py-2 transition-opacity"
-                style={{
-                  color: active ? "#F0E8D6" : "#F0E8D6",
-                  opacity: active ? 1 : 0.45,
-                }}
+                // Actif = accent cyan + barre de 3 px (jamais l'opacité seule).
+                // Inactif = texte secondaire (contraste AA).
+                className={`relative flex min-h-[56px] flex-col items-center justify-center gap-1 py-2 transition-colors ${
+                  active ? "text-accent-cyan" : "text-muted"
+                }`}
               >
                 <svg
                   width="22"
@@ -101,7 +97,7 @@ export default function DashboardNav() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.6"
+                  strokeWidth={active ? 2 : 1.6}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   aria-hidden="true"
@@ -112,10 +108,7 @@ export default function DashboardNav() {
                   {item.label}
                 </span>
                 {active && (
-                  <span
-                    className="absolute top-0 h-0.5 w-8 rounded-full"
-                    style={{ background: "#A8804D" }}
-                  />
+                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-accent-cyan" />
                 )}
               </Link>
             </li>

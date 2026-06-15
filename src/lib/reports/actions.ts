@@ -57,7 +57,8 @@ export async function generateReport(): Promise<{ id?: string; error?: string }>
       const tasks = (e.extracted_tasks_json as ExtractedTask[]) || [];
       for (const t of tasks) {
         const line = `- ${t.title || "Sans titre"} (priorité: ${t.priority || "—"}, assigné: ${t.assignee_suggestion || "—"})`;
-        if (t.status === "fait") {
+        // Statut harmonisé avec l'UI (TaskCard écrit "validated"/"done").
+        if (t.status === "done") {
           tasksDone.push(line);
         } else {
           tasksPending.push(line);
@@ -75,7 +76,7 @@ export async function generateReport(): Promise<{ id?: string; error?: string }>
 
 **DONNÉES :**
 - Nombre total d'entrées aujourd'hui : ${totalEntries}
-- Tâches terminées (fait) :
+- Tâches terminées :
 ${tasksDone.length ? tasksDone.join("\n") : "  Aucune"}
 - Tâches en cours / à faire :
 ${tasksPending.length ? tasksPending.join("\n") : "  Aucune"}

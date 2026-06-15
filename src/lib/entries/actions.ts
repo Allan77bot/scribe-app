@@ -80,16 +80,18 @@ export async function createEntry(formData: FormData) {
     redirect("/dashboard?error=create-failed");
   }
 
-  // Pipeline IA pour les entrées audio (transcription + extraction de tâches)
-  if (type === "audio") {
-    try {
-      const result = await processEntry(entry.id);
-      if (result.error) {
-        console.error("[entries:createEntry] pipeline:", result.error);
-      }
-    } catch (err) {
-      console.error("[entries:createEntry] pipeline unexpected:", err);
+  // Pipeline IA pour TOUTES les entrées : audio (transcription + extraction) ET
+  // texte (extraction directe). Sans ça, les notes écrites n'apparaissent jamais
+  // dans Tâches (entrées fantômes).
+  // TODO (audit UX niveau 2) : rendre ce pipeline asynchrone pour ne pas faire
+  // attendre l'utilisateur (Whisper + Haiku) avant le redirect.
+  try {
+    const result = await processEntry(entry.id);
+    if (result.error) {
+      console.error("[entries:createEntry] pipeline:", result.error);
     }
+  } catch (err) {
+    console.error("[entries:createEntry] pipeline unexpected:", err);
   }
 
   revalidatePath("/dashboard");

@@ -47,26 +47,16 @@ export default async function TasksPage() {
   });
 
   return (
-    <main
-      className="min-h-screen flex flex-col overflow-x-hidden"
-      style={{ background: "#0A0708", color: "#F0E8D6" }}
-    >
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
       <div className="w-full max-w-md mx-auto px-5 pt-8 pb-10">
         <header className="mb-6">
           <h1 className="text-xl font-semibold">Tâches extraites</h1>
-          <p className="mt-1 text-xs" style={{ color: "#A8804D" }}>
+          <p className="mt-1 text-xs text-muted">
             {tasks.length} tâche{tasks.length !== 1 ? "s" : ""} au total
           </p>
         </header>
 
         <TaskList tasks={tasks} />
-
-        <p
-          className="mt-10 text-center text-xs font-mono"
-          style={{ color: "#6E1F2C" }}
-        >
-          PHASE 3 DONE
-        </p>
       </div>
     </main>
   );

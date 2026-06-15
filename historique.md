@@ -500,3 +500,38 @@ Format d'une entrée :
 - `users` → RLS ON + policies org_id ✓
 - `organizations` → RLS ON (table racine, sans policy = OK)
 - `_scribe_migrations` → RLS ON (table interne)
+
+---
+
+## 2026-06-15 — Bugs critiques + quick wins UX (branche `prototype`)
+
+Sur la base de `docs/audit-ux-scribe.md` et `docs/brand-guide-scribe.md`.
+
+✅ **3 bugs critiques corrigés**
+- **Fuite cross-org `updateTask`** (`lib/tasks/actions.ts`, règle d'or n°2) :
+  le client admin bypassait la RLS sans filtre d'org. Choix : garder le client
+  admin (la RLS `entries_update_own` limite à l'auteur seul — incompatible avec
+  la coordination où un coéquipier valide la tâche d'un autre) MAIS refiltrer
+  lecture ET écriture sur l'`org_id` lu via la session. Fuite fermée, coordination
+  intra-org préservée.
+- **Statut « fait » invisible** (`lib/reports/actions.ts`) : l'UI écrit
+  `validated`/`done`, le rapport testait `status === "fait"` → aucune tâche
+  terminée n'était comptée. Harmonisé sur `done`.
+- **Notes écrites jamais traitées** (`lib/entries/actions.ts`) : `processEntry`
+  n'était lancé que pour l'audio → les notes texte restaient des entrées fantômes.
+  Lancé pour audio ET texte. TODO laissé : rendre le pipeline asynchrone (audit niv. 2).
+
+✅ **Quick wins UX**
+- **Design system tokenisé** (`app/globals.css`) : tokens Scribe en `@theme`
+  Tailwind v4 (marine `--color-ink-*`, cloud, `accent-cyan/blue/deep`, sémantique,
+  priorités) + `:root` (rayons, ombres, dégradés signature). Rupture nette avec la
+  charte Atelier Klar (obsidienne/bordeaux/or) sur tout le dashboard.
+- **Migration palette** : `dashboard/{page,layout}`, `capture`, `tasks`, `report`,
+  `billing` + `DashboardNav`, `TaskCard`, `TaskList` passés aux classes Scribe.
+- **Contraste nav** (`DashboardNav.tsx`) : onglet actif = `accent-cyan` + barre 3 px
+  (plus l'opacité seule) ; inactif = texte secondaire. Fond marine translucide + flou.
+- **Empty states utiles** (Tâches, Rapport) : titre + une phrase + CTA d'action.
+- **Nettoyage prod** : marqueurs `PHASE 3/4/5 DONE` retirés ; emojis du billing
+  (✅⚠️🚨💡⏱️) remplacés par des états colorés sobres.
+
+Vérifs : `tsc --noEmit` et `eslint` propres. Pas de migration SQL (check:rls sans objet).

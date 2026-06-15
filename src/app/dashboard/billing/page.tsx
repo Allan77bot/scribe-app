@@ -45,12 +45,12 @@ export default async function BillingPage({
   // État incohérent rare : le compte auth existe mais pas le profil applicatif.
   if (error || !profile) {
     return (
-      <main className="flex flex-1 items-center justify-center px-6 text-center">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-lg font-semibold text-slate-900">
+      <main className="flex min-h-screen flex-1 items-center justify-center bg-ink-900 px-6 text-center">
+        <div className="w-full max-w-sm rounded-2xl border border-ink-600 bg-ink-700 p-6">
+          <h1 className="text-lg font-semibold text-cloud-50">
             Profil introuvable
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted">
             Impossible de charger les informations de facturation.
           </p>
         </div>
@@ -86,49 +86,46 @@ export default async function BillingPage({
   );
 
   return (
-    <main
-      className="min-h-screen flex flex-col overflow-x-hidden"
-      style={{ background: "#0A0708", color: "#F0E8D6" }}
-    >
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-cloud-50">
       <div className="w-full max-w-md mx-auto px-5 pt-8 pb-10">
         <header className="mb-6">
           <h1 className="text-xl font-semibold">Facturation</h1>
-          <p className="mt-1 text-xs" style={{ color: "#A8804D" }}>
+          <p className="mt-1 text-xs text-muted">
             Gestion de votre abonnement et quotas
           </p>
         </header>
 
         {/* Messages d'état URL */}
         {showSuccess && (
-          <div className="mb-6 rounded-lg bg-green-900/20 border border-green-700 p-4">
-            <p className="text-sm text-green-300">
-              ✅ Paiement effectué avec succès ! Votre abonnement est maintenant actif.
+          <div className="mb-6 rounded-lg border border-success/40 bg-success/10 p-4">
+            <p className="text-sm text-success">
+              Paiement effectué. Votre abonnement est maintenant actif.
             </p>
           </div>
         )}
 
         {showCanceled && (
-          <div className="mb-6 rounded-lg bg-yellow-900/20 border border-yellow-700 p-4">
-            <p className="text-sm text-yellow-300">
-              ⚠️ Paiement annulé. Vous pouvez essayer à nouveau quand vous le souhaitez.
+          <div className="mb-6 rounded-lg border border-warning/40 bg-warning/10 p-4">
+            <p className="text-sm text-warning">
+              Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.
             </p>
           </div>
         )}
 
         {/* Informations actuelles */}
-        <section className="mb-6 rounded-2xl bg-white/5 p-5 border border-white/10">
-          <h2 className="text-sm font-medium" style={{ color: "#A8804D" }}>Plan actuel</h2>
+        <section className="mb-6 rounded-2xl border border-ink-600 bg-ink-700 p-5">
+          <h2 className="text-sm font-medium text-muted">Plan actuel</h2>
 
           <div className="mt-3 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-base font-semibold capitalize">{org.plan}</span>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                className={`px-2 py-1 rounded-full text-xs font-medium border ${
                   org.subscription_status === "active"
-                    ? "bg-green-900/30 text-green-300 border border-green-700/50"
+                    ? "bg-success/15 text-success border-success/40"
                     : org.subscription_status === "trial"
-                    ? "bg-blue-900/30 text-blue-300 border border-blue-700/50"
-                    : "bg-red-900/30 text-red-300 border border-red-700/50"
+                    ? "bg-accent-blue/15 text-accent-blue border-accent-blue/40"
+                    : "bg-danger/15 text-danger border-danger/40"
                 }`}
               >
                 {org.subscription_status === "trial" ? "Essai" :
@@ -141,18 +138,18 @@ export default async function BillingPage({
 
             {/* Compteur trial */}
             {org.plan === "trial" && trialDaysLeft !== null && (
-              <div className="rounded-lg bg-blue-900/20 border border-blue-700/50 p-3">
-                <p className="text-sm text-blue-300">
-                  ⏱️ <strong>{trialDaysLeft} jour{trialDaysLeft !== 1 ? "s" : ""} restant{trialDaysLeft !== 1 ? "s" : ""}</strong> dans votre période d&apos;essai
+              <div className="rounded-lg border border-accent-blue/40 bg-accent-blue/10 p-3">
+                <p className="text-sm text-accent-blue">
+                  <strong>{trialDaysLeft} jour{trialDaysLeft !== 1 ? "s" : ""} restant{trialDaysLeft !== 1 ? "s" : ""}</strong> dans votre période d&apos;essai
                 </p>
               </div>
             )}
 
             {/* Message fin d'abonnement */}
             {org.subscription_status === "canceled" && (
-              <div className="rounded-lg bg-red-900/20 border border-red-700/50 p-3">
-                <p className="text-sm text-red-300">
-                  🚨 Votre abonnement a été annulé. Souscrivez à nouveau pour continuer à utiliser Scribe.
+              <div className="rounded-lg border border-danger/40 bg-danger/10 p-3">
+                <p className="text-sm text-danger">
+                  Votre abonnement a été annulé. Souscrivez à nouveau pour continuer à utiliser Scribe.
                 </p>
               </div>
             )}
@@ -160,8 +157,8 @@ export default async function BillingPage({
         </section>
 
         {/* Quotas et usage */}
-        <section className="mb-6 rounded-2xl bg-white/5 p-5 border border-white/10">
-          <h2 className="text-sm font-medium" style={{ color: "#A8804D" }}>Usage ce mois</h2>
+        <section className="mb-6 rounded-2xl border border-ink-600 bg-ink-700 p-5">
+          <h2 className="text-sm font-medium text-muted">Usage ce mois</h2>
 
           <div className="mt-3 space-y-4">
             <div>
@@ -171,17 +168,17 @@ export default async function BillingPage({
               </div>
 
               {/* Barre de progression */}
-              <div className="mt-2 w-full bg-white/10 rounded-full h-2.5">
+              <div className="mt-2 h-2.5 w-full rounded-full bg-ink-600">
                 <div
                   className={`h-2.5 rounded-full transition-all duration-300 ${
-                    usagePercent >= 90 ? "bg-red-500" :
-                    usagePercent >= 75 ? "bg-yellow-500" : "bg-green-500"
+                    usagePercent >= 90 ? "bg-danger" :
+                    usagePercent >= 75 ? "bg-warning" : "bg-success"
                   }`}
                   style={{ width: `${usagePercent}%` }}
                 />
               </div>
 
-              <p className="mt-1 text-xs" style={{ color: "#A8804D" }}>
+              <p className="mt-1 text-xs text-muted">
                 {minutesLeft} minute{minutesLeft !== 1 ? "s" : ""} restante{minutesLeft !== 1 ? "s" : ""}
               </p>
             </div>
@@ -191,7 +188,7 @@ export default async function BillingPage({
         {/* Boutons d'upgrade — seulement si admin et s'il reste des paliers supérieurs */}
         {profile.role === "admin" && upgradePlans.length > 0 && (
           <section className="space-y-3">
-            <h2 className="text-sm font-medium" style={{ color: "#A8804D" }}>Changer de plan</h2>
+            <h2 className="text-sm font-medium text-muted">Changer de plan</h2>
 
             {upgradePlans.map((p) => (
               <UpgradeButton
@@ -206,19 +203,12 @@ export default async function BillingPage({
 
         {/* Message pour non-admin */}
         {profile.role !== "admin" && (
-          <section className="rounded-2xl bg-white/5 p-5 border border-white/10">
-            <p className="text-sm" style={{ color: "#A8804D" }}>
-              💡 Seuls les administrateurs peuvent modifier le plan de facturation.
+          <section className="rounded-2xl border border-ink-600 bg-ink-700 p-5">
+            <p className="text-sm text-muted">
+              Seuls les administrateurs peuvent modifier le plan de facturation.
             </p>
           </section>
         )}
-
-        <p
-          className="mt-10 text-center text-xs font-mono"
-          style={{ color: "#6E1F2C" }}
-        >
-          PHASE 5 DONE
-        </p>
       </div>
     </main>
   );

@@ -14,13 +14,14 @@ export type Task = {
   assignee?: string | null;
 };
 
+// Pastille de priorité — couleur + libellé (jamais la couleur seule, cf. brand guide §7).
 const PRIORITY_STYLE: Record<
   Task["priority"],
-  { bg: string; text: string; label: string }
+  { dot: string; label: string }
 > = {
-  haute: { bg: "#6E1F2C", text: "#F0E8D6", label: "Haute" },
-  moyenne: { bg: "#A8804D", text: "#F0E8D6", label: "Moyenne" },
-  basse: { bg: "#F0E8D6", text: "#0A0708", label: "Basse" },
+  haute: { dot: "bg-prio-high", label: "Haute" },
+  moyenne: { dot: "bg-prio-med", label: "Moyenne" },
+  basse: { dot: "bg-prio-low", label: "Basse" },
 };
 
 export default function TaskCard({ task }: { task: Task }) {
@@ -38,23 +39,20 @@ export default function TaskCard({ task }: { task: Task }) {
 
   return (
     <div
-      className="rounded-xl p-4 mb-3 transition-opacity"
-      style={{ background: "#1A1214", opacity: isDone ? 0.55 : 1 }}
+      className={`mb-3 rounded-xl bg-ink-700 p-4 transition-opacity ${
+        isDone ? "opacity-55" : ""
+      }`}
     >
-      {/* Badge priorité + titre */}
-      <div className="flex items-start gap-3">
-        <span
-          className="shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold mt-0.5"
-          style={{ background: style.bg, color: style.text }}
-        >
+      {/* Pastille priorité + titre */}
+      <div className="flex items-start gap-2.5">
+        <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-md bg-ink-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-cloud-50">
+          <span className={`h-2 w-2 rounded-full ${style.dot}`} aria-hidden />
           {style.label}
         </span>
         <p
-          className="text-sm font-medium leading-snug"
-          style={{
-            color: "#F0E8D6",
-            textDecoration: isDone ? "line-through" : "none",
-          }}
+          className={`text-sm font-medium leading-snug text-cloud-50 ${
+            isDone ? "line-through" : ""
+          }`}
         >
           {task.title}
         </p>
@@ -64,14 +62,12 @@ export default function TaskCard({ task }: { task: Task }) {
       {(task.assignee_suggestion || task.deadline_suggestion) && (
         <div className="mt-2 flex flex-wrap gap-4">
           {task.assignee_suggestion && (
-            <p className="text-xs" style={{ color: "#A8804D" }}>
+            <p className="text-xs text-accent-cyan">
               → {task.assignee ?? task.assignee_suggestion}
             </p>
           )}
           {task.deadline_suggestion && (
-            <p className="text-xs" style={{ color: "#F0E8D6", opacity: 0.4 }}>
-              {task.deadline_suggestion}
-            </p>
+            <p className="text-xs text-hint">{task.deadline_suggestion}</p>
           )}
         </div>
       )}
@@ -83,34 +79,32 @@ export default function TaskCard({ task }: { task: Task }) {
             <button
               onClick={() => handleStatus("validated")}
               disabled={isPending}
-              className="flex-1 rounded-lg py-2 text-xs font-medium min-h-[36px] disabled:opacity-40"
-              style={{ background: "#6E1F2C", color: "#F0E8D6" }}
+              className="min-h-[36px] flex-1 rounded-lg border border-ink-600 py-2 text-xs font-medium text-cloud-50 transition-colors hover:border-accent-cyan disabled:opacity-40"
             >
-              Valider
+              {isPending ? "…" : "Valider"}
             </button>
           )}
           <button
             onClick={() => handleStatus("done")}
             disabled={isPending}
-            className="flex-1 rounded-lg py-2 text-xs font-medium min-h-[36px] disabled:opacity-40"
-            style={
+            className={`min-h-[36px] flex-1 rounded-lg py-2 text-xs font-medium transition-opacity disabled:opacity-40 ${
               isValidated
-                ? { background: "#A8804D", color: "#F0E8D6" }
-                : {
-                    background: "transparent",
-                    color: "#F0E8D6",
-                    border: "1px solid #A8804D",
-                  }
+                ? "text-cloud-50"
+                : "border border-ink-600 text-cloud-50"
+            }`}
+            style={
+              isValidated ? { background: "var(--gradient-accent)" } : undefined
             }
           >
-            Terminé
+            {isPending ? "…" : "Terminé"}
           </button>
         </div>
       )}
 
       {isDone && (
-        <p className="mt-2 text-xs" style={{ color: "#A8804D" }}>
-          ✓ Terminé
+        <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-success">
+          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+          Terminé
         </p>
       )}
     </div>
