@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
 
   // Utilise le client admin pour modifier les données org (service_role)
   const supabase = createAdminSupabase(
-    process.env.SUPABASE_URL!,
+    // SUPABASE_URL n'existe pas sur Vercel — l'URL canonique est NEXT_PUBLIC_SUPABASE_URL.
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 

@@ -11,7 +11,8 @@ import { revalidatePath } from "next/cache";
 export async function generateReport(): Promise<{ id?: string; error?: string }> {
   try {
     const admin = createSupabaseAdmin(
-      process.env.SUPABASE_URL!,
+      // SUPABASE_URL n'existe pas sur Vercel — l'URL canonique est NEXT_PUBLIC_SUPABASE_URL.
+      process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 

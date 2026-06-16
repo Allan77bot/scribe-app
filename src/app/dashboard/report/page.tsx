@@ -4,11 +4,19 @@ import { createClient as createAdminSupabase } from "@supabase/supabase-js";
 import ReportCard, { type Report, type ReportRead } from "@/components/ReportCard";
 import GenerateReportButton from "@/components/GenerateReportButton";
 
+// Client admin (service_role). L'URL canonique du projet est exposée via
+// NEXT_PUBLIC_SUPABASE_URL (SUPABASE_URL n'est pas défini sur Vercel) : sans ce
+// repli, le constructeur recevait `undefined` et levait au rendu → 500 « digest ».
+// On isole aussi la création dans un try/catch pour ne jamais rendre un 500 brut.
 function adminClient() {
-  return createAdminSupabase(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  try {
+    const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return null;
+    return createAdminSupabase(url, key);
+  } catch {
+    return null;
+  }
 }
 
 export default async function ReportPage() {
@@ -28,21 +36,25 @@ export default async function ReportPage() {
 
   const admin = adminClient();
 
-  // Dernier rapport de l'org — admin client pour bypasser la RLS qu'on gère via org_id
-  const { data: reportRaw } = await admin
-    .from("reports")
-    .select("id, report_date, shift_label, html, created_at")
-    .eq("org_id", profile.org_id)
-    .eq("kind", "report")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Dernier rapport de l'org — admin client pour bypasser la RLS qu'on gère via org_id.
+  // Si la clé service_role / l'URL manque, `admin` est null : on rend l'état vide
+  // plutôt qu'un 500.
+  const { data: reportRaw } = admin
+    ? await admin
+        .from("reports")
+        .select("id, report_date, shift_label, html, created_at")
+        .eq("org_id", profile.org_id)
+        .eq("kind", "report")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
 
   const report = reportRaw as Report | null;
 
   let reads: ReportRead[] = [];
 
-  if (report) {
+  if (report && admin) {
     const { data: readsRaw } = await admin
       .from("report_reads")
       .select("report_id, user_id, read_at")
