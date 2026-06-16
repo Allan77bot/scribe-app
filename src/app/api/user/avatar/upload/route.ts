@@ -82,27 +82,19 @@ export async function POST(request: Request) {
   // remplace la précédente du même format.
   const path = `${user.id}/avatar.${ext}`;
 
-  // Convertit le fichier en Buffer — Supabase Storage attend un ArrayBuffer/Buffer
-  // mais le File Next.js (Web API) peut ne pas être reconnu comme tel par le
-  // client Supabase. arrayBuffer() garantit la compatibilité.
-  const arrayBuf = await file.arrayBuffer();
-
-  // Écriture Storage via admin si dispo (crée le bucket au besoin), sinon via la
-  // session (RLS Storage). `storage` sert ensuite à construire l'URL publique.
+  // Le File Web API est un Blob — Supabase Storage l'accepte nativement.
+  // Pas de Buffer.from() ici : Buffer n'existe pas sur Edge Runtime (Vercel).
   const admin = adminClient();
   const storage = admin ?? supabase;
 
+  // Crée le bucket s'il manque (idempotent)
   if (admin) {
-    try {
-      await ensureBucket(admin);
-    } catch (err) {
-      console.error("[avatar:bucket]", err instanceof Error ? err.message : err);
-    }
+    try { await ensureBucket(admin); } catch (e) { /* silencieux */ }
   }
 
   const { error: uploadError } = await storage.storage
     .from("avatars")
-    .upload(path, Buffer.from(arrayBuf), { upsert: true, contentType: file.type });
+    .upload(path, file, { upsert: true, contentType: file.type });
 
   if (uploadError) {
     console.error("[avatar:upload]", uploadError.message);
