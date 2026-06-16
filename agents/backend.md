@@ -11,6 +11,13 @@
 - **RLS** sur toutes les tables de données
 - **Migrations** SQL numérotées dans `supabase/migrations/`
 
+```bash
+npm run db:apply        # applique les migrations non exécutées (SUPABASE_DB_URL)
+npm run check:rls       # zéro table à org_id sans RLS — doit être VERT
+npm run test:isolation  # prouve qu'une org ne lit jamais l'autre (4/4)
+# Nouvelle table → /nouvelle-table <nom> (scaffold org_id + RLS + 4 policies)
+```
+
 ## Clients Supabase
 
 | Fichier | Rôle | Clé | Usage |
@@ -48,7 +55,7 @@ CREATE POLICY "users_select_own_org" ON table_name
 | **reports** | `src/lib/reports/actions.ts` | synthèse soir Sonnet 4.6 |
 | **handover** | `src/lib/handover/actions.ts` | passation 3×8 |
 | **billing** | `src/lib/billing/stripe.ts` | Stripe Checkout + webhook |
-| **email** | `src/lib/email/brevo.ts` | Emails transactionnels (invitation, confirmation) |
+| **brevo** | `src/lib/email/brevo.ts` | Emails transactionnels (invitation, confirmation) |
 | **invites** | `src/app/api/invites/send` | POST génération jeton UUID v4 |
 | **onboarding** | `src/lib/onboarding/` | Wizard 3 étapes |
 
