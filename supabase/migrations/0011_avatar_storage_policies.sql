@@ -1,67 +1,50 @@
--- Migration 0011: politiques RLS storage pour le bucket avatars.
--- Permet aux utilisateurs authentifiés d'uploader/écraser leur avatar
--- dans leur propre dossier {uid}/, SANS avoir besoin de la clé service_role
--- (qui est tronquée sur Vercel à cause du bug Hermes JWT > 200 chars).
---
--- Contexte : le bucket `avatars` est déjà public (lecture pour tous).
--- Cette migration ajoute les droits d'écriture par dossier utilisateur.
+-- Migration 0011: Storage policies for avatars bucket
+-- Run via Supabase Dashboard > SQL Editor
 
--- 1) INSERT — un user auth peut créer un fichier dans son propre dossier
-BEGIN;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM storage.policies
-    WHERE name = 'avatars_insert_own_folder'
-    AND bucket_id = 'avatars'
-  ) THEN
-    INSERT INTO storage.policies (name, bucket_id, operation, definition)
-    VALUES (
-      'avatars_insert_own_folder',
-      'avatars',
-      'INSERT',
-      '(bucket_id = ''avatars''::text) AND (auth.uid()::text = (storage.foldername(name))[1])'
-    );
-  END IF;
-END $$;
-COMMIT;
+-- 1) Ensure avatars bucket exists (skip if already)
+-- Done via Dashboard: Storage > New bucket > avatars, Public=true, 5MB limit
 
--- 2) UPDATE — un user auth peut écraser son propre avatar
-BEGIN;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM storage.policies
-    WHERE name = 'avatars_update_own_folder'
-    AND bucket_id = 'avatars'
-  ) THEN
-    INSERT INTO storage.policies (name, bucket_id, operation, definition)
-    VALUES (
-      'avatars_update_own_folder',
-      'avatars',
-      'UPDATE',
-      '(bucket_id = ''avatars''::text) AND (auth.uid()::text = (storage.foldername(name))[1])'
-    );
-  END IF;
-END $$;
-COMMIT;
+-- 2) Create storage policies for avatars
+-- These allow authenticated users to read all avatars and write their own.
 
--- 3) DELETE — un user auth peut supprimer son propre avatar
 BEGIN;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM storage.policies
-    WHERE name = 'avatars_delete_own_folder'
-    AND bucket_id = 'avatars'
-  ) THEN
-    INSERT INTO storage.policies (name, bucket_id, operation, definition)
-    VALUES (
-      'avatars_delete_own_folder',
-      'avatars',
-      'DELETE',
-      '(bucket_id = ''avatars''::text) AND (auth.uid()::text = (storage.foldername(name))[1])'
-    );
-  END IF;
+
+-- Remove any existing policies on storage.objects for avatars to avoid conflicts
+DO $$ 
+DECLARE 
+  rec RECORD;
+BEGIN 
+  FOR rec IN 
+    SELECT policyname FROM pg_policies 
+    WHERE tablename = 'objects' AND schemaname = 'storage'
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON storage.objects', rec.policyname);
+  END LOOP;
 END $$;
+
+-- Public read access to avatars
+CREATE POLICY "avatars_select_public" 
+  ON storage.objects FOR SELECT 
+  USING (bucket_id = 'avatars');
+
+-- Authenticated users can insert into their own folder
+CREATE POLICY "avatars_insert_own" 
+  ON storage.objects FOR INSERT 
+  WITH CHECK (
+    bucket_id = 'avatars' 
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Users can update their own avatars
+CREATE POLICY "avatars_update_own" 
+  ON storage.objects FOR UPDATE 
+  USING (bucket_id = 'avatars' AND owner = auth.uid())
+  WITH CHECK (bucket_id = 'avatars' AND owner = auth.uid());
+
+-- Users can delete their own avatars
+CREATE POLICY "avatars_delete_own" 
+  ON storage.objects FOR DELETE 
+  USING (bucket_id = 'avatars' AND owner = auth.uid());
+
 COMMIT;
