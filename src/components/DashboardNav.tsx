@@ -61,6 +61,17 @@ const ITEMS: Item[] = [
       </>
     ),
   },
+  {
+    href: "/dashboard/settings",
+    label: "Profil",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="9.5" r="3.5" />
+        <path d="M5.5 19a7.5 7.5 0 0 1 13 0" />
+      </>
+    ),
+  },
 ];
 
 export default function DashboardNav() {

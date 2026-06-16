@@ -5,10 +5,14 @@ import ReportCard, { type Report, type ReportRead } from "@/components/ReportCar
 import GenerateHandoverButton from "@/components/GenerateHandoverButton";
 
 function adminClient() {
-  return createAdminSupabase(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  try {
+    return createAdminSupabase(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+  } catch {
+    return null;
+  }
 }
 
 // Page de passation 3×8 : « ce qu'il faut savoir depuis le dernier passage ».
@@ -32,12 +36,16 @@ export default async function HandoverPage() {
   // ou tronquée (env mal configuré), on n'expose JAMAIS une erreur 500 brute :
   // on rend une carte propre et explicite. Tout le bloc admin est isolé.
   let report: Report | null = null;
-  let memberCount: number | undefined;
   let reads: ReportRead[] = [];
+  let memberCount: number | undefined;
   let adminUnavailable = false;
 
   try {
     const admin = adminClient();
+    if (!admin) {
+      adminUnavailable = true;
+      throw new Error("Client admin indisponible (clé service_role absente ou tronquée).");
+    }
 
     // Dernière passation de l'org — admin client filtré à la main sur org_id + kind.
     const { data: reportRaw, error: reportErr } = await admin

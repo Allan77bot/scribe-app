@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   // Profil : on a besoin du rôle (admin) et du nom de l'org pour l'e-mail.
   const { data: profile } = await supabase
     .from("users")
-    .select("role, display_name, organizations(name)")
+    .select("role, display_name, organizations(name), org_id")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     // token + expires_at posés par les defaults de la table (UUID v4, +72 h).
     const { data: inserted, error } = await supabase
       .from("invitations")
-      .insert({ email, created_by: user.id })
+      .insert({ email, created_by: user.id, org_id: profile.org_id })
       .select("token, expires_at")
       .single();
 
