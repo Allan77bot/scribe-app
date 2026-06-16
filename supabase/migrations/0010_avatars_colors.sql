@@ -43,32 +43,48 @@ values (
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
--- Lecture : tout le monde (la photo s'affiche dans l'app comme une URL publique).
-create policy "avatars_public_read"
-  on storage.objects for select
-  using (bucket_id = 'avatars');
+-- Policies Storage — IDEMPOTENTES et tolérantes aux erreurs. Sans le `drop … if
+-- exists`, un second passage levait « policy already exists » et faisait ROLLBACK
+-- de TOUTE la migration (y compris les colonnes color/avatar_url ajoutées plus
+-- haut) → colonnes absentes en prod. Le bloc DO capture aussi un éventuel défaut
+-- de privilège sur storage.objects (selon le rôle de migration) pour que les
+-- colonnes et le bucket restent, eux, bien commités.
+do $$
+begin
+  drop policy if exists "avatars_public_read"  on storage.objects;
+  drop policy if exists "avatars_owner_insert" on storage.objects;
+  drop policy if exists "avatars_owner_update" on storage.objects;
+  drop policy if exists "avatars_owner_delete" on storage.objects;
 
--- Écriture : un utilisateur authentifié, uniquement dans SON dossier {uid}/.
-create policy "avatars_owner_insert"
-  on storage.objects for insert to authenticated
-  with check (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
+  -- Lecture : tout le monde (la photo s'affiche comme une URL publique).
+  create policy "avatars_public_read"
+    on storage.objects for select
+    using (bucket_id = 'avatars');
 
-create policy "avatars_owner_update"
-  on storage.objects for update to authenticated
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
+  -- Écriture : un utilisateur authentifié, uniquement dans SON dossier {uid}/.
+  create policy "avatars_owner_insert"
+    on storage.objects for insert to authenticated
+    with check (
+      bucket_id = 'avatars'
+      and (storage.foldername(name))[1] = auth.uid()::text
+    );
 
-create policy "avatars_owner_delete"
-  on storage.objects for delete to authenticated
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
+  create policy "avatars_owner_update"
+    on storage.objects for update to authenticated
+    using (
+      bucket_id = 'avatars'
+      and (storage.foldername(name))[1] = auth.uid()::text
+    );
+
+  create policy "avatars_owner_delete"
+    on storage.objects for delete to authenticated
+    using (
+      bucket_id = 'avatars'
+      and (storage.foldername(name))[1] = auth.uid()::text
+    );
+exception when others then
+  raise notice 'Policies storage.objects non appliquées (%). Colonnes + bucket OK.', sqlerrm;
+end $$;
 
 
 -- ────────────────────────────────────────────────────────────────────────
