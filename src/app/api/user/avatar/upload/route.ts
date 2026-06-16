@@ -1,129 +1,76 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminSupabase } from "@supabase/supabase-js";
 
 // POST /api/user/avatar/upload — reçoit un fichier image (FormData), l'envoie
-// dans le bucket public `avatars` au chemin {uid}/avatar.<ext>, puis met à jour
-// users.avatar_url.
+// dans le bucket `avatars` au chemin {uid}/avatar.{ext}, puis met à jour
+// users.avatar_url. L'identité est vérifiée par la SESSION ; le bucket DOIT
+// exister (créé manuellement ou via migration 0010).
 //
-// L'identité est toujours vérifiée par la SESSION (getUser), mais l'écriture
-// Storage passe par le client service_role : le chemin est verrouillé côté
-// serveur sur {uid}/, donc la garantie d'isolation est identique à la policy
-// avatars_owner_insert, SANS dépendre de la section Storage de la migration 0010
-// (bucket + policies). On crée le bucket s'il manque → l'upload marche en prod
-// même si 0010 n'a pas encore été appliquée. C'est le correctif du bug
-// « L'envoi de la photo a échoué ».
+// TOUT passe par la session RLS — pas de service_role. Plus robuste en prod.
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5 Mo — aligné sur le bucket
+const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "image/gif": "gif",
 };
-const ALLOWED_MIME = Object.keys(ALLOWED);
-
-// Client admin (service_role) — null si l'env est incomplète (on retombe alors
-// sur le client de session + RLS Storage).
-function adminClient() {
-  try {
-    const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !key) return null;
-    return createAdminSupabase(url, key, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-  } catch {
-    return null;
-  }
-}
-
-// Garantit que le bucket public `avatars` existe (idempotent). Sans ça, un projet
-// où la migration 0010 n'a pas été appliquée renvoie « Bucket not found » à l'upload.
-async function ensureBucket(admin: NonNullable<ReturnType<typeof adminClient>>) {
-  const { data } = await admin.storage.getBucket("avatars");
-  if (data) return;
-  await admin.storage.createBucket("avatars", {
-    public: true,
-    fileSizeLimit: MAX_BYTES,
-    allowedMimeTypes: ALLOWED_MIME,
-  });
-}
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    }
+
+    const form = await request.formData();
+    const file = form.get("file");
+    if (!(file instanceof File) || file.size === 0) {
+      return NextResponse.json({ error: "Aucun fichier reçu." }, { status: 400 });
+    }
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json({ error: "Image trop lourde (5 Mo max)." }, { status: 400 });
+    }
+    const ext = ALLOWED[file.type];
+    if (!ext) {
+      return NextResponse.json({ error: "Format non supporté. JPG, PNG, WebP ou GIF." }, { status: 400 });
+    }
+
+    // Stockage sous {uid}/avatar.{ext} — isolation par user, pas par org.
+    // upsert écrase la précédente photo du même format.
+    const path = `${user.id}/avatar.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, buffer, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      console.error("[avatar:upload]", uploadError.message);
+      return NextResponse.json(
+        { error: "L'envoi a échoué. Vérifie que le bucket avatars existe dans Supabase Storage." },
+        { status: 500 },
+      );
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+    const bustedUrl = `${publicUrl}?v=${Date.now()}`;
+
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ avatar_url: bustedUrl })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("[avatar:update]", updateError.message);
+      // Photo stockée mais pas persistée dans le profil — on prévient
+      return NextResponse.json({ avatarUrl: bustedUrl, persisted: false });
+    }
+
+    return NextResponse.json({ avatarUrl: bustedUrl, persisted: true });
+  } catch (err) {
+    console.error("[avatar:unexpected]", err);
+    return NextResponse.json({ error: "Erreur inattendue." }, { status: 500 });
   }
-
-  const form = await request.formData();
-  const file = form.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return NextResponse.json({ error: "Aucun fichier reçu." }, { status: 400 });
-  }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json(
-      { error: "Image trop lourde (5 Mo maximum)." },
-      { status: 400 },
-    );
-  }
-  const ext = ALLOWED[file.type];
-  if (!ext) {
-    return NextResponse.json(
-      { error: "Format non supporté. Utilise JPG, PNG, WebP ou GIF." },
-      { status: 400 },
-    );
-  }
-
-  // Chemin verrouillé sur l'uid : un membre n'écrase que SA photo. upsert : on
-  // remplace la précédente du même format.
-  const path = `${user.id}/avatar.${ext}`;
-
-  // Le File Web API est un Blob — Supabase Storage l'accepte nativement.
-  // Pas de Buffer.from() ici : Buffer n'existe pas sur Edge Runtime (Vercel).
-  const admin = adminClient();
-  const storage = admin ?? supabase;
-
-  // Crée le bucket s'il manque (idempotent)
-  if (admin) {
-    try { await ensureBucket(admin); } catch (e) { /* silencieux */ }
-  }
-
-  const { error: uploadError } = await storage.storage
-    .from("avatars")
-    .upload(path, file, { upsert: true, contentType: file.type });
-
-  if (uploadError) {
-    console.error("[avatar:upload]", uploadError.message);
-    return NextResponse.json(
-      { error: "L'envoi de la photo a échoué. Réessaie." },
-      { status: 500 },
-    );
-  }
-
-  // URL publique + anti-cache (le chemin est stable, le navigateur garderait
-  // l'ancienne photo sinon).
-  const {
-    data: { publicUrl },
-  } = storage.storage.from("avatars").getPublicUrl(path);
-  const bustedUrl = `${publicUrl}?v=${Date.now()}`;
-
-  // Mise à jour du profil via la SESSION (RLS users_update_self). Si la colonne
-  // avatar_url manque (migration 0010 non appliquée), on ne renvoie PAS une
-  // erreur bloquante : la photo est bien stockée, on signale juste qu'elle ne
-  // persistera qu'après application de la migration.
-  const { error: updateError } = await supabase
-    .from("users")
-    .update({ avatar_url: bustedUrl })
-    .eq("id", user.id);
-
-  if (updateError) {
-    console.error("[avatar:update]", updateError.message);
-    return NextResponse.json({ avatarUrl: bustedUrl, persisted: false });
-  }
-
-  return NextResponse.json({ avatarUrl: bustedUrl, persisted: true });
 }
