@@ -19,8 +19,16 @@ export function isValidEmail(email: string): boolean {
   return e.length >= 3 && e.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
+// URL publique du site pour bâtir le lien d'acceptation. NEXT_PUBLIC_SITE_URL
+// n'est pas toujours défini sur Vercel → sans repli, les invitations pointaient
+// vers http://localhost:3000. On retombe sur VERCEL_URL (injecté automatiquement
+// par Vercel) avant le localhost de dev.
 function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (explicit) return explicit;
+  const vercel = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+  return "http://localhost:3000";
 }
 
 // Lien d'acceptation : jamais d'org_id en clair, seulement le jeton secret.

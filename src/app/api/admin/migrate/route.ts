@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     // === Migration 0006: task_validations + onboarding ===
 
     // Créer la table task_validations si elle n'existe pas
-    const { data: tv, error: tvE } = await admin.rpc("pgrest_exec", {
+    const { error: tvE } = await admin.rpc("pgrest_exec", {
       sql: `
         CREATE TABLE IF NOT EXISTS public.task_validations (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -107,7 +107,10 @@ export async function POST(req: Request) {
     results.push("m7_rls: " + (rls7 ? "✗ " + rls7.message : "✓"));
 
     return NextResponse.json({ ok: true, results });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e) },
+      { status: 500 },
+    );
   }
 }

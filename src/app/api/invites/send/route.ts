@@ -98,7 +98,15 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !inserted) {
-      console.error("[invites:send] insert", error?.message);
+      // Diagnostic complet en log : code PostgREST + détail. `42P01` = table
+      // invitations absente (migration 0007 non appliquée) ; `42501`/RLS = policy
+      // invitations_insert_admin. Le message client reste générique.
+      console.error("[invites:send] insert", {
+        code: error?.code,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+      });
       return NextResponse.json(
         { error: "L'invitation n'a pas pu être créée." },
         { status: 500 },
