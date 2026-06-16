@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import InviteMemberButton from "@/components/InviteMemberButton";
 import RevokeInviteButton from "@/components/RevokeInviteButton";
 import Avatar from "@/components/Avatar";
+import { fetchOrgMembers } from "@/lib/user/profile";
 
 // Page Équipe — qui fait partie de l'org, qui est attendu. C'est le « casting »
 // de la coordination : sans coéquipiers, pas d'accusé de lecture ni de passation.
@@ -49,13 +50,9 @@ export default async function TeamPage() {
     .maybeSingle();
   const isAdmin = me?.role === "admin";
 
-  // Membres de l'org (RLS : même org uniquement). Admins d'abord.
-  const { data: membersRaw } = await supabase
-    .from("users")
-    .select("id, display_name, email, role, color, avatar_url")
-    .order("role", { ascending: true })
-    .order("created_at", { ascending: true });
-  const members = (membersRaw ?? []) as Member[];
+  // Membres de l'org (RLS : même org uniquement). Admins d'abord. Lecture
+  // défensive : color/avatar_url peuvent manquer (migration 0010 non appliquée).
+  const members = (await fetchOrgMembers(supabase)) as unknown as Member[];
 
   // Invitations en attente (non expirées). Affichées à l'admin seulement.
   let pending: Invite[] = [];

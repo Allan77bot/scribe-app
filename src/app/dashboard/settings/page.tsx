@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/auth/actions";
 import { updateProfile } from "@/lib/user/actions";
+import { fetchOwnProfile } from "@/lib/user/profile";
 import AvatarUpload from "@/components/AvatarUpload";
 import ColorPicker from "@/components/ColorPicker";
 
@@ -21,21 +22,19 @@ export default async function SettingsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: me } = await supabase
-    .from("users")
-    .select("display_name, email, role, color, avatar_url, org_id")
-    .eq("id", user.id)
-    .single();
+  // Lecture défensive : si color/avatar_url manquent en prod (migration 0010 non
+  // appliquée), on ne renvoie PAS l'utilisateur à l'accueil — on charge le profil
+  // sans ces colonnes. C'est le correctif des bugs « Réglages inaccessible » et
+  // « clic profil → accueil ».
+  const me = await fetchOwnProfile(supabase, user.id, "org_id");
   if (!me) redirect("/dashboard?error=no-profile");
 
   const isAdmin = me.role === "admin";
 
   // Couleurs déjà prises par les AUTRES membres (RLS : même org seulement).
-  const { data: others } = await supabase
-    .from("users")
-    .select("color")
-    .neq("id", user.id);
-  const taken = (others ?? [])
+  // La colonne color peut manquer → on tolère l'erreur (aucune couleur prise).
+  const othersRes = await supabase.from("users").select("color").neq("id", user.id);
+  const taken = (othersRes.error ? [] : othersRes.data ?? [])
     .map((u) => u.color)
     .filter((c): c is string => Boolean(c));
 

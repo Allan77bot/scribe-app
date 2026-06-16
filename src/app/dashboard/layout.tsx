@@ -1,6 +1,7 @@
 import DashboardNav from "@/components/DashboardNav";
 import UserMenu from "@/components/UserMenu";
 import { createClient } from "@/lib/supabase/server";
+import { fetchOwnProfile } from "@/lib/user/profile";
 
 // Layout commun à toutes les pages du dashboard : applique le fond clair du
 // design system, centre le contenu sur une largeur max de 1200px (DESIGN.md §4)
@@ -18,33 +19,16 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  type Profile = { display_name: string; email: string; role: string; color?: string; avatar_url?: string };
-  let me: Profile | null = null;
-
-  if (user) {
-    try {
-      const { data } = await supabase
-        .from("users")
-        .select("display_name, email, role, color, avatar_url")
-        .eq("id", user.id)
-        .single();
-      if (data) me = data as Profile;
-    } catch {
-      // Colonnes manquantes (migration 0010 non appliquée) → on lit sans elles
-      const { data } = await supabase
-        .from("users")
-        .select("display_name, email, role")
-        .eq("id", user.id)
-        .single();
-      if (data) me = data as Profile;
-    }
-  }
+  // Lecture défensive : color/avatar_url peuvent manquer (migration 0010 non
+  // appliquée). supabase-js renvoie `{error}` sans lever → le helper retombe sur
+  // les colonnes garanties pour que la pastille de compte s'affiche toujours.
+  const me = user ? await fetchOwnProfile(supabase, user.id) : null;
 
   return (
     <div className="min-h-screen bg-surface">
       {me && (
         <UserMenu
-          name={me.display_name}
+          name={me.display_name ?? ""}
           email={me.email}
           color={me.color}
           avatarUrl={me.avatar_url}
