@@ -1,3 +1,62 @@
+## 2026-06-16 — UltraReview : audit complet + correction de 5 bugs prod ✅
+
+### Contexte
+Cinq bugs « confirmés » signalés en prod (`scribe-app-beta.vercel.app`) : 500
+« digest » sur plusieurs pages, upload avatar KO, invitation KO, Réglages
+inaccessible, clic profil → accueil. Audit systématique du dashboard (lecture de
+chaque page, route API, query Supabase) avant toute correction (skill
+systematic-debugging : pas de fix sans cause racine).
+
+### Cause racine (commune)
+**Schema drift** : les migrations `0006` (onboarding_complete, kind), `0007`
+(table `invitations`) et `0010` (`users.color`/`avatar_url` + bucket `avatars` +
+policies) ne sont PAS appliquées sur le projet réel `kgbxxzujlubflsvprmef` (le
+sandbox Hermes est hors-ligne, et Hermes ne touche jamais le projet réel). Plus
+une variable d'env oubliée (`SUPABASE_URL` jamais définie, seul
+`NEXT_PUBLIC_SUPABASE_URL` l'est) et `NEXT_PUBLIC_SITE_URL` absente.
+Point technique clef : **supabase-js NE LÈVE PAS** sur une colonne inconnue —
+il renvoie `{ data:null, error }`. Les `try/catch` autour d'un `await select`
+(layout, anciennes « corrections ») étaient donc du **code mort**.
+
+### Corrigé (4 commits séparés)
+- **bug1 — 500 « digest »** : le client admin (service_role) lisait
+  `process.env.SUPABASE_URL` (undefined sur Vercel) → constructeur en échec au
+  rendu. Repli `?? NEXT_PUBLIC_SUPABASE_URL` dans `report/page.tsx` (+ try/catch
+  → null → état vide), `lib/reports/actions.ts`, `lib/tasks/actions.ts`,
+  `lib/entries/actions.ts`, `api/stripe/webhook/route.ts`. (handover + pipeline
+  étaient déjà bons.)
+- **bug4/5 — Réglages inaccessible + clic profil → accueil** : `settings/page.tsx`
+  sélectionnait `color/avatar_url` → `{error}` → `me=null` → `redirect('/dashboard')`.
+  Nouveau `src/lib/user/profile.ts` (`fetchOwnProfile`/`fetchOrgMembers`, lecture
+  défensive : tente les colonnes optionnelles, retombe sur les garanties).
+  Utilisé dans settings, layout (remplace le try/catch mort → pastille toujours
+  rendue) et team (liste jamais vidée par l'absence de colonnes).
+- **bug2 — upload avatar « L'envoi a échoué »** : écriture Storage via
+  service_role (chemin verrouillé `{uid}/` → isolation identique à la policy),
+  `ensureBucket()` crée le bucket s'il manque, repli sur la session sinon ;
+  colonne `avatar_url` manquante → `persisted:false` (photo stockée, pas d'erreur
+  bloquante). Migration `0010` rendue **idempotente** : `drop policy if exists`
+  + `DO/exception` autour des policies `storage.objects` → un échec policies ne
+  fait plus ROLLBACK des colonnes `color/avatar_url` ni du bucket.
+- **bug3 — invitation KO** : `siteUrl()` retombait sur `http://localhost:3000`
+  → repli `NEXT_PUBLIC_SITE_URL ?? VERCEL_URL ?? localhost`. Log d'erreur d'insert
+  complet (code/détail/hint) pour distinguer table absente (`42P01`, migration
+  0007) d'un refus RLS. Lint bloquant corrigé dans `api/admin/migrate` (`any` +
+  var inutilisée).
+
+### Vérifs
+`npx tsc --noEmit` propre ; `npm run lint` propre ; `npm run build` vert (23
+routes). `npm run check:rls` non rejouable (sandbox hors-ligne, `FATAL XX000`) —
+aucune table neuve à `org_id` ajoutée → posture RLS inchangée par construction.
+
+### Reste à faire (ops — Allan, projet réel)
+**`supabase db push`** des migrations `0006` + `0007` + `0010` sur
+`kgbxxzujlubflsvprmef` : c'est le vrai correctif de bug2 (bucket + colonne
+avatar_url) et bug3 (table invitations). Le code est désormais défensif et ne
+plante plus en attendant, mais la persistance des avatars et l'émission
+d'invitations nécessitent le schéma. Définir aussi `NEXT_PUBLIC_SITE_URL` sur
+Vercel (sinon repli `VERCEL_URL`).
+
 ## 2026-06-16 — Avatars + couleurs d'équipe + waveform live + fix passation ✅
 
 ### Contexte

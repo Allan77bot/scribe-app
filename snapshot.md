@@ -5,12 +5,31 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-16
-**Phase :** Prototype — identité d'équipe (avatars + couleurs) + waveform live
+**Phase :** Prototype — UltraReview : correction des bugs 500/prod
 **Branche active :** `prototype`
 
 ---
 
 **TL;DR (pour Discord)**
+
+**UltraReview : 5 bugs prod corrigés, build vert (23 routes).** Cause racine
+commune = **schema drift** (migrations 0006/0007/0010 pas appliquées en prod) +
+une variable d'env oubliée. (1) **500 « digest »** : le client admin lisait
+`SUPABASE_URL` (absent sur Vercel) → `undefined` → crash au rendu de
+`/dashboard/report` et à l'appel des actions report/tasks/entries + webhook
+Stripe → repli `?? NEXT_PUBLIC_SUPABASE_URL` partout. (2) **Réglages
+inaccessible + « clic profil → accueil »** : `settings` sélectionnait
+`color/avatar_url` (colonnes absentes) → supabase renvoie `{error}` (ne lève
+pas, le `try/catch` du layout était mort) → `me=null` → redirect accueil →
+nouveau helper `lib/user/profile.ts` à lecture défensive (layout + settings +
+team). (3) **Upload avatar** : bucket/policies Storage absents → écriture via
+service_role (chemin verrouillé `{uid}/`) + création du bucket au besoin ;
+0010 rendue idempotente (plus de ROLLBACK des colonnes). (4) **Invitations** :
+`siteUrl()` retombait sur `localhost` → repli `VERCEL_URL` ; log d'erreur
+d'insert complet (distingue table absente vs RLS). 4 commits séparés, **pas de
+PR**. ⚠️ Vrai correctif #2/#3 = `supabase db push` 0006/0007/0010 en prod (ops Allan).
+
+_Session précédente :_
 
 **Les membres ont un visage, et le micro respire.** 4 chantiers : (1) **avatars**
 — photo de profil (bucket `avatars` public, upload `{uid}/avatar.<ext>`) +
@@ -54,6 +73,18 @@ minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ## Fait
 
+- [x] **UltraReview — 5 bugs prod corrigés (2026-06-16, `prototype`)** : audit
+  complet du dashboard. (1) bug1 `SUPABASE_URL`→`NEXT_PUBLIC_SUPABASE_URL`
+  (repli) dans report/page + reports/tasks/entries actions + webhook Stripe
+  (cause du 500 « digest ») ; (2) bug4/5 helper `lib/user/profile.ts` (lecture
+  défensive color/avatar_url) dans settings/layout/team → Réglages accessible,
+  plus de redirection accueil ; (3) bug2 upload avatar via service_role +
+  `ensureBucket` + 0010 idempotente (DO/exception, plus de ROLLBACK des
+  colonnes) ; (4) bug3 `siteUrl()` repli `VERCEL_URL` + diagnostic d'insert.
+  `tsc`/`eslint`/`build` verts (23 routes). `check:rls` non rejouable (sandbox
+  hors-ligne). 4 commits séparés. **À faire côté ops : `supabase db push` des
+  migrations 0006/0007/0010 sur le projet réel** (vrai correctif #2/#3). Détail
+  dans `historique.md`.
 - [x] **Avatars + couleurs d'équipe + waveform live + fix passation (2026-06-16, `prototype`)** :
   migration `0010` (`users.avatar_url`/`color`, bucket Storage `avatars` public,
   `handle_new_user()` auto-attribue une couleur libre) ; lib `avatar.ts` (palette
