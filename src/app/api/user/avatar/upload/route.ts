@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@/lib/supabase/service";
 
-// POST /api/user/avatar/upload — reçoit un fichier image (FormData), l'envoie
-// dans le bucket `avatars` au chemin {uid}/avatar.{ext}, puis met à jour
+// POST /api/user/avatar/upload — reçoit un fichier image, l'upload dans le
+// bucket `avatars` via le client session (RLS storage), puis met à jour
 // users.avatar_url.
 //
-// Le stockage utilise le client service_role (pas RLS) pour éviter les
-// problèmes de policies storage.objects. La session vérifie l'identité, le
-// service_role écrit — le chemin est verrouillé sur l'uid.
+// N'utilise PLUS le client service_role : la clé SUPABASE_SERVICE_ROLE_KEY
+// est tronquée sur Vercel (bug Hermes > 200 chars) et rend le JWT invalide.
+// Les politiques RLS storage permettent à un user auth d'écrire dans son
+// propre dossier {uid}/ — c'est plus sûr et sans dépendance admin.
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED: Record<string, string> = {
@@ -39,21 +39,48 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Format non supporté. JPG, PNG, WebP ou GIF." }, { status: 400 });
     }
 
-    // Stockage via service_role — pas de RLS storage.objects à gérer
+    // Stockage via la session utilisateur (pas service_role). Le fichier va
+    // dans {user.id}/avatar.{ext} — les politiques RLS storage limitent
+    // l'écriture à son propre dossier.
     const path = `${user.id}/avatar.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const service = await createServiceClient();
-    const { error: uploadError } = await service.storage
+    const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, buffer, { upsert: true, contentType: file.type });
 
     if (uploadError) {
       console.error("[avatar:upload]", uploadError.message);
-      return NextResponse.json(
-        { error: "L'envoi a échoué. Vérifie que le bucket avatars existe dans Supabase Storage." },
-        { status: 500 },
-      );
+
+      // Si l'upload RLS échoue (politiques storage manquantes), on tente
+      // l'upload direct via REST API avec le token de session.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const restUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/avatars/${path}`;
+        const restRes = await fetch(restUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            "Content-Type": file.type,
+            "x-upsert": "true",
+          },
+          body: buffer,
+        });
+        if (!restRes.ok) {
+          const body = await restRes.text();
+          console.error("[avatar:rest-fallback]", body);
+          return NextResponse.json(
+            { error: "L'envoi a échoué. Réessaie." },
+            { status: 500 },
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { error: "L'envoi a échoué. Réessaie." },
+          { status: 500 },
+        );
+      }
     }
 
     const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
