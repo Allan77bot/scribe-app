@@ -12,24 +12,39 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   // Profil pour la pastille de compte (en haut à droite). RLS : on ne lit que
-  // le sien. Si absent (cas limite), on n'affiche simplement pas le menu.
+  // le sien. Colonnes color/avatar_url (migration 0010) peuvent manquer.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { data: me } = user
-    ? await supabase
+
+  type Profile = { display_name: string; email: string; role: string; color?: string; avatar_url?: string };
+  let me: Profile | null = null;
+
+  if (user) {
+    try {
+      const { data } = await supabase
         .from("users")
         .select("display_name, email, role, color, avatar_url")
         .eq("id", user.id)
-        .single()
-    : { data: null };
+        .single();
+      if (data) me = data as Profile;
+    } catch {
+      // Colonnes manquantes (migration 0010 non appliquée) → on lit sans elles
+      const { data } = await supabase
+        .from("users")
+        .select("display_name, email, role")
+        .eq("id", user.id)
+        .single();
+      if (data) me = data as Profile;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-surface">
       {me && (
         <UserMenu
-          name={me.display_name || ""}
+          name={me.display_name}
           email={me.email}
           color={me.color}
           avatarUrl={me.avatar_url}
