@@ -82,6 +82,11 @@ export async function POST(request: Request) {
   // remplace la précédente du même format.
   const path = `${user.id}/avatar.${ext}`;
 
+  // Convertit le fichier en Buffer — Supabase Storage attend un ArrayBuffer/Buffer
+  // mais le File Next.js (Web API) peut ne pas être reconnu comme tel par le
+  // client Supabase. arrayBuffer() garantit la compatibilité.
+  const arrayBuf = await file.arrayBuffer();
+
   // Écriture Storage via admin si dispo (crée le bucket au besoin), sinon via la
   // session (RLS Storage). `storage` sert ensuite à construire l'URL publique.
   const admin = adminClient();
@@ -97,7 +102,7 @@ export async function POST(request: Request) {
 
   const { error: uploadError } = await storage.storage
     .from("avatars")
-    .upload(path, file, { upsert: true, contentType: file.type });
+    .upload(path, Buffer.from(arrayBuf), { upsert: true, contentType: file.type });
 
   if (uploadError) {
     console.error("[avatar:upload]", uploadError.message);
