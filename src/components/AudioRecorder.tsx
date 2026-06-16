@@ -5,7 +5,21 @@ import { getSignedUploadUrl, createEntry } from "@/lib/entries/actions";
 
 type RecState = "idle" | "recording" | "recorded" | "uploading" | "error";
 
-const BAR_HEIGHTS = [0.4, 0.65, 1, 0.65, 0.4];
+// ── Waveform live (FEATURE 3) ─────────────────────────────────────────────
+// 7 barres dont la hauteur suit le volume réel du micro (Web Audio API). Le
+// rendu est piloté en direct via des refs DOM dans une boucle requestAnimation-
+// Frame → aucun re-render React à 60 fps (cf. bonnes pratiques perf).
+const BAR_COUNT = 7;
+const MAX_BAR_HEIGHT = 48; // px — hauteur du conteneur
+const MIN_RATIO = 0.05; // silence = 5 % (les barres ne disparaissent jamais)
+
+// Couleur par niveau : bleu d'action au calme, navy quand ça monte, rouge à la
+// saturation. (Tokens DESIGN.md : primary / secondary / error.)
+function levelColor(level: number): string {
+  if (level >= 0.9) return "#ba1a1a"; // error — saturation
+  if (level >= 0.5) return "#002b5b"; // secondary — voix soutenue
+  return "#0059bb"; // primary — voix normale
+}
 
 export default function AudioRecorder() {
   const [state, setState] = useState<RecState>("idle");
@@ -18,11 +32,79 @@ export default function AudioRecorder() {
   const blobRef = useRef<Blob | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Refs audio + animation.
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const dataRef = useRef<Uint8Array | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const barsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const startMeter = useCallback((stream: MediaStream) => {
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    if (!Ctx) return; // pas de Web Audio → on reste sans waveform, sans crash
+    const ctx = new Ctx();
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 128; // 64 bins — assez fin pour la voix
+    analyser.smoothingTimeConstant = 0.8; // lissage temporel (mouvement fluide)
+    source.connect(analyser); // jamais vers destination (pas de larsen)
+
+    audioCtxRef.current = ctx;
+    analyserRef.current = analyser;
+    sourceRef.current = source;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    dataRef.current = data;
+
+    // Boucle d'animation : lit le spectre, le replie en 4 bandes (grave → aigu)
+    // affichées en miroir autour du centre → silhouette de voix symétrique.
+    const loop = () => {
+      analyser.getByteFrequencyData(data);
+
+      const usable = Math.floor(data.length * 0.45); // bande de la voix (grave)
+      const bandSize = Math.max(1, Math.floor(usable / 4));
+      const bands = [0, 1, 2, 3].map((b) => {
+        let sum = 0;
+        for (let i = b * bandSize; i < (b + 1) * bandSize; i++) sum += data[i];
+        // Gain doux : l'entrée micro est souvent basse, on la rend vivante.
+        return Math.min(1, (sum / bandSize / 255) * 1.6);
+      });
+
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const el = barsRef.current[i];
+        if (!el) continue;
+        const level = bands[Math.abs(i - 3)]; // centre = grave (le plus fort)
+        const ratio = Math.max(MIN_RATIO, level);
+        el.style.height = `${ratio * MAX_BAR_HEIGHT}px`;
+        el.style.backgroundColor = levelColor(level);
+      }
+
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+  }, []);
+
+  const stopMeter = useCallback(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    sourceRef.current?.disconnect();
+    sourceRef.current = null;
+    analyserRef.current = null;
+    dataRef.current = null;
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
+  }, []);
+
+  // Nettoyage global à la sortie du composant.
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      stopMeter();
     };
-  }, []);
+  }, [stopMeter]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -39,6 +121,7 @@ export default function AudioRecorder() {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
+        stopMeter();
         stream.getTracks().forEach((t) => t.stop());
         const b = new Blob(chunksRef.current, { type: mime });
         blobRef.current = b;
@@ -51,17 +134,15 @@ export default function AudioRecorder() {
 
       recorderRef.current = recorder;
       recorder.start();
+      startMeter(stream); // waveform branchée sur le même flux
       setState("recording");
       setSeconds(0);
-      timerRef.current = setInterval(
-        () => setSeconds((s) => s + 1),
-        1000,
-      );
+      timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     } catch {
       setErrorMsg("Micro inaccessible. Vérifie les permissions du navigateur.");
       setState("error");
     }
-  }, []);
+  }, [startMeter, stopMeter]);
 
   const stopRecording = useCallback(() => {
     if (timerRef.current) {
@@ -96,6 +177,7 @@ export default function AudioRecorder() {
   }, []);
 
   const reset = useCallback(() => {
+    stopMeter();
     setAudioUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -104,7 +186,7 @@ export default function AudioRecorder() {
     setSeconds(0);
     setErrorMsg("");
     setState("idle");
-  }, []);
+  }, [stopMeter]);
 
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -164,85 +246,78 @@ export default function AudioRecorder() {
 
   // ── États idle + recording ───────────────────────────────────────────────
   return (
-    <>
-      {/* Keyframes pour les barres audio animées */}
-      <style>{`
-        @keyframes bar-breathe {
-          from { transform: scaleY(0.4); opacity: 0.6; }
-          to   { transform: scaleY(1);   opacity: 1; }
-        }
-      `}</style>
-
-      <div className="flex flex-col items-center gap-6 py-8">
-        {state === "recording" && (
-          <div className="flex flex-col items-center gap-3">
-            <div
-              className="flex items-end gap-1"
-              style={{ height: 48 }}
-              aria-hidden
-            >
-              {BAR_HEIGHTS.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-2 rounded-full bg-primary"
-                  style={{
-                    height: `${h * 48}px`,
-                    transformOrigin: "bottom",
-                    animation: `bar-breathe 0.6s ease-in-out ${i * 0.1}s infinite alternate`,
-                  }}
-                />
-              ))}
-            </div>
-            <p className="font-mono text-2xl tabular-nums text-secondary">
-              {fmt(seconds)}
-            </p>
+    <div className="flex flex-col items-center gap-6 py-8">
+      {state === "recording" && (
+        <div className="flex flex-col items-center gap-3">
+          {/* Waveform live — hauteurs/couleurs pilotées par la boucle draw(). */}
+          <div
+            className="flex items-end justify-center gap-1"
+            style={{ height: MAX_BAR_HEIGHT }}
+            aria-hidden
+          >
+            {Array.from({ length: BAR_COUNT }).map((_, i) => (
+              <div
+                key={i}
+                ref={(el) => {
+                  barsRef.current[i] = el;
+                }}
+                className="w-2 rounded-full bg-primary"
+                style={{
+                  height: `${MIN_RATIO * MAX_BAR_HEIGHT}px`,
+                  transition: "height 100ms ease-out",
+                }}
+              />
+            ))}
           </div>
+          <p className="font-mono text-2xl tabular-nums text-secondary">
+            {fmt(seconds)}
+          </p>
+        </div>
+      )}
+
+      {/* Bouton principal micro / stop */}
+      <button
+        onClick={state === "idle" ? startRecording : stopRecording}
+        className={`flex size-16 items-center justify-center rounded-full transition-transform active:scale-95 ${
+          // Enregistrement = error (signal d'arrêt) ; repos = primary.
+          state === "recording"
+            ? "bg-error text-on-error"
+            : "bg-primary text-on-primary"
+        }`}
+        aria-label={
+          state === "idle"
+            ? "Commencer l'enregistrement"
+            : "Arrêter l'enregistrement"
+        }
+      >
+        {state === "idle" ? (
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden
+          >
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
+          </svg>
+        ) : (
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden
+          >
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
         )}
+      </button>
 
-        {/* Bouton principal micro / stop */}
-        <button
-          onClick={state === "idle" ? startRecording : stopRecording}
-          className={`flex size-16 items-center justify-center rounded-full transition-transform active:scale-95 ${
-            // Enregistrement = error (signal d'arrêt) ; repos = primary.
-            state === "recording"
-              ? "bg-error text-on-error"
-              : "bg-primary text-on-primary"
-          }`}
-          aria-label={
-            state === "idle"
-              ? "Commencer l'enregistrement"
-              : "Arrêter l'enregistrement"
-          }
-        >
-          {state === "idle" ? (
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden
-            >
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
-            </svg>
-          ) : (
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden
-            >
-              <rect x="6" y="6" width="12" height="12" rx="2" />
-            </svg>
-          )}
-        </button>
-
-        <p className="text-sm text-on-surface-variant">
-          {state === "idle"
-            ? "Appuyer pour enregistrer"
-            : "Appuyer pour arrêter"}
-        </p>
-      </div>
-    </>
+      <p className="text-sm text-on-surface-variant">
+        {state === "idle"
+          ? "Appuyer pour enregistrer"
+          : "Appuyer pour arrêter"}
+      </p>
+    </div>
   );
 }

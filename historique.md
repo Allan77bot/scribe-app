@@ -1,3 +1,73 @@
+## 2026-06-16 — Avatars + couleurs d'équipe + waveform live + fix passation ✅
+
+### Contexte
+Quatre demandes utilisateur sur le prototype (`prototype`) : fiabiliser la page
+Passation (crash si clé service_role absente/tronquée), donner une identité
+visuelle aux membres (photo + couleur distinctive), et rendre l'enregistreur
+vocal vraiment réactif (la waveform était une fausse animation en boucle).
+
+### Ajouté
+- **Migration `0010_avatars_colors.sql`** : `users.avatar_url` + `users.color`
+  (`varchar(7)`), bucket Storage **`avatars`** (public en lecture, écriture
+  verrouillée au dossier `{uid}/` — 4 policies), et `handle_new_user()` réécrit
+  pour **auto-attribuer une couleur libre** de la palette (admin neuf = 1re
+  teinte ; invité = 1re teinte libre dans l'org, `WITH ORDINALITY` pour l'ordre).
+  N'ajoute **aucune table neuve** → posture RLS inchangée (règle d'or n°2).
+- `src/lib/avatar.ts` — palette AA 8 teintes, `initials()`, contraste
+  `textColorOn()`, `isValidMemberColor()` (garde-fou serveur). Palette tenue en
+  phase avec le SQL du trigger.
+- `src/components/Avatar.tsx` — avatar circulaire réutilisable (photo `next/image`
+  ou monogramme coloré), **bordure or 2px** pour les admins.
+- `src/components/AvatarUpload.tsx` — cercle 64px cliquable, aperçu `data:` URL
+  immédiat, POST vers l'API, spinner pendant l'envoi.
+- `src/components/ColorPicker.tsx` — sélecteur 8 couleurs ; teintes prises par
+  d'autres membres désactivées (cadenas).
+- `src/components/UserMenu.tsx` — pastille de compte 32px en haut à droite du
+  dashboard (Réglages / déconnexion), ferme au clic extérieur / Échap.
+- `src/app/dashboard/settings/page.tsx` — Réglages : photo + nom + couleur,
+  e-mail en lecture seule, déconnexion.
+- `src/lib/user/actions.ts` — `updateProfile` (session, RLS `users_update_self`) :
+  valide le nom, la couleur (palette fermée **et** libre dans l'org).
+- `src/app/api/user/avatar/upload/route.ts` — upload FormData → bucket `avatars`
+  (chemin `{uid}/avatar.<ext>`, upsert), met à jour `avatar_url` (URL publique
+  anti-cache). Tout par le client de session (pas de service_role).
+
+### Modifié
+- `src/app/dashboard/handover/page.tsx` — **bug fix** : tout le bloc client
+  admin est isolé dans un `try/catch` ; clé absente (throw) **ou** tronquée
+  (erreur de requête) → carte blanche propre « Passation momentanément
+  indisponible » au lieu d'un 500.
+- `src/components/AudioRecorder.tsx` — **waveform réelle** (Web Audio API :
+  `AnalyserNode` + `requestAnimationFrame`). 7 barres pilotées en direct par
+  refs DOM (zéro re-render à 60 fps), hauteur ∝ volume, couleur par niveau
+  (primary < 50 % / secondary / error > 90 %), repli en 4 bandes en miroir,
+  minimum 5 %, transition 100 ms. Nettoyage `AudioContext` à l'arrêt/démontage.
+- `src/app/dashboard/team/page.tsx` — membres affichés via `Avatar` (couleur +
+  photo + bordure or admin).
+- `src/app/dashboard/layout.tsx` — devient async, monte `UserMenu`.
+- `src/app/dashboard/page.tsx` — retrait du bouton « Se déconnecter » du header
+  (redondant + chevauchait la pastille). `pr-14` pour laisser la place.
+- `next.config.ts` — `images.remotePatterns` pour le Storage public Supabase.
+
+### Validations
+- `npm run lint` → **propre sur tous mes fichiers** ✓ (restent 1 erreur + 1
+  warning **pré-existants** dans `api/admin/migrate/route.ts`, hors périmètre).
+- `npm run build` → compile + TS OK, **23 routes** ✓.
+- `npm run check:rls` → **non exécutable ici** : le sandbox Supabase
+  (`doorjfxqetoawqnvguvz`) ne répond plus (ENOTFOUND). La migration 0010
+  n'ajoute aucune table à `org_id` → RLS inchangée par construction. À rejouer
+  sur un sandbox/CI vivant après `npm run db:apply`.
+
+### Décision
+La couleur est **auto-attribuée** à l'inscription (pas de choix dans le flux
+public d'invitation), puis modifiable dans Réglages parmi les teintes libres —
+moins de friction, distinction garantie dès la création.
+
+### Branche
+`prototype` (commit direct demandé). Pas de PR.
+
+---
+
 ## 2026-06-14 — Navigation + dashboard-hub : on relie enfin les modules ✅
 
 ### Contexte

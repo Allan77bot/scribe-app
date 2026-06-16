@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import InviteMemberButton from "@/components/InviteMemberButton";
 import RevokeInviteButton from "@/components/RevokeInviteButton";
+import Avatar from "@/components/Avatar";
 
 // Page Équipe — qui fait partie de l'org, qui est attendu. C'est le « casting »
 // de la coordination : sans coéquipiers, pas d'accusé de lecture ni de passation.
@@ -12,6 +13,8 @@ type Member = {
   display_name: string;
   email: string;
   role: "admin" | "member";
+  color: string | null;
+  avatar_url: string | null;
 };
 
 type Invite = {
@@ -19,14 +22,6 @@ type Invite = {
   email: string;
   expires_at: string;
 };
-
-// Initiales pour le monogramme d'avatar (pas de photo en MVP).
-function initials(name: string, email: string): string {
-  const base = name.trim() || email.split("@")[0];
-  const parts = base.split(/[\s._-]+/).filter(Boolean);
-  const letters = parts.length >= 2 ? parts[0][0] + parts[1][0] : base.slice(0, 2);
-  return letters.toUpperCase();
-}
 
 // Échéance relative et honnête (« expire dans 2 j », « expire bientôt »).
 function expiresIn(iso: string): string {
@@ -57,7 +52,7 @@ export default async function TeamPage() {
   // Membres de l'org (RLS : même org uniquement). Admins d'abord.
   const { data: membersRaw } = await supabase
     .from("users")
-    .select("id, display_name, email, role")
+    .select("id, display_name, email, role, color, avatar_url")
     .order("role", { ascending: true })
     .order("created_at", { ascending: true });
   const members = (membersRaw ?? []) as Member[];
@@ -106,16 +101,14 @@ export default async function TeamPage() {
                 key={m.id}
                 className="flex items-center gap-3 rounded-card bg-white p-3 shadow-card"
               >
-                <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                    m.role === "admin"
-                      ? "bg-primary text-on-primary"
-                      : "bg-azure text-primary"
-                  }`}
-                  aria-hidden
-                >
-                  {initials(m.display_name, m.email)}
-                </span>
+                <Avatar
+                  name={m.display_name}
+                  email={m.email}
+                  color={m.color}
+                  avatarUrl={m.avatar_url}
+                  isAdmin={m.role === "admin"}
+                  size={40}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-on-surface">
                     {m.display_name || m.email.split("@")[0]}

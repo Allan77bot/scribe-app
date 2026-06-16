@@ -151,7 +151,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
-      <header className="flex items-center justify-between px-5 py-4">
+      {/* Compte (déconnexion + réglages) géré par la pastille UserMenu du layout,
+          en haut à droite. On garde ici l'identité d'équipe, sans bouton qui la
+          chevaucherait. pr-14 : réserve la place de la pastille. */}
+      <header className="px-5 py-4 pr-14">
         <div className="min-w-0">
           <p className="truncate text-base font-semibold text-secondary">
             {org?.name ?? "Mon équipe"}
@@ -161,14 +164,6 @@ export default async function DashboardPage() {
             {profile.role === "admin" ? " · admin" : ""}
           </p>
         </div>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="shrink-0 rounded-pill bg-azure px-4 py-2 text-sm font-medium text-primary transition-all hover:brightness-95"
-          >
-            Se déconnecter
-          </button>
-        </form>
       </header>
 
       <div className="mx-auto w-full max-w-md px-5 py-6">

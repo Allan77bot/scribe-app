@@ -4,24 +4,35 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-15
-**Phase :** Prototype — niveau 2 (structurel) + niveau 3 (vision) construits
+| **Dernière mise à jour :** 2026-06-16
+**Phase :** Prototype — identité d'équipe (avatars + couleurs) + waveform live
 **Branche active :** `prototype`
 
 ---
 
 **TL;DR (pour Discord)**
 
-**Le front passe en clair — design « Professional Flow ».** Migration complète
-du thème **sombre → clair** (source de vérité `DESIGN.md`) : police **Manrope**,
-fond `#f7fafd`, **cartes blanches** rayon 32px + ombres douces navy, **boutons
-primary pilule 56px** (`#0059bb`), **inputs sans bordure** rayon 16px, **titres
-Deep Navy** `#002b5b`. Tokens redéfinis dans `globals.css` (`@theme` Tailwind v4,
-pas de `tailwind.config.ts`) ; **28 fichiers UI** migrés (landing, nav, layout
-1200px, 12 pages, 13 composants) ; **zéro trace du dark**. `tsc`/`eslint`/`next
-build` verts (20 routes). Pas de PR (attente accord).
+**Les membres ont un visage, et le micro respire.** 4 chantiers : (1) **avatars**
+— photo de profil (bucket `avatars` public, upload `{uid}/avatar.<ext>`) +
+page **Réglages** + pastille **UserMenu** 32px en haut à droite ; (2) **couleurs
+distinctes par membre** — palette AA 8 teintes, auto-attribuée à l'inscription,
+modifiable dans Réglages (teintes prises grisées), **bordure or** sur les admins,
+affichées sur Équipe ; (3) **waveform réelle** dans l'enregistreur (Web Audio
+`AnalyserNode` + `rAF`, 7 barres pilotées par refs, hauteur ∝ volume, couleur par
+niveau) ; (4) **fix passation** — `try/catch` autour du client admin → carte
+propre au lieu d'un 500 si la clé service_role manque/est tronquée. Migration
+**`0010`** (`users.avatar_url`/`color` + bucket + `handle_new_user` couleur auto),
+**aucune table neuve** → RLS inchangée. `eslint`/`build` verts (23 routes). Pas de PR.
 
 _Session précédente :_
+
+**Le front passe en clair — design « Professional Flow ».** Migration complète
+du thème **sombre → clair** (source de vérité `DESIGN.md`) : Manrope, fond
+`#f7fafd`, cartes blanches 32px, boutons primary pilule 56px (`#0059bb`), titres
+Deep Navy. Tokens dans `globals.css` (`@theme` Tailwind v4) ; 28 fichiers UI
+migrés ; zéro trace du dark. Build vert (20 routes).
+
+_Avant ça :_
 **Les invitations d'équipe sont vivantes.** Au-dessus de la boucle de coordination,
 on branche les **acteurs** : table `invitations` à **jeton signé** (UUID v4 +
 e-mail + expiration 72 h, jamais de rattachement par `org_id` brut — règle d'or
@@ -43,6 +54,17 @@ minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ## Fait
 
+- [x] **Avatars + couleurs d'équipe + waveform live + fix passation (2026-06-16, `prototype`)** :
+  migration `0010` (`users.avatar_url`/`color`, bucket Storage `avatars` public,
+  `handle_new_user()` auto-attribue une couleur libre) ; lib `avatar.ts` (palette
+  AA 8 teintes + contraste) ; composants `Avatar`, `AvatarUpload` (64px),
+  `ColorPicker`, `UserMenu` (32px) ; page `/dashboard/settings` ; action
+  `updateProfile` (RLS session) ; `POST /api/user/avatar/upload`. Équipe affiche
+  avatars colorés + bordure or admin. `AudioRecorder` : waveform Web Audio réelle
+  (7 barres rAF, couleur par niveau). Passation : `try/catch` client admin → carte
+  propre (plus de 500). `next.config` : remotePatterns Storage. Build vert (23
+  routes). **`0010` à appliquer** + `check:rls` à rejouer (sandbox hors-ligne ici).
+  Détail dans `historique.md`.
 - [x] **Migration design dark → clair « Professional Flow » (2026-06-15, `prototype`)** :
   refonte complète du design system selon `DESIGN.md`. `globals.css` réécrit
   (`@theme` Tailwind v4 : surfaces/on-surface/primary/secondary navy/azure/error,
@@ -84,10 +106,11 @@ minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ## En cours / bloqué
 
-- **Migrations `0006` + `0007` à appliquer** : `npm run db:apply` puis
-  `npm run check:rls` (vert) sur le sandbox/CI — non exécutable ici
-  (`SUPABASE_DB_URL` absent). `invitations` conforme au patron (org_id + RLS + 4
-  policies) ; `0007` remplace `handle_new_user()` (gestion du jeton d'invitation).
+- **Migrations `0006` + `0007` + `0010` à appliquer** : `npm run db:apply` puis
+  `npm run check:rls` (vert) sur un sandbox/CI vivant — **non exécutable ici** :
+  le sandbox `doorjfxqetoawqnvguvz` ne répond plus (ENOTFOUND). `0010` ajoute
+  `avatar_url`/`color` + bucket `avatars` + couleur auto dans `handle_new_user()` ;
+  aucune table neuve → posture RLS inchangée par construction.
 - **Limite invitations** : un e-mail déjà inscrit sur Scribe ne peut pas accepter
   une invitation (signup refusé) → multi-org par compte = TODO post-MVP.
 - **Gabarit e-mail encore en charte Atelier Klar** (`email/send.ts`) : migrer aux
