@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// POST /api/user/avatar/upload — reçoit un fichier image, l'upload dans le
-// bucket `avatars` via le client session (RLS storage), puis met à jour
-// users.avatar_url.
+// POST /api/user/avatar/upload — upload de photo de profil.
 //
-// N'utilise PLUS le client service_role : la clé SUPABASE_SERVICE_ROLE_KEY
-// est tronquée sur Vercel (bug Hermes > 200 chars) et rend le JWT invalide.
-// Les politiques RLS storage permettent à un user auth d'écrire dans son
-// propre dossier {uid}/ — c'est plus sûr et sans dépendance admin.
+// Méthode : fetch direct vers l'API REST Supabase avec la clé service_role.
+// Plus fiable que le client JS (pas de RLS storage à configurer, pas de
+// dépendance aux policies bucket). La clé est le JWT service_role stocké
+// dans SUPABASE_SERVICE_ROLE_KEY sur Vercel.
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED: Record<string, string> = {
@@ -18,10 +16,35 @@ const ALLOWED: Record<string, string> = {
   "image/gif": "gif",
 };
 
+async function ensureBucket(baseUrl: string, key: string): Promise<void> {
+  // Crée le bucket avatars s'il n'existe pas (idempotent).
+  const url = `${baseUrl}/storage/v1/bucket`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: "avatars",
+      name: "avatars",
+      public: true,
+      file_size_limit: 5 * 1024 * 1024,
+      allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    }),
+  });
+  // 409 = already exists → OK. Tout autre code = log mais on continue.
+  if (!res.ok && res.status !== 409) {
+    console.error("[avatar:bucket]", await res.text());
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
@@ -36,56 +59,54 @@ export async function POST(request: Request) {
     }
     const ext = ALLOWED[file.type];
     if (!ext) {
-      return NextResponse.json({ error: "Format non supporté. JPG, PNG, WebP ou GIF." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Format non supporté. JPG, PNG, WebP ou GIF." },
+        { status: 400 },
+      );
     }
 
-    // Stockage via la session utilisateur (pas service_role). Le fichier va
-    // dans {user.id}/avatar.{ext} — les politiques RLS storage limitent
-    // l'écriture à son propre dossier.
+    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!baseUrl || !key) {
+      console.error("[avatar] NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant");
+      return NextResponse.json(
+        { error: "Configuration serveur incomplète." },
+        { status: 500 },
+      );
+    }
+
+    // Crée le bucket si absent (idempotent).
+    await ensureBucket(baseUrl, key);
+
     const path = `${user.id}/avatar.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(path, buffer, { upsert: true, contentType: file.type });
+    // Upload via REST API + service_role (pas de RLS storage).
+    const uploadUrl = `${baseUrl}/storage/v1/object/avatars/${path}`;
+    const uploadRes = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": file.type,
+        "x-upsert": "true",
+      },
+      body: buffer,
+    });
 
-    if (uploadError) {
-      console.error("[avatar:upload]", uploadError.message);
-
-      // Si l'upload RLS échoue (politiques storage manquantes), on tente
-      // l'upload direct via REST API avec le token de session.
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        const restUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/avatars/${path}`;
-        const restRes = await fetch(restUrl, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${session.access_token}`,
-            "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            "Content-Type": file.type,
-            "x-upsert": "true",
-          },
-          body: buffer,
-        });
-        if (!restRes.ok) {
-          const body = await restRes.text();
-          console.error("[avatar:rest-fallback]", body);
-          return NextResponse.json(
-            { error: "L'envoi a échoué. Réessaie." },
-            { status: 500 },
-          );
-        }
-      } else {
-        return NextResponse.json(
-          { error: "L'envoi a échoué. Réessaie." },
-          { status: 500 },
-        );
-      }
+    if (!uploadRes.ok) {
+      const body = await uploadRes.text();
+      console.error("[avatar:upload]", uploadRes.status, body.slice(0, 300));
+      return NextResponse.json(
+        { error: "L'envoi a échoué. Réessaie." },
+        { status: 500 },
+      );
     }
 
-    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-    const bustedUrl = `${publicUrl}?v=${Date.now()}`;
+    // URL publique (bucket public).
+    const publicUrl = `${baseUrl}/storage/v1/object/public/avatars/${path}`;
+    const bustedUrl = `${publicUrl}?t=${Date.now()}`;
 
+    // Met à jour users.avatar_url via la session RLS.
     const { error: updateError } = await supabase
       .from("users")
       .update({ avatar_url: bustedUrl })
@@ -93,6 +114,8 @@ export async function POST(request: Request) {
 
     if (updateError) {
       console.error("[avatar:update]", updateError.message);
+      // L'image est uploadée mais le profil pas mis à jour — on retourne
+      // l'URL pour que le front puisse réessayer.
       return NextResponse.json({ avatarUrl: bustedUrl, persisted: false });
     }
 

@@ -11,14 +11,29 @@ export default async function OnboardingPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // RLS : on ne lit que sa propre org.
-  const { data: profile } = await supabase
-    .from("users")
-    .select("organizations(name, onboarding_complete)")
-    .eq("id", user.id)
-    .maybeSingle();
+  // Lecture défensive : onboarding_complete peut manquer (migration 0006 non
+  // appliquée en prod). Si la colonne est absente, on traite comme si
+  // l'onboarding n'était pas encore fait — l'utilisateur voit le wizard.
+  let org: Org | undefined;
+  try {
+    const { data: profile, error } = await supabase
+      .from("users")
+      .select("organizations(name, onboarding_complete)")
+      .eq("id", user.id)
+      .maybeSingle();
 
-  const org = profile?.organizations as unknown as Org | undefined;
+    if (error) throw error;
+    org = profile?.organizations as unknown as Org | undefined;
+  } catch {
+    // Colonne onboarding_complete absente → fallback : onboarding pas encore fait.
+    const { data: profile } = await supabase
+      .from("users")
+      .select("organizations(name)")
+      .eq("id", user.id)
+      .maybeSingle();
+    const raw = profile?.organizations as unknown as { name: string } | undefined;
+    org = raw ? { name: raw.name, onboarding_complete: false } : undefined;
+  }
 
   // Déjà terminé → on n'impose pas le wizard à nouveau.
   if (org?.onboarding_complete) redirect("/dashboard");
