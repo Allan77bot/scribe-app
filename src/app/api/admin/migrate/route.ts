@@ -1,65 +1,100 @@
 import { NextResponse } from "next/server";
+import { createClient as createSessionClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/admin/migrate
- * Vérifie l'état des migrations sur Supabase.
- * Protégé par token partagé : {"token":"scribe-migrate-2026"}
+ * Diagnostic de l'état du schéma en prod (LECTURE SEULE).
  *
- * Pour appliquer les migrations : exécuter supabase/migrations/0012_fix_all.sql
- * dans l'éditeur SQL Supabase (Dashboard → SQL Editor).
+ * AUTH (règle d'or n°1) : session Supabase + rôle 'admin'. PLUS de token statique.
+ * L'ancien token en clair `scribe-migrate-2026` gardait un endpoint à privilèges
+ * service_role — supprimé.
+ *
+ * Pour APPLIQUER les migrations : exécuter supabase/migrations/0013_reconcile_drift.sql
+ * dans l'éditeur SQL Supabase (Dashboard → SQL Editor), APRÈS un snapshot de la base.
  */
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const { token } = await req.json();
-    if (token !== "scribe-migrate-2026") {
+    // ── Garde de session : authentifié ET admin de son org (règle d'or n°1/n°2). ──
+    const supabase = await createSessionClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role !== "admin") {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) {
-      return NextResponse.json({ error: `env missing (url=${!!url}, key=${key?.length ?? 0} chars)` }, { status: 500 });
+      return NextResponse.json(
+        { error: `env missing (url=${!!url}, key=${key?.length ?? 0} chars)` },
+        { status: 500 },
+      );
     }
 
     const status: Record<string, string> = {};
+    const headers = { Authorization: `Bearer ${key}`, apikey: key };
 
-    // Check tables via REST API
-    for (const table of ["task_validations", "invitations", "organizations", "users"]) {
+    // Existence des tables.
+    for (const table of [
+      "task_validations",
+      "invitations",
+      "organizations",
+      "users",
+      "reports",
+    ]) {
       try {
-        const res = await fetch(`${url}/rest/v1/${table}?limit=0`, {
-          headers: { Authorization: `Bearer ${key}`, apikey: key },
-        });
+        const res = await fetch(`${url}/rest/v1/${table}?limit=0`, { headers });
         status[table] = res.ok ? "✓" : `✗ ${res.status}`;
       } catch {
         status[table] = "✗ unreachable";
       }
     }
 
-    // Check users columns
-    try {
-      const res = await fetch(`${url}/rest/v1/users?select=avatar_url,color&limit=1`, {
-        headers: { Authorization: `Bearer ${key}`, apikey: key },
-      });
-      const data = await res.json();
-      const row = Array.isArray(data) ? data[0] : data;
-      status["users.avatar_url"] = row && "avatar_url" in Object(row) ? "✓" : "✗ missing";
-      status["users.color"] = row && "color" in Object(row) ? "✓" : "✗ missing";
-    } catch {
-      status["users.cols"] = "✗ unreachable";
+    // Vérification post-migration 0013 : colonnes clés du drift (un select sur une
+    // colonne absente échoue → on détecte le drift à distance).
+    async function probe(query: string, label: string) {
+      try {
+        const res = await fetch(`${url}/rest/v1/${query}`, { headers });
+        status[label] = res.ok ? "✓" : "✗ missing";
+      } catch {
+        status[label] = "✗ unreachable";
+      }
     }
+    await probe(
+      "task_validations?select=entry_id,task_index&limit=0",
+      "task_validations.entry_id+task_index",
+    );
+    await probe("reports?select=kind&limit=0", "reports.kind");
+    await probe("users?select=avatar_url,color&limit=1", "users.avatar_url+color");
 
-    // Check avatars bucket
+    // Bucket avatars.
     try {
-      const res = await fetch(`${url}/storage/v1/bucket/avatars`, {
-        headers: { Authorization: `Bearer ${key}`, apikey: key },
-      });
+      const res = await fetch(`${url}/storage/v1/bucket/avatars`, { headers });
       status["bucket.avatars"] = res.ok ? "✓" : `✗ ${res.status}`;
     } catch {
       status["bucket.avatars"] = "✗ unreachable";
     }
 
-    return NextResponse.json({ ok: true, status, action: "Run supabase/migrations/0012_fix_all.sql in SQL Editor if any ✗" });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e.message }, { status: 500 });
+    return NextResponse.json({
+      ok: true,
+      status,
+      action:
+        "Si un ✗ : exécuter supabase/migrations/0013_reconcile_drift.sql dans le SQL Editor (après snapshot).",
+    });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, error: e instanceof Error ? e.message : String(e) },
+      { status: 500 },
+    );
   }
 }

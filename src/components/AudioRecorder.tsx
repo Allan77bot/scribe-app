@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { getSignedUploadUrl, createEntry } from "@/lib/entries/actions";
+import { savePending, loadPending, clearPending } from "@/lib/audio/pending";
 
 type RecState = "idle" | "recording" | "recorded" | "uploading" | "error";
 
@@ -26,6 +27,10 @@ export default function AudioRecorder() {
   const [seconds, setSeconds] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  // true quand on a restauré un enregistrement non envoyé (récupéré d'IndexedDB).
+  const [recovered, setRecovered] = useState(false);
+  // Reflète la présence d'un blob (le ref ne se lit pas pendant le rendu).
+  const [hasRecording, setHasRecording] = useState(false);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -125,6 +130,11 @@ export default function AudioRecorder() {
         stream.getTracks().forEach((t) => t.stop());
         const b = new Blob(chunksRef.current, { type: mime });
         blobRef.current = b;
+        // Persiste tout de suite (IndexedDB) : si l'upload échoue ou la page se
+        // recharge en zone sans réseau, l'enregistrement n'est PAS perdu.
+        void savePending(b);
+        setHasRecording(true);
+        setRecovered(false);
         setAudioUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
           return URL.createObjectURL(b);
@@ -164,6 +174,9 @@ export default function AudioRecorder() {
       });
       if (!res.ok) throw new Error(`Upload échoué (${res.status})`);
 
+      // L'audio est dans le storage → l'enregistrement est safe, on purge le cache.
+      await clearPending();
+
       const fd = new FormData();
       fd.append("type", "audio");
       fd.append("storage_path", path);
@@ -176,6 +189,7 @@ export default function AudioRecorder() {
     }
   }, []);
 
+  // Jeter l'enregistrement (Recommencer / Supprimer) → purge aussi le cache offline.
   const reset = useCallback(() => {
     stopMeter();
     setAudioUrl((prev) => {
@@ -183,27 +197,85 @@ export default function AudioRecorder() {
       return null;
     });
     blobRef.current = null;
+    void clearPending();
+    setHasRecording(false);
+    setRecovered(false);
     setSeconds(0);
     setErrorMsg("");
     setState("idle");
   }, [stopMeter]);
+
+  // Récupération : au montage, si un enregistrement non envoyé traîne en cache
+  // (upload échoué / page rechargée en zone sans réseau), on le restaure pour
+  // pouvoir le renvoyer — il n'est jamais perdu.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const pend = await loadPending();
+      if (cancelled || !pend || blobRef.current) return;
+      blobRef.current = pend.blob;
+      setAudioUrl(URL.createObjectURL(pend.blob));
+      setHasRecording(true);
+      setRecovered(true);
+      setState((s) => (s === "idle" ? "recorded" : s));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Renvoi automatique au retour du réseau, quand un envoi avait échoué.
+  useEffect(() => {
+    if (state !== "error") return;
+    const onOnline = () => {
+      if (blobRef.current) void handleUpload();
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [state, handleUpload]);
 
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   // ── État erreur ─────────────────────────────────────────────────────────
   if (state === "error") {
+    // Si un enregistrement existe encore (échec d'upload), on propose de RENVOYER
+    // sans jamais effacer le blob — on ne perd pas la passation. Sinon (erreur
+    // micro), simple retour à l'état initial.
+    const canRetryUpload = hasRecording;
     return (
       <div className="flex flex-col items-center gap-4 py-8">
         <p className="w-full rounded-field bg-error-container px-4 py-3 text-center text-sm text-on-error-container">
           {errorMsg}
         </p>
-        <button
-          onClick={reset}
-          className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-        >
-          Réessayer
-        </button>
+        {canRetryUpload ? (
+          <>
+            <p className="text-center text-xs text-on-surface-variant">
+              Ton enregistrement est conservé. Réessaie l&apos;envoi.
+            </p>
+            <div className="flex w-full gap-3">
+              <button
+                onClick={reset}
+                className="flex h-14 flex-1 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95 active:scale-[0.98]"
+              >
+                Supprimer
+              </button>
+              <button
+                onClick={handleUpload}
+                className="flex h-14 flex-1 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
+              >
+                Réessayer l&apos;envoi
+              </button>
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={reset}
+            className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
+          >
+            Réessayer
+          </button>
+        )}
       </div>
     );
   }
@@ -225,6 +297,11 @@ export default function AudioRecorder() {
   if (state === "recorded" && audioUrl) {
     return (
       <div className="flex flex-col items-center gap-6 py-6">
+        {recovered && (
+          <p className="w-full rounded-field bg-azure px-4 py-3 text-center text-sm text-primary">
+            Enregistrement non envoyé récupéré. Tu peux l&apos;envoyer maintenant.
+          </p>
+        )}
         <audio src={audioUrl} controls className="w-full" />
         <div className="flex w-full gap-3">
           <button
