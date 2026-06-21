@@ -1,3 +1,218 @@
+## 2026-06-21 — Lot stabilité codé + design produit (onboarding & assignation) maquetté ✅
+
+### 1. Lot `fix/stabilite-prod` IMPLÉMENTÉ (branche dédiée, non commité)
+Suite aux décisions ultracode (stabilité d'abord), code écrit sur `fix/stabilite-prod` :
+- **`supabase/migrations/0013_reconcile_drift.sql`** — migration **idempotente/défensive** qui
+  converge depuis n'importe quel état prod : `task_validations` en forme `0006`
+  (`entry_id`+`task_index`+`unique`, ne DROP que si forme drift ET vide), `reports.kind` garanti,
+  `handle_new_user` restauré (version `0010` : invitation + couleur) + **un seul** trigger.
+- **`src/components/AudioRecorder.tsx`** + **`src/lib/audio/pending.ts`** — blob persisté en IndexedDB
+  dès l'arrêt, « Réessayer » **renvoie** (n'efface plus le blob), récupération au montage, renvoi auto
+  au retour du réseau. Fin de la perte d'enregistrement terrain.
+- **`src/app/api/admin/migrate/route.ts`** — token statique `scribe-migrate-2026` **retiré** →
+  garde **session + rôle admin** (règle d'or n°1) + sert de vérificateur post-migration.
+- `lint` + `build` **verts** (23 routes ; `npm install` requis : 9 paquets manquaient). `check:rls` /
+  `test:isolation` non rejoués (DB live = ops Allan ; `test:isolation` écrit → jamais sur la prod).
+- ⚠️ **Reste à faire (Allan)** : exécuter `0013` sur la prod `kgbxxzujlubflsvprmef` après snapshot DB.
+  Firsthand : `0012` avait régressé le trigger (invitation perdue + `plan='free'` invalide pour l'enum
+  + trigger en doublon) — tout corrigé par `0013`.
+
+### 2. Design produit avec Allan — maquettes `/demo` (public, sans login, jetable)
+Allan bloqué par l'auth (signup cassé en prod) → espace **`/demo`** créé pour prévisualiser sans login :
+- **`/demo/onboarding`** — nouvel onboarding fluide, **2 parcours** (toggle Manager/Employé) :
+  Manager = nommer l'équipe → inviter (« combien êtes-vous » règle le nb de champs = **idée A**) →
+  mini-tour 3 onglets → prêt ; Employé = bienvenue (rejoint) → profil (nom+couleur) → mini-tour → prêt.
+- **`/demo/dashboard`** — hub + **guide « première fois »** : voile + chaque onglet s'allume avec une bulle.
+- **`/demo/tasks`** — **assignation & suivi** : badges **initiales** (AM/SD…), assignation, création manuelle
+  (briefing), filtre par personne, **réglage admin** « qui peut assigner », toggle Manager/Employé.
+- **`/demo/capture`** — réutilise l'écran réel pour montrer le fix enregistreur.
+- Décisions design : couleur = **priorité** (couleur membre seulement sur l'avatar) ; **pas de shift** à
+  l'inscription (rotation 3×8) ; friction douce sur le skip d'invite ; admin épinglé bleu.
+
+### 3. Specs écrits (convergence)
+- **`docs/specs/2026-06-21-onboarding.md`** → branche `feat/onboarding`.
+- **`docs/specs/2026-06-21-tasks-assignment.md`** → branche `feat/tasks-assignment` (⚠️ trancher
+  JSONB vs table `public.tasks` au début).
+
+### Next (déterminé, cf. `snapshot.md`)
+1. Allan exécute `0013` en prod (snapshot avant) → débloque le produit. 2. Commit/hygiène sur OK Allan.
+3. `feat/onboarding`. 4. `feat/tasks-assignment`. Rien poussé ; `/demo` à retirer avant PR.
+
+## 2026-06-19 — Passage à l'ACTION : jugement par skill + décisions stratégiques (ultracode) ✅
+
+### Méthode
+Mode ultracode, 2 workflows multi-agents (**48 agents** au total) :
+1. **Jugement par skill** (23 agents) — 1 agent/skill applique son `SKILL.md` au code réel
+   (preuves `fichier:ligne`), puis 1 sceptique adversarial par faiblesse critique (défaut = réfuter).
+2. **Boucle de décision** (25 agents) — pour 4 décisions : débat chiffré (1 avocat/option) →
+   juge → challenge adversarial → juge final (stabilité). Le challenge a **renversé 3 verdicts sur 4**.
+
+### Verdicts (scores /10 après réfutation)
+claude-code-build **5,5** · retention **4,5** · ship-mobile-app **4,5** · design-ui **6,5**.
+- **Critiques CONFIRMÉES** : schema drift `task_validations` (`0006` entry_id+task_index+unique
+  VS `0012` task_id sans unique → validation humaine plante, RG n°4) ; `reports.kind` absent de
+  `0012` (passation insert+select KO) ; token statique `scribe-migrate-2026` sur endpoint
+  service_role (viole RG n°1) ; perte d'enregistrement vocal si l'upload échoue ; 0 notif au
+  shift entrant ; génération de passation 100 % manuelle + bug fenêtre UTC.
+- ➕ Trouvaille firsthand (lecture 0006/0012) : `0012` a aussi **régressé le `handle_new_user`
+  de `0007`** → un invité recrée une org au lieu de rejoindre la sienne.
+- **Dégradés en mineur par les sceptiques** (≠ audit du matin) : dark mode (le skill le classe
+  lui-même P3), focus-visible, contraste AA, collision 0011 / policies storage (bucket privé +
+  service_role → non exploitable), révélation temps réel des tâches.
+
+### Décisions
+- (a) Vertical : **logistique par défaut, NON gelé** (agro descendu — IFS/HACCP faux en droit ;
+  santé = #2, mur HDS). Vrai déterminant = réseau d'Allan + 5-10 entretiens.
+- (b) Pricing : **par-siège simple au lancement** (marge >89 % prouvée, quota = risque fantôme),
+  compteur minutes gardé en garde-fou interne. **Décision finale = Allan, session dédiée.**
+- (c) Conformité : **minimale séquencée** (réparer bloquants d'abord, socle minimal ~3j,
+  kit CSE à la demande, purge reportée).
+- (d) Séquencement : **stabilité d'abord** — Sprint 1 = `fix/stabilite-prod` mono-concern
+  (schema drift + perte enregistrement + token), notif reportée après discovery du canal.
+
+### Next
+Lot P1 n°1 = **`fix/stabilite-prod`**. Migration `0013` idempotente/défensive (réconcilie depuis
+n'importe quel état prod), fix `AudioRecorder` (blob persistant), garde de session sur
+`/api/admin/migrate`. ⚠️ Exécution de la migration sur la prod réelle = **ops Allan** (snapshot
+DB avant ; sandbox mort ici, CI verte ≠ preuve sur données réelles). Aucune PR sans accord.
+**Aucun code Scribe touché dans cette session de décision.**
+
+## 2026-06-19 — Forge des 2 skills V7 « build avec Claude Code » (mode étude) ✅
+
+Allan a collé la transcription COMPLÈTE de la vidéo 7 (`docs/v7-transcript-a-coller.md`)
+→ extraction (agent) → 2 skills installés niveau utilisateur :
+- **`~/.claude/skills/claude-code-build/`** — discipline Claude Code réutilisable (contexte
+  `/init`/`/clear`/`/compact`, design-first, framework MVP 5 points, test loop 3 étapes,
+  audit sécu en contexte vierge + prompt générique en `references/`, secrets `.env`, GitHub tôt).
+- **`~/.claude/skills/ship-mobile-app/`** — spécifique mobile natif (Expo/RN, Expo Go,
+  Supabase+RLS, edge functions, EAS build/submit, App Store + Play, `references/deploy-stores.md`).
+Corrections : « Anti-Gravity » = **Google Antigravity** (IDE, fork VS Code) — IDE
+interchangeable ; prompt d'audit sécu de Nick non fourni → remplacé par un prompt générique.
+**Découpage 2 skills validé par Allan.** Panel passe-2 NON rejoué sur ces 2-là (session
+longue) — à faire si besoin. **Aucun code Scribe touché.**
+
+## 2026-06-19 — Audit global Scribe avec les nouveaux skills (mode étude) ✅
+
+### Contexte
+Une fois `design-ui` + `retention` forgés, Allan demande un **audit global** de Scribe à
+leur lumière. 2 agents en parallèle appliquent chaque skill au code réel (preuves
+`fichier:ligne`), puis synthèse en plan priorisé Route B. **Aucun code touché.**
+
+### Constats clés (convergents design + rétention)
+- **Boucle de valeur jamais fermée pour un nouvel user** : l'invite à l'onboarding est
+  OPTIONNELLE (`OnboardingWizard.tsx` étape 2) → sans 2ᵉ membre, pas d'accusé de lecture,
+  pas de passation reçue → churn. **Levier n°1.**
+- **Aucun déclencheur externe** : pas de notif/e-mail de relève (pourtant Brevo est branché).
+- **Récompense cassée** : après capture, « rechargez dans quelques secondes » au lieu d'une
+  révélation temps réel des tâches extraites.
+- **Route B mal servi** : pas de dark mode (shift de nuit aveuglé), boutons de validation à
+  36px (< 44px WCAG), « Rejeter » sans filet.
+- **Garde-fou** : ne jamais exposer « qui n'a PAS lu » (surveillance perçue = mort de
+  l'adoption terrain).
+- **Déjà bon** : waveform live, accusés de lecture avec délai, empty states tâches/passation,
+  sanitizer HTML.
+
+### Livrable
+`docs/audit-global.md` — plan priorisé P1/P2/P3 Route B. Snapshot « Prochaines étapes »
+mis à jour pour pointer dessus. Pointeur ajouté dans `CLAUDE.md`.
+
+### Next
+Exécuter les P1 (quand on repasse en mode dev, sur branches dédiées) ; recevoir la
+transcription V7 d'Allan → forger le skill « build avec Claude Code ».
+
+## 2026-06-19 — Forge de 2 skills depuis 4 vidéos YouTube (mode étude) ✅
+
+### Contexte
+Allan envoie 4 vidéos (`A: <lien>`, playlist design/Claude Code) pour enrichir les skills
+avant de reprendre le dev. Skill `regarder-video` : Gemini = les yeux, puis Forge.
+
+### Vidéos analysées (Gemini via firecrawl/script + 1 transcript yt-dlp)
+- V1 « The Truth About Gamification » → design comportemental / rétention.
+- V2 « 11 UI/UX principles in 10 minutes » → craft visuel systématique.
+- V3 « How to Design Your First Dashboard UI » → composition de dashboard.
+- V7 « How to Build Mobile Apps with Claude Code (Full Course) » de Nick Saraev → trop
+  longue pour la voie visuelle Gemini → **transcript yt-dlp** (install via
+  `python -m pip install -U yt-dlp`). Thème distinct (build avec Claude Code) → skill
+  potentiel séparé, NON forgé (en attente accord Allan).
+
+### Forge (pipeline regarder-video, 2 checkpoints + panel ×2)
+- Checkpoint 1 : compréhension validée. Décision Allan : **2 skills séparés** (pas 1
+  combiné) — sur reco [bloquant] du panel « productivité ».
+- Panel passe 1 (plan) + passe 2 (draft), 3 angles (Optimisation / Spécialiste IA /
+  Productivité). Corrections intégrées : lecture de l'existant avant audit, nuances WCAG
+  (4.5:1 corps vs 3:1 titres), dark mode Material 2 vs 3, `useOptimistic` (état temporaire,
+  pas rollback magique), tracking en `em` pas `%`, leading 1.5 corps, chiffres non sourcés
+  ramollis (notif, J7), garde-fou éthique Hook, triggers FR enrichis.
+
+### Livrables (niveau utilisateur, réutilisables tous projets)
+- **`~/.claude/skills/design-ui/`** — craft visuel + composition de dashboard. Sortie =
+  audit ≤ 5 points par impact. Router Acte 0. + `references/checklist-ui.md`.
+- **`~/.claude/skills/retention/`** — design comportemental (Hook, anti-PBL, anti-patterns
+  B2B). Sortie = 3 mécaniques priorisées. + `references/patterns-retention.md`.
+- Renvoi mutuel entre les deux. Détectés par le harnais.
+
+### Next
+Refaire un **audit global** de Scribe à la lumière de ces 2 skills (demande d'Allan) +
+décider si on forge un 3ᵉ skill « build mobile/app avec Claude Code » depuis V7.
+
+## 2026-06-19 — Étude stratégique 5 agents + audit stack ↔ UX (mode étude) ✅
+
+### Contexte
+Avant de reprendre le dev (migrations, etc.), Allan veut cadrer **l'enjeu réel** de
+l'app et **l'ICP** : à qui la vendre, quelles fonctionnalités manquent ou sont inutiles,
+quels angles marketing. Demande explicite : firecrawl pour une étude chiffrée + 5 agents
+spécialisés. **Mode étude assumé : aucun code ni migration touché.**
+
+### Méthode
+Cadrage avec Allan : marché **francophone (FR/BE/CH/QC)**, tête de pont laissée libre
+aux agents. 4 agents de recherche en parallèle (marketing chiffré · UX/UI · sécurité &
+RGPD · psychologie/rétention/ICP), chacun avec firecrawl + la vraie réalité produit.
+Puis 1 agent de **vérification adversariale** qui a fact-checké les chiffres porteurs
+(sources primaires). Synthèse par moi.
+
+### Verdict (unanime, 4 angles indépendants)
+**On assume Route B (équipes en relais 3×8).** Tête de pont : industrie / logistique /
+agro-alimentaire / santé, PME 20–150 sal., France d'abord. Le centre de gravité =
+**infrastructure de passation** (un rituel métier obligatoire), pas un outil de
+transcription optionnel. Créneau réellement vide (personne ne combine voix→passation
++ anti-collision + validation humaine + RGPD/UE).
+
+### Vérification — chiffres descendus (à ne pas réutiliser)
+- « 50 Md$ de pertes dues aux passations de shift » → FAUX : le chiffre Deloitte mesure
+  le **downtime machine non planifié**, pas les passations. À reformuler.
+- « 70 % des décisions oubliées en 24h » → sourcing cassé (absent de la source citée).
+- « 37,5 % activation / 98 % churn 2 sem. » → blog sans méthodologie.
+- Correction : entité IA UE = **Anthropic Ireland Ltd** (pas « PBC US »).
+Chiffres solides retenus : collab d'équipe 40,2→85,2 Md$ CAGR 9,7 % (GVR) ; 35 % réunions
+improductives (LSE) ; NRR ~101 % 2024 ; CNIL SAN-2024-021 (40 000 €, déc. 2024).
+
+### Audit stack actuelle ↔ recos UX/UI (code réel, preuves fichier:ligne)
+- **Déjà solide** : waveform Web Audio réelle (`AudioRecorder.tsx:43-87`), 5 états de
+  capture + gestion erreur micro, accusés de lecture « qui/quand », empty states, billing
+  hors hub, Manrope + tokens clairs.
+- **3 écarts critiques Route B** : (1) **anti-collision ABSENTE** — pas de `task_claims`,
+  pourtant listée « cœur » dans `brief-produit.md` → **dérive doc↔code** ; (2) invitation
+  onboarding **OPTIONNELLE** (`OnboardingWizard.tsx:95`) alors que l'activation
+  multi-utilisateur en 24-48h est le levier de rétention n°1 ; (3) **notifications push
+  ABSENTES** (pas de SW/Notification API).
+- **Écarts moyens** : passation = 3 sections H2 LLM non stylisées en zones colorées ;
+  dark mode absent (shift de nuit) ; 6 onglets de nav (reco ≤ 5) ; haptique absent,
+  bouton 64px (reco ≥ 88px), accusé non sticky.
+- **Conflit capté** : la reco UX d'**auto-confirmation au compte à rebours** des tâches
+  violerait la **règle d'or n°4** (validation humaine obligatoire) → on garde les boutons
+  explicites (`TaskValidationCard.tsx:164`). Décision : ne pas l'implémenter.
+
+### Décisions d'Allan (même jour)
+- ✅ **Route B VALIDÉE** : « on go Route B ».
+- ⏸️ **Pricing reporté** à une session de travail dédiée (ne pas trancher d'ici là).
+- ⬜ Restent ouverts : (a) vertical exact dans Route B ; (c) profondeur du socle conformité.
+- 📹 **À venir** : Allan enverra des vidéos (`A: "lien"` → skill `regarder-video`) pour
+  enrichir les skills/méthodes ; **une fois assimilées, refaire un audit global** du projet.
+
+### Livrable
+`docs/etude-strategique.md` (canonique) + `snapshot.md` mis à jour + pointeur dans
+`CLAUDE.md`. Direction produit Route B consignée en §8 du doc.
+
 ## 2026-06-16 — UltraReview : audit complet + correction de 5 bugs prod ✅
 
 ### Contexte

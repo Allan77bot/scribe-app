@@ -30,6 +30,8 @@ gravité est la **coordination active**.
 | Besoin | Fichier |
 |---|---|
 | Vision, modèle de données, archi cible, conformité, pricing | `docs/brief-produit.md` (spec canonique) |
+| **Stratégie : ICP/Route B, marché chiffré, features, audit stack↔UX** | `docs/etude-strategique.md` (2026-06-19) |
+| **Plan d'action priorisé Route B** (audit global design + rétention) | `docs/audit-global.md` (2026-06-19) |
 | **Où on en est MAINTENANT** (à lire avant de coder) | `snapshot.md` |
 | **Plan d'attaque** (prérequis + étapes feat/auth + roadmap + skills/commandes) | `docs/plan-attaque.md` |
 | Journal daté des décisions et jalons | `historique.md` |
