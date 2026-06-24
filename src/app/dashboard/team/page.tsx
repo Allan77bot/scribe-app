@@ -68,12 +68,19 @@ export default async function TeamPage() {
 
   return (
     <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
-      <header className="border-b border-outline-variant px-5 py-4">
-        <h1 className="text-xl font-bold tracking-tight text-secondary">Équipe</h1>
-        <p className="mt-0.5 text-xs text-on-surface-variant">
-          {members.length} membre{members.length !== 1 ? "s" : ""}
+      <header className="border-b border-line bg-surface px-5 pb-5 pt-6">
+        <p className="eyebrow">Coordination</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-secondary">Équipe</h1>
+        <p className="mt-1.5 text-sm text-on-surface-variant">
+          <span className="tnum">{members.length}</span> membre{members.length !== 1 ? "s" : ""}
           {pending.length > 0
-            ? ` · ${pending.length} invitation${pending.length !== 1 ? "s" : ""} en attente`
+            ? (
+              <>
+                {" · "}
+                <span className="tnum">{pending.length}</span> invitation
+                {pending.length !== 1 ? "s" : ""} en attente
+              </>
+            )
             : ""}
         </p>
       </header>
@@ -81,22 +88,20 @@ export default async function TeamPage() {
       <div className="mx-auto w-full max-w-md px-5 py-6">
         {/* CTA d'invitation — réservé aux admins (la policy le verrouille côté base). */}
         {isAdmin && (
-          <div className="mb-6">
+          <div className="mb-7">
             <InviteMemberButton />
           </div>
         )}
 
         {/* Membres */}
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-          Membres
-        </h2>
-        <ul className="flex flex-col gap-2">
+        <h2 className="eyebrow mb-3">Membres</h2>
+        <ul className="flex flex-col gap-2.5">
           {members.map((m) => {
             const isMe = m.id === user.id;
             return (
               <li
                 key={m.id}
-                className="flex items-center gap-3 rounded-card bg-white p-3 shadow-card"
+                className="flex items-center gap-3 rounded-card bg-white p-3.5 shadow-card"
               >
                 <Avatar
                   name={m.display_name}
@@ -104,20 +109,20 @@ export default async function TeamPage() {
                   color={m.color}
                   avatarUrl={m.avatar_url}
                   isAdmin={m.role === "admin"}
-                  size={40}
+                  size={44}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-on-surface">
                     {m.display_name || m.email.split("@")[0]}
-                    {isMe && <span className="text-on-surface-variant"> · vous</span>}
+                    {isMe && <span className="font-medium text-on-surface-variant"> · toi</span>}
                   </p>
                   <p className="truncate text-xs text-on-surface-variant">{m.email}</p>
                 </div>
                 <span
                   className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
                     m.role === "admin"
-                      ? "bg-primary text-on-primary"
-                      : "bg-azure text-primary"
+                      ? "bg-amber-tint text-secondary"
+                      : "bg-surface-container text-on-surface-variant"
                   }`}
                 >
                   {m.role === "admin" ? "Admin" : "Membre"}
@@ -127,33 +132,36 @@ export default async function TeamPage() {
           })}
         </ul>
 
-        {/* Invitations en attente — visibles par l'admin. */}
+        {/* Invitations en attente — visibles par l'admin. Carte calme (tint azure). */}
         {isAdmin && pending.length > 0 && (
           <>
-            <h2 className="mb-3 mt-7 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-              Invitations en attente
-            </h2>
-            <ul className="flex flex-col gap-2">
+            <h2 className="eyebrow mb-3 mt-8">Invitations en attente</h2>
+            <ul className="flex flex-col gap-2.5">
               {pending.map((inv) => (
                 <li
                   key={inv.id}
-                  className="flex items-center gap-3 rounded-card border border-dashed border-outline-variant bg-white p-3 shadow-card"
+                  className="flex items-center gap-3 rounded-card bg-azure p-3.5"
                 >
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-azure text-primary"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-primary"
                     aria-hidden
                   >
-                    {/* Signal en transit : enveloppe au trait cyan. */}
+                    {/* Signal en transit : enveloppe au trait fin. */}
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="5" width="18" height="14" rx="2" />
                       <path d="m3 7 9 6 9-6" />
                     </svg>
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-on-surface">
+                    <p className="truncate text-sm font-semibold text-on-surface">
                       {inv.email}
                     </p>
-                    <p className="text-xs text-on-surface-variant">{expiresIn(inv.expires_at)}</p>
+                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-on-surface-variant">
+                      <span className="inline-flex items-center rounded-pill bg-white px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        En attente
+                      </span>
+                      <span>{expiresIn(inv.expires_at)}</span>
+                    </p>
                   </div>
                   <RevokeInviteButton invitationId={inv.id} />
                 </li>

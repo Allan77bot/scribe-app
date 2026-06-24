@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { getSignedUploadUrl, createEntry } from "@/lib/entries/actions";
 import { savePending, loadPending, clearPending } from "@/lib/audio/pending";
+import { Button } from "@/components/ui/Button";
 
 type RecState = "idle" | "recording" | "recorded" | "uploading" | "error";
 
@@ -14,12 +15,21 @@ const BAR_COUNT = 7;
 const MAX_BAR_HEIGHT = 48; // px — hauteur du conteneur
 const MIN_RATIO = 0.05; // silence = 5 % (les barres ne disparaissent jamais)
 
-// Couleur par niveau : bleu d'action au calme, navy quand ça monte, rouge à la
-// saturation. (Tokens DESIGN.md : primary / secondary / error.)
+// Couleur des barres par niveau, calée sur les tokens DS « Scribe IA ».
+// On lit les variables CSS au runtime → la waveform suit toujours le thème :
+// primary (cobalt) au calme, cyan quand la voix monte, error à la saturation.
+const cssVar = (name: string, fallback: string): string => {
+  if (typeof window === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return v || fallback;
+};
+
 function levelColor(level: number): string {
-  if (level >= 0.9) return "#ba1a1a"; // error — saturation
-  if (level >= 0.5) return "#002b5b"; // secondary — voix soutenue
-  return "#0059bb"; // primary — voix normale
+  if (level >= 0.9) return cssVar("--color-error", "#dc2626"); // saturation
+  if (level >= 0.5) return cssVar("--color-cyan", "#22d3ee"); // voix soutenue
+  return cssVar("--color-primary", "#2a4fb0"); // voix normale
 }
 
 export default function AudioRecorder() {
@@ -244,37 +254,28 @@ export default function AudioRecorder() {
     // micro), simple retour à l'état initial.
     const canRetryUpload = hasRecording;
     return (
-      <div className="flex flex-col items-center gap-4 py-8">
+      <div className="flex flex-col items-center gap-4 rounded-card bg-white p-6 shadow-card">
         <p className="w-full rounded-field bg-error-container px-4 py-3 text-center text-sm text-on-error-container">
           {errorMsg}
         </p>
         {canRetryUpload ? (
           <>
             <p className="text-center text-xs text-on-surface-variant">
-              Ton enregistrement est conservé. Réessaie l&apos;envoi.
+              Votre enregistrement est conservé. Réessayez l&apos;envoi.
             </p>
             <div className="flex w-full gap-3">
-              <button
-                onClick={reset}
-                className="flex h-14 flex-1 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95 active:scale-[0.98]"
-              >
+              <Button variant="danger" size="lg" fullWidth onClick={reset}>
                 Supprimer
-              </button>
-              <button
-                onClick={handleUpload}
-                className="flex h-14 flex-1 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-              >
+              </Button>
+              <Button size="lg" fullWidth onClick={handleUpload}>
                 Réessayer l&apos;envoi
-              </button>
+              </Button>
             </div>
           </>
         ) : (
-          <button
-            onClick={reset}
-            className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-          >
+          <Button size="lg" onClick={reset}>
             Réessayer
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -283,7 +284,7 @@ export default function AudioRecorder() {
   // ── État upload en cours ─────────────────────────────────────────────────
   if (state === "uploading") {
     return (
-      <div className="flex flex-col items-center gap-4 py-12">
+      <div className="flex flex-col items-center gap-4 rounded-card bg-white p-10 shadow-card">
         <div
           className="h-10 w-10 animate-spin rounded-full border-2 border-primary"
           style={{ borderTopColor: "transparent" }}
@@ -296,26 +297,24 @@ export default function AudioRecorder() {
   // ── État enregistrement terminé — prévisualisation ───────────────────────
   if (state === "recorded" && audioUrl) {
     return (
-      <div className="flex flex-col items-center gap-6 py-6">
+      <div className="flex flex-col gap-5 rounded-card bg-white p-6 shadow-card">
         {recovered && (
           <p className="w-full rounded-field bg-azure px-4 py-3 text-center text-sm text-primary">
-            Enregistrement non envoyé récupéré. Tu peux l&apos;envoyer maintenant.
+            Enregistrement non envoyé récupéré. Vous pouvez l&apos;envoyer
+            maintenant.
           </p>
         )}
-        <audio src={audioUrl} controls className="w-full" />
+        <div className="flex flex-col gap-1.5">
+          <p className="eyebrow">Votre enregistrement</p>
+          <audio src={audioUrl} controls className="w-full" />
+        </div>
         <div className="flex w-full gap-3">
-          <button
-            onClick={reset}
-            className="flex h-14 flex-1 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95 active:scale-[0.98]"
-          >
+          <Button variant="secondary" size="lg" fullWidth onClick={reset}>
             Recommencer
-          </button>
-          <button
-            onClick={handleUpload}
-            className="flex h-14 flex-1 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-          >
+          </Button>
+          <Button size="lg" fullWidth onClick={handleUpload}>
             Envoyer
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -323,13 +322,15 @@ export default function AudioRecorder() {
 
   // ── États idle + recording ───────────────────────────────────────────────
   return (
-    <div className="flex flex-col items-center gap-6 py-8">
+    <div className="flex flex-col items-center gap-7 rounded-card bg-white p-8 shadow-card">
       {state === "recording" && (
-        <div className="flex flex-col items-center gap-3">
-          {/* Waveform live — hauteurs/couleurs pilotées par la boucle draw(). */}
+        <div className="flex flex-col items-center gap-4">
+          {/* Waveform live — hauteurs/couleurs pilotées par la boucle loop().
+              Barres de fond posées sur bg-surface-container ; au repos primary,
+              cyan/error quand la voix monte (cf. levelColor + tokens DS). */}
           <div
-            className="flex items-end justify-center gap-1"
-            style={{ height: MAX_BAR_HEIGHT }}
+            className="flex items-end justify-center gap-1.5 rounded-field bg-surface-container px-4 py-3"
+            style={{ height: MAX_BAR_HEIGHT + 24 }}
             aria-hidden
           >
             {Array.from({ length: BAR_COUNT }).map((_, i) => (
@@ -346,16 +347,16 @@ export default function AudioRecorder() {
               />
             ))}
           </div>
-          <p className="font-mono text-2xl tabular-nums text-secondary">
+          <p className="tnum text-3xl font-semibold text-secondary">
             {fmt(seconds)}
           </p>
         </div>
       )}
 
-      {/* Bouton principal micro / stop */}
+      {/* Bouton principal micro / stop — action principale, cible 64px. */}
       <button
         onClick={state === "idle" ? startRecording : stopRecording}
-        className={`flex size-16 items-center justify-center rounded-full transition-transform active:scale-95 ${
+        className={`flex size-20 items-center justify-center rounded-full shadow-card transition-transform active:scale-95 ${
           // Enregistrement = error (signal d'arrêt) ; repos = primary.
           state === "recording"
             ? "bg-error text-on-error"
@@ -392,8 +393,8 @@ export default function AudioRecorder() {
 
       <p className="text-sm text-on-surface-variant">
         {state === "idle"
-          ? "Appuyer pour enregistrer"
-          : "Appuyer pour arrêter"}
+          ? "Appuyez pour enregistrer"
+          : "Appuyez pour arrêter"}
       </p>
     </div>
   );

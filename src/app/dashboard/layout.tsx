@@ -1,5 +1,6 @@
 import DashboardNav from "@/components/DashboardNav";
 import UserMenu from "@/components/UserMenu";
+import { Logo } from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 import { fetchOwnProfile } from "@/lib/user/profile";
 
@@ -26,6 +27,15 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-surface">
+      {/* Logo officiel — coin haut-gauche, symétrique de la pastille de compte
+          (UserMenu, coin haut-droit). Même offset (left-4/top-3) et même marge
+          de sécurité iOS pour un alignement visuel propre. */}
+      <div
+        className="fixed left-4 top-3 z-40"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <Logo size={24} />
+      </div>
       {me && (
         <UserMenu
           name={me.display_name ?? ""}
@@ -35,7 +45,9 @@ export default async function DashboardLayout({
           isAdmin={me.role === "admin"}
         />
       )}
-      <div className="mx-auto w-full max-w-[1200px] pb-24">{children}</div>
+      {/* pt-16 réserve la hauteur de la barre logo/compte fixe ;
+          pb-24 garde le dernier contenu au-dessus de la nav basse. */}
+      <div className="mx-auto w-full max-w-[1200px] pb-24 pt-16">{children}</div>
       <DashboardNav />
     </div>
   );

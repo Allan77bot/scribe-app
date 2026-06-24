@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from "react";
 import { generateHandover } from "@/lib/handover/actions";
+import { Button } from "@/components/ui/Button";
 
 export default function GenerateHandoverButton() {
   const [isPending, startTransition] = useTransition();
@@ -17,13 +18,10 @@ export default function GenerateHandoverButton() {
 
   return (
     <div className="flex flex-col gap-2">
-      <button
-        onClick={handleClick}
-        disabled={isPending}
-        className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-50"
-      >
+      {/* Action principale du relais → Button DS size="lg" (≥56px, cible tactile terrain). */}
+      <Button size="lg" fullWidth onClick={handleClick} disabled={isPending}>
         {isPending ? "Génération en cours…" : "Générer la passation"}
-      </button>
+      </Button>
       {error && (
         <p className="rounded-field bg-error-container px-4 py-2 text-center text-xs text-on-error-container">
           Erreur : {error}

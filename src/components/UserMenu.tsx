@@ -64,7 +64,8 @@ export default function UserMenu({ name, email, color, avatarUrl, isAdmin }: Pro
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-11 w-52 overflow-hidden rounded-card bg-white py-2 shadow-modal"
+          // Carte calme DS : rayon lg, ombre modale seule (jamais ombre+bordure).
+          className="absolute right-0 top-11 w-52 overflow-hidden rounded-lg bg-white py-2 shadow-modal"
         >
           <div className="px-4 pb-2 pt-1">
             <p className="truncate text-sm font-semibold text-on-surface">
@@ -72,7 +73,7 @@ export default function UserMenu({ name, email, color, avatarUrl, isAdmin }: Pro
             </p>
             <p className="truncate text-xs text-on-surface-variant">{email}</p>
           </div>
-          <div className="h-px bg-outline-variant/40" />
+          <div className="h-px bg-line" />
           <Link
             href="/dashboard/settings"
             role="menuitem"

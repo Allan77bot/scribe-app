@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/auth/actions";
+import { Button } from "@/components/ui/Button";
 
 type Org = {
   name: string;
@@ -52,16 +53,17 @@ export default async function DashboardPage() {
 
     if (!org) {
       return (
-        <main className="flex min-h-screen flex-1 items-center justify-center bg-surface px-6 text-center text-on-surface">
+        <main className="flex min-h-screen flex-1 items-center justify-center overflow-x-hidden bg-surface px-6 text-center text-on-surface">
           <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
             <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
             <p className="mt-2 text-sm text-on-surface-variant">
-              Erreur lors de la création du profil. Réessaie ou contacte le support.
+              La création du profil a échoué. Réessaie, ou contacte le support si
+              le problème persiste.
             </p>
-            <form action={logout} className="mt-4">
-              <button type="submit" className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]">
+            <form action={logout} className="mt-5">
+              <Button type="submit" variant="secondary" size="lg" fullWidth>
                 Se déconnecter
-              </button>
+              </Button>
             </form>
           </div>
         </main>
@@ -92,20 +94,17 @@ export default async function DashboardPage() {
 
   if (error || !profile) {
     return (
-      <main className="flex min-h-screen flex-1 items-center justify-center bg-surface px-6 text-center text-on-surface">
+      <main className="flex min-h-screen flex-1 items-center justify-center overflow-x-hidden bg-surface px-6 text-center text-on-surface">
         <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
           <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
           <p className="mt-2 text-sm text-on-surface-variant">
-            Votre compte existe mais son profil d&apos;équipe n&apos;a pas pu être
-            chargé. Déconnectez-vous puis reconnectez-vous.
+            Ton compte existe, mais son profil d&apos;équipe n&apos;a pas pu être
+            chargé. Déconnecte-toi puis reconnecte-toi.
           </p>
-          <form action={logout} className="mt-4">
-            <button
-              type="submit"
-              className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-            >
+          <form action={logout} className="mt-5">
+            <Button type="submit" variant="secondary" size="lg" fullWidth>
               Se déconnecter
-            </button>
+            </Button>
           </form>
         </div>
       </main>
@@ -156,10 +155,11 @@ export default async function DashboardPage() {
           chevaucherait. pr-14 : réserve la place de la pastille. */}
       <header className="px-5 py-4 pr-14">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-secondary">
+          <p className="eyebrow">Mon équipe</p>
+          <p className="mt-0.5 truncate text-lg font-semibold text-secondary">
             {org?.name ?? "Mon équipe"}
           </p>
-          <p className="truncate text-xs text-on-surface-variant">
+          <p className="mt-1 truncate text-xs text-on-surface-variant">
             {profile.display_name || user.email}
             {profile.role === "admin" ? " · admin" : ""}
           </p>
@@ -167,49 +167,51 @@ export default async function DashboardPage() {
       </header>
 
       <div className="mx-auto w-full max-w-md px-5 py-6">
-        {/* Quick capture */}
+        {/* Carte d'accès rapide : capturer une note (action principale, cobalt). */}
         <Link
           href="/dashboard/capture"
-          className="flex items-center justify-between rounded-card bg-primary p-5 text-on-primary shadow-card transition-all hover:bg-primary-container active:scale-[0.98]"
+          className="flex items-center justify-between rounded-card bg-primary p-6 text-on-primary shadow-card transition-all hover:shadow-md active:scale-[0.99]"
         >
           <div className="min-w-0">
-            <p className="text-base font-semibold">Capturer une note</p>
+            <p className="eyebrow text-on-primary/70">Capture</p>
+            <p className="mt-1 text-base font-semibold">Capturer une note</p>
             <p className="mt-0.5 text-xs text-on-primary/80">
-              Vocal ou écrit — Scribe en extrait les tâches
+              Vocal ou écrit. Scribe en extrait les tâches.
             </p>
           </div>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
             <rect x="9" y="2.5" width="6" height="11" rx="3" />
             <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
           </svg>
         </Link>
 
-        {/* Météo des tâches */}
-        <Link href="/dashboard/tasks" className="mt-4 block">
-          <section className="rounded-card bg-white p-6 shadow-card">
-            <h2 className="mb-3 text-sm font-medium text-secondary">Météo des tâches</h2>
-            <dl className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <dt className="text-xs text-on-surface-variant">À confirmer</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums text-secondary">{toConfirm}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-on-surface-variant">En cours</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums text-primary">{active}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-on-surface-variant">Terminées</dt>
-                <dd className="mt-1 text-2xl font-bold tabular-nums text-on-surface">{done}</dd>
-              </div>
-            </dl>
-          </section>
+        {/* Carte d'accès rapide : météo des tâches (compteurs vers /tasks). */}
+        <Link
+          href="/dashboard/tasks"
+          className="mt-4 block rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+        >
+          <h2 className="eyebrow mb-4">Météo des tâches</h2>
+          <dl className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <dt className="text-xs text-on-surface-variant">À confirmer</dt>
+              <dd className="tnum mt-1.5 text-2xl font-bold text-secondary">{toConfirm}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-on-surface-variant">En cours</dt>
+              <dd className="tnum mt-1.5 text-2xl font-bold text-primary">{active}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-on-surface-variant">Terminées</dt>
+              <dd className="tnum mt-1.5 text-2xl font-bold text-on-surface">{done}</dd>
+            </div>
+          </dl>
         </Link>
 
-        {/* Quota minutes */}
+        {/* Synthèse de l'org : minutes consommées sur le quota du mois. */}
         <section className="mt-4 rounded-card bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-secondary">Minutes ce mois</h2>
-            <span className="text-xs tabular-nums text-on-surface-variant">
+            <h2 className="eyebrow">Minutes ce mois</h2>
+            <span className="tnum text-xs text-on-surface-variant">
               <strong className="text-on-surface">{minutesUsed}</strong> / {minutesQuota}
             </span>
           </div>
@@ -221,35 +223,40 @@ export default async function DashboardPage() {
               style={{ width: `${usagePercent}%` }}
             />
           </div>
-          <p className="mt-1.5 text-xs text-on-surface-variant">
-            {minutesLeft} minute{minutesLeft !== 1 ? "s" : ""} restante{minutesLeft !== 1 ? "s" : ""}
+          <p className="mt-2 text-xs text-on-surface-variant">
+            <span className="tnum">{minutesLeft}</span> minute{minutesLeft !== 1 ? "s" : ""} restante{minutesLeft !== 1 ? "s" : ""}
           </p>
         </section>
 
-        {/* Aperçu passation */}
-        <Link href="/dashboard/handover" className="mt-4 block">
-          <section className="flex items-center justify-between rounded-card bg-white p-6 shadow-card">
-            <div className="min-w-0">
-              <h2 className="text-sm font-medium text-secondary">Dernière passation</h2>
-              <p className="mt-1 text-sm font-semibold text-on-surface">
-                {handover
-                  ? `${new Date(handover.report_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ${handover.shift_label}`
-                  : "Aucune passation générée"}
-              </p>
-            </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-primary">
-              <path d="m9 6 6 6-6 6" />
-            </svg>
-          </section>
+        {/* Carte d'accès rapide : dernière passation générée. */}
+        <Link
+          href="/dashboard/handover"
+          className="mt-4 flex items-center justify-between rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+        >
+          <div className="min-w-0">
+            <h2 className="eyebrow">Dernière passation</h2>
+            <p className="mt-1.5 truncate text-sm font-semibold text-on-surface">
+              {handover
+                ? `${new Date(handover.report_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · ${handover.shift_label}`
+                : "Aucune passation générée"}
+            </p>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="ml-3 shrink-0 text-primary">
+            <path d="m9 6 6 6-6 6" />
+          </svg>
         </Link>
 
-        {/* Modules */}
-        <h2 className="mb-3 mt-7 text-sm font-medium text-secondary">Tous les modules</h2>
+        {/* Cartes d'accès rapide vers les modules. */}
+        <h2 className="eyebrow mb-3 mt-8">Tous les modules</h2>
         <div className="grid grid-cols-2 gap-3">
           {MODULES.map((m) => (
-            <Link key={m.href} href={m.href} className="rounded-card bg-white p-6 shadow-card transition-all hover:brightness-95 active:scale-[0.98]">
+            <Link
+              key={m.href}
+              href={m.href}
+              className="rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+            >
               <p className="text-sm font-semibold text-secondary">{m.title}</p>
-              <p className="mt-0.5 text-xs text-on-surface-variant">{m.desc}</p>
+              <p className="mt-1 text-xs text-on-surface-variant">{m.desc}</p>
             </Link>
           ))}
         </div>

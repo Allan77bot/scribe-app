@@ -112,22 +112,26 @@ export default async function HandoverPage() {
       <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
         <div className="mx-auto w-full max-w-md px-5 pb-10 pt-8">
           <header className="mb-6">
-            <h1 className="text-xl font-semibold text-secondary">Passation</h1>
+            <p className="eyebrow">Relais d&apos;équipe</p>
+            <h1 className="mt-1 text-xl font-semibold text-secondary">Passation</h1>
           </header>
-          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
-            <svg
-              className="h-6 w-6 text-on-surface-variant"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <path d="M12 9v4M12 17h.01" />
-            </svg>
+          {/* Carte « indisponible » — ton calme, jamais une 500 brute (clé service_role absente). */}
+          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+            <span className="flex h-12 w-12 items-center justify-center rounded-field bg-amber-tint text-amber">
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <path d="M12 9v4M12 17h.01" />
+              </svg>
+            </span>
             <h2 className="text-base font-semibold text-secondary">
               Passation momentanément indisponible
             </h2>
@@ -145,8 +149,9 @@ export default async function HandoverPage() {
     <main className="flex min-h-screen flex-col overflow-x-hidden bg-surface text-on-surface">
       <div className="mx-auto w-full max-w-md px-5 pb-10 pt-8">
         <header className="mb-6">
-          <h1 className="text-xl font-semibold text-secondary">Passation</h1>
-          <p className="mt-1 text-xs text-on-surface-variant">
+          <p className="eyebrow">Relais d&apos;équipe</p>
+          <h1 className="mt-1 text-xl font-semibold text-secondary">Passation</h1>
+          <p className="mt-1.5 text-xs text-on-surface-variant">
             Le relais pour l&apos;équipe qui prend le poste — tâches en cours,
             bloquées, décisions du jour.
           </p>
@@ -166,27 +171,33 @@ export default async function HandoverPage() {
           </div>
         ) : (
           // État vide = onboarding : icône + titre + une phrase + le CTA de génération.
-          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
-            <svg
-              className="h-6 w-6 text-primary"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <path d="M14 2v6h6" />
-              <path d="M16 13H8M16 17H8M10 9H8" />
-            </svg>
+          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+            <span className="flex h-12 w-12 items-center justify-center rounded-field bg-azure text-primary">
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M16 13H8M16 17H8M10 9H8" />
+              </svg>
+            </span>
             <h2 className="text-base font-semibold text-secondary">
               Pas encore de passation
             </h2>
             <p className="max-w-xs text-sm text-on-surface-variant">
               Scribe agrège les tâches en cours, les points bloqués et les
               décisions du jour en un relais prêt à transmettre au shift suivant.
+            </p>
+            {/* Angle de marque : la nuit décide, le jour le sait. */}
+            <p className="max-w-xs text-xs italic text-on-surface-variant">
+              L&apos;équipe de nuit a décidé. À 6h, l&apos;équipe de jour le sait.
             </p>
             <div className="mt-2">
               <GenerateHandoverButton />

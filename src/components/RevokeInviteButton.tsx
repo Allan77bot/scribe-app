@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { revokeInvitation } from "@/lib/invitations/actions";
+import { Button } from "@/components/ui/Button";
 
 // Annule une invitation en attente (admin). Confirmation en deux temps pour
 // éviter la révocation accidentelle, sans modale lourde.
@@ -19,26 +20,31 @@ export default function RevokeInviteButton({ invitationId }: { invitationId: str
     });
   }
 
+  // Repos : action discrète (text). Une fois armée : danger pour confirmer.
   if (!armed) {
     return (
-      <button
+      <Button
         type="button"
+        variant="text"
+        size="md"
+        className="shrink-0 px-3"
         onClick={() => setArmed(true)}
-        className="shrink-0 rounded-pill px-2.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:text-error"
       >
-        Annuler
-      </button>
+        Révoquer
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="danger"
+      size="md"
+      className="shrink-0 px-3"
       onClick={revoke}
       disabled={isPending}
-      className="shrink-0 rounded-pill bg-error-container px-2.5 py-1.5 text-xs font-semibold text-on-error-container transition-opacity disabled:opacity-50"
     >
       {isPending ? "…" : "Confirmer"}
-    </button>
+    </Button>
   );
 }

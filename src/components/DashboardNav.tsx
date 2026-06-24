@@ -79,9 +79,9 @@ export default function DashboardNav() {
 
   return (
     <nav
-      // Fond surface-container clair + flou, ombre montante teintée navy.
-      // Jamais de bordure forte (DESIGN.md §6). safe-area iOS.
-      className="fixed inset-x-0 bottom-0 z-50 bg-surface-container/90 shadow-card backdrop-blur"
+      // Fond carte clair + hairline haut (DS : bordure OU ombre, pas les deux).
+      // Léger flou pour rester lisible au scroll. safe-area iOS.
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex w-full max-w-md">

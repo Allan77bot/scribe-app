@@ -12,11 +12,14 @@ export default function CapturePage() {
   return (
     <main className="flex min-h-screen flex-col items-center overflow-x-hidden bg-surface text-on-surface">
       <div className="w-full max-w-md px-5 pt-8 pb-10">
-        <h1 className="text-xl font-semibold mb-6 text-secondary">Nouvelle note</h1>
+        <p className="eyebrow mb-1.5">Capture</p>
+        <h1 className="mb-6 text-2xl font-semibold text-secondary">
+          Nouvelle note
+        </h1>
 
-        {/* Sélecteur d'onglets */}
+        {/* Segmented control — onglet actif posé en blanc, inactif discret. */}
         <div
-          className="mb-8 flex overflow-hidden rounded-pill bg-surface-container p-1"
+          className="mb-8 flex rounded-pill bg-surface-container p-1"
           role="tablist"
         >
           {(["vocal", "ecrit"] as Tab[]).map((t) => (
@@ -25,9 +28,9 @@ export default function CapturePage() {
               role="tab"
               aria-selected={tab === t}
               onClick={() => setTab(t)}
-              className={`min-h-[44px] flex-1 rounded-pill py-3 text-sm font-medium transition-colors ${
+              className={`min-h-[44px] flex-1 rounded-pill text-sm font-semibold transition-all ${
                 tab === t
-                  ? "bg-primary text-on-primary"
+                  ? "bg-white text-primary shadow-card"
                   : "text-on-surface-variant"
               }`}
             >

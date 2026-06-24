@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 // Feuille remontante (bottom sheet) d'invitation — cf. brand guide §5.
 // Sur mobile on privilégie la feuille à la modale centrée : poignée, voile,
@@ -18,7 +19,7 @@ type Props = {
 
 export default function InviteMemberButton({
   variant = "primary",
-  label = "Inviter un coéquipier",
+  label = "Inviter un membre",
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -88,16 +89,28 @@ export default function InviteMemberButton({
     }
   }
 
-  const triggerClass =
-    variant === "primary"
-      ? "flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
-      : "inline-flex min-h-[44px] items-center justify-center text-sm font-semibold text-primary";
-
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={triggerClass}>
-        {label}
-      </button>
+      {/* Déclencheur : bouton de marque (page Équipe) ou lien discret (onboarding). */}
+      {variant === "primary" ? (
+        <Button
+          type="button"
+          size="lg"
+          fullWidth
+          onClick={() => setOpen(true)}
+          iconLeft={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          }
+        >
+          {label}
+        </Button>
+      ) : (
+        <Button type="button" variant="text" size="md" onClick={() => setOpen(true)}>
+          {label}
+        </Button>
+      )}
 
       {open && (
         <div
@@ -136,9 +149,7 @@ export default function InviteMemberButton({
                 </div>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-                    Adresse e-mail
-                  </span>
+                  <span className="eyebrow">Adresse e-mail</span>
                   <input
                     ref={inputRef}
                     type="email"
@@ -158,20 +169,17 @@ export default function InviteMemberButton({
                   </p>
                 )}
 
-                <button
+                <Button
                   type="submit"
+                  size="lg"
+                  fullWidth
                   disabled={pending || !email.trim()}
-                  className="flex h-14 items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40"
                 >
                   {pending ? "Envoi…" : "Envoyer l'invitation"}
-                </button>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="min-h-[44px] text-sm font-medium text-on-surface-variant"
-                >
+                </Button>
+                <Button type="button" variant="text" size="md" fullWidth onClick={close}>
                   Annuler
-                </button>
+                </Button>
               </form>
             ) : (
               <div className="flex flex-col gap-4">
@@ -191,32 +199,26 @@ export default function InviteMemberButton({
                   <span className="min-w-0 flex-1 truncate font-mono text-xs text-on-surface-variant">
                     {sent.link}
                   </span>
-                  <button
-                    type="button"
-                    onClick={copyLink}
-                    className="shrink-0 rounded-pill bg-azure px-3 py-1.5 text-xs font-semibold text-primary transition-all hover:brightness-95"
-                  >
+                  <Button type="button" variant="secondary" size="md" onClick={copyLink}>
                     {copied ? "Copié" : "Copier"}
-                  </button>
+                  </Button>
                 </div>
 
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
                   onClick={() => {
                     setSent(null);
                     setEmail("");
                   }}
-                  className="flex h-14 items-center justify-center rounded-pill bg-azure px-6 text-base font-semibold text-primary transition-all hover:brightness-95"
                 >
                   Inviter quelqu&apos;un d&apos;autre
-                </button>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="min-h-[44px] text-sm font-medium text-on-surface-variant"
-                >
+                </Button>
+                <Button type="button" variant="text" size="md" fullWidth onClick={close}>
                   Terminé
-                </button>
+                </Button>
               </div>
             )}
           </div>

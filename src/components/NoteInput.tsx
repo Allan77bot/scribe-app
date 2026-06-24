@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createEntry } from "@/lib/entries/actions";
+import { Button } from "@/components/ui/Button";
 
 export default function NoteInput() {
   const [text, setText] = useState("");
@@ -31,26 +32,35 @@ export default function NoteInput() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Écrivez votre note ici — Scribe en extrait les tâches…"
         disabled={loading}
-        className="min-h-[120px] w-full resize-none rounded-field bg-surface-container-low p-3.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+        rows={6}
+        className="min-h-[160px] w-full resize-none rounded-field bg-surface-container-low p-4 text-base leading-relaxed text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
       />
+
+      <p className="text-xs text-on-surface-variant">
+        Scribe vous proposera les tâches ; rien n&apos;est lancé sans votre
+        confirmation.
+      </p>
+
       {error && (
         <p className="rounded-field bg-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </p>
       )}
-      <button
+
+      <Button
         type="submit"
+        size="lg"
+        fullWidth
         disabled={!text.trim() || loading}
-        className="flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-primary"
       >
         {loading ? "Envoi…" : "Envoyer"}
-      </button>
+      </Button>
     </form>
   );
 }
