@@ -23,7 +23,8 @@ produit vit sur les branches feature). Le lot stabilité était **déjà commit�
   de `uploads/…svg` (une source/concept). Allan a pointé le **handoff** (`Branding/…/assets/logos`) → le
   **logo officiel est le S angulaire** (color cobalt + pointes cyan / white-cyan en dark / cobalt mono).
   Swap : PNG officiels détourés (`public/logos`), favicon `icon.png`, bascule clair/dark via CSS.
-  `Branding/` + `legacy/` ajoutés aux ignores eslint.
+  `Branding/` + `legacy/` ajoutés aux ignores eslint. + `suppressHydrationWarning` sur `<html>`
+  (le script anti-flash pose `data-theme` avant hydratation → mismatch SSR volontaire, attendu).
 - **Stage 3/4 — Composants + écran Tâches (preuve)** : `components/ui/StatusBadge` (4 statuts,
   cyan = Active) + `components/ui/Button` (pilule, ≥44px, 4 variantes). `TaskValidationCard` refondu
   au look DS — **logique / RLS / server actions intactes**. Page publique `/demo/ds` (aperçu réel

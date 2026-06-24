@@ -44,7 +44,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`h-full antialiased ${manrope.variable}`}>
+    // suppressHydrationWarning : le script anti-flash pose data-theme sur <html>
+    // avant l'hydratation (mismatch serveur/client volontaire et attendu).
+    <html
+      lang="fr"
+      suppressHydrationWarning
+      className={`h-full antialiased ${manrope.variable}`}
+    >
       <body className="flex min-h-full flex-col bg-surface text-on-surface">
         {/* Anti-flash : applique data-theme (stocké ou préférence système) avant
             le premier rendu, pour éviter un flash clair sur un shift de nuit. */}
