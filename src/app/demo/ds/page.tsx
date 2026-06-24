@@ -1,6 +1,7 @@
 import TaskValidationCard, { type Task } from "@/components/TaskValidationCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // Aperçu PUBLIC (sans login) des composants du design system Scribe IA, rendus
 // en réel. Sert de preuve visuelle + galerie de composants pendant le rollout.
@@ -62,6 +63,7 @@ export default function DesignPreview() {
             Rendu réel des composants DS. La carte de validation est le vrai
             composant produit — ne clique pas (pas de session ici).
           </p>
+          <ThemeToggle className="mt-4 inline-flex items-center gap-2 rounded-pill bg-azure px-4 py-2 text-sm font-semibold text-primary transition-all active:scale-[0.98]" />
         </header>
 
         <section className="space-y-3">
