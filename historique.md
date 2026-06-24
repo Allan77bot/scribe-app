@@ -17,10 +17,13 @@ produit vit sur les branches feature). Le lot stabilité était **déjà commit�
   = signature « validé/actif », ambre rare, statuts proposed/validated/done/rejected, hairlines
   chaudes, ombres basses). themeColor + background paper (fin du résidu sombre `#0f172a`). Markup
   inchangé → re-skin par les seules valeurs des tokens. (commit `e3faf43`)
-- **Stage 2 — Logo** : le vrai logo (S « fleuve » + coche de validation cyan) vectorisé depuis
-  `uploads/…svg` du DS, fond retiré, couleurs mappées sur la palette. Composants `Logo`/`ScribeMark`
-  (SVG inline), favicon `src/app/icon.svg` + `apple-icon.png` + icônes PWA régénérées (sharp),
+- **Stage 2 — Logo** : favicon + `apple-icon` + icônes PWA + composant `Logo` (mark + mot-marque),
   câblé landing + invite. Anciennes icônes Atelier Klar supprimées (accord Allan). (commit `e3faf43`)
+  ⚠️ **Correction (nuit 24→25, commit `3b1d818`)** : la 1ʳᵉ version utilisait par erreur le S « fleuve »
+  de `uploads/…svg` (une source/concept). Allan a pointé le **handoff** (`Branding/…/assets/logos`) → le
+  **logo officiel est le S angulaire** (color cobalt + pointes cyan / white-cyan en dark / cobalt mono).
+  Swap : PNG officiels détourés (`public/logos`), favicon `icon.png`, bascule clair/dark via CSS.
+  `Branding/` + `legacy/` ajoutés aux ignores eslint.
 - **Stage 3/4 — Composants + écran Tâches (preuve)** : `components/ui/StatusBadge` (4 statuts,
   cyan = Active) + `components/ui/Button` (pilule, ≥44px, 4 variantes). `TaskValidationCard` refondu
   au look DS — **logique / RLS / server actions intactes**. Page publique `/demo/ds` (aperçu réel

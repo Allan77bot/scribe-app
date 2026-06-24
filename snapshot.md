@@ -23,7 +23,7 @@ Build 28 routes vert, tsc+lint propres, **rien poussé**. Avant : lot stabilité
 **Session design system (2026-06-24) — brand guide → app, Stages 1-4.**
 Le design system « Scribe IA » d'Allan (projet Claude Design, importé via DesignSync) est implémenté
 sur `feat/design-system` : palette paper chaud + cobalt `#2A4FB0` + **accent cyan `#22D3EE`** (signature
-« validé/actif »), **logo officiel** (S + coche cyan) + favicon/icônes PWA, composants `ui/Button` +
+« validé/actif »), **logo officiel** (S angulaire, cobalt + pointes cyan) + favicon/icônes PWA, composants `ui/Button` +
 `ui/StatusBadge`, et **re-skin des 5 écrans** (chrome, accueil, capture, passation, équipe) — logique/RLS
 intactes, + **dark mode marine** (toggle clair/sombre dans le menu compte, logo S blanc). Build 28 routes
 vert, tsc+lint propres, **rien poussé**. Aperçu public : `/demo/ds`. Reste (polish) : normaliser tu/vous, sort de `Branding/`.
