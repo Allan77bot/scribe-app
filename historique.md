@@ -11,7 +11,7 @@ Le DS final reste sur **Manrope** (le « Inter » des planches logo a été aban
 produit vit sur les branches feature). Le lot stabilité était **déjà commité** (le snapshot du
 2026-06-21 était périmé : working tree propre sauf `Branding/`).
 
-### Fait — 4 stages, 4 commits, build 28 routes vert, tsc + lint propres. Rien poussé.
+### Fait — 5 stages, 6 commits, build 28 routes vert, tsc + lint propres. Rien poussé.
 - **Stage 1 — Foundation** (`globals.css`, `layout.tsx`, `manifest.ts`) : remap des tokens @theme
   vers la palette DS (paper chaud `#F8F7F4`, cobalt désaturé `#2A4FB0`, **accent CYAN `#22D3EE`**
   = signature « validé/actif », ambre rare, statuts proposed/validated/done/rejected, hairlines
@@ -31,10 +31,13 @@ produit vit sur les branches feature). Le lot stabilité était **déjà commit�
   Button, couleurs waveform sur tokens — **waveform réelle préservée**), Passation (sections rapport
   lisibles, accusés de lecture sans cadrage surveillance), Équipe (cartes membres, invitations,
   badge rôle ambre). Logique partout préservée. (commit `1f4bcdb`)
+- **Stage 5 — Dark mode marine** (nuit du 24→25) : tokens marine sous `html[data-theme="dark"]`
+  (surfaces #12132A/#1A1A2E, cobalt remonté #4F73D6, ombres noires) ; token thémable `bg-card`
+  (47 `bg-white` remplacés / 24 fichiers) ; **logo S blanc** en dark (`--logo-s`/`--logo-cut`) ;
+  toggle clair/sombre dans le menu compte (`useSyncExternalStore`, SSR-safe) + **script anti-flash**
+  + `themeColor` clair/sombre. (commit `1482dd8`)
 
 ### Reste / à surveiller
-- **Stage 5 — dark mode marine** (`data-theme="dark"`, shifts de nuit) : NON fait → prochaine
-  session. Nécessite aussi un **logo blanc** (variante dark à générer).
 - **Incohérence voix tu/vous** : l'écran Capture est passé en « vous », le reste tutoie → normaliser en « tu ».
 - **Muted `#8A93A3`** (choix du DS) frôle l'AA sur très petit texte — à surveiller au cas par cas.
 - **`Branding/`** (4 planches concept logo) toujours non suivi — à committer (référence) ou retirer.

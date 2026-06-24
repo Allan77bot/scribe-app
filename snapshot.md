@@ -5,16 +5,16 @@
 > sur Discord lors d'un point d'équipe.
 
 | **Dernière mise à jour :** 2026-06-24 (session design system implémenté)
-**Phase :** BUILD. **Design system « Scribe IA » implémenté** sur `feat/design-system` (Stages 1-4 :
-palette cobalt + **cyan**, logo officiel + favicon/icônes, composants DS, re-skin des 5 écrans).
+**Phase :** BUILD. **Design system « Scribe IA » implémenté** sur `feat/design-system` (Stages 1-5 :
+palette cobalt + **cyan**, logo officiel + favicon/icônes, composants DS, re-skin des 5 écrans, **dark mode marine**).
 Build 28 routes vert, tsc+lint propres, **rien poussé**. Avant : lot stabilité **commité** sur
 `fix/stabilite-prod`, onboarding + assignation maquettés/validés (specs `docs/specs/2026-06-21-*.md`).
 **Branche active :** `feat/design-system` (4 commits design ; `Branding/` non suivi).
 
-> ▶ **PROCHAINES ACTIONS** : (0) **design : Stage 5 dark mode marine** + logo blanc + normaliser tu/vous
-> (sur `feat/design-system`) ; décider du sort de `Branding/` ; (1) **Allan exécute la migration `0013`
-> en prod** (snapshot DB avant) → débloque le produit cassé ; (2) **`feat/onboarding`** ; (3)
-> **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`. Aucune PR ouverte.
+> ▶ **PROCHAINES ACTIONS** : (0) **design (polish)** : normaliser tu/vous + décider du sort de `Branding/`
+> + (option) renvoyer le master SVG du logo dans le projet Claude Design ; **review/merge `feat/design-system`** ;
+> (1) **Allan exécute la migration `0013` en prod** (snapshot DB avant) → débloque le produit cassé ;
+> (2) **`feat/onboarding`** ; (3) **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`. Aucune PR ouverte.
 
 ---
 
@@ -25,8 +25,8 @@ Le design system « Scribe IA » d'Allan (projet Claude Design, importé via Des
 sur `feat/design-system` : palette paper chaud + cobalt `#2A4FB0` + **accent cyan `#22D3EE`** (signature
 « validé/actif »), **logo officiel** (S + coche cyan) + favicon/icônes PWA, composants `ui/Button` +
 `ui/StatusBadge`, et **re-skin des 5 écrans** (chrome, accueil, capture, passation, équipe) — logique/RLS
-intactes. Build 28 routes vert, tsc+lint propres, **rien poussé**. Aperçu public : `/demo/ds`. Reste :
-Stage 5 dark mode marine + logo blanc, normaliser tu/vous, sort de `Branding/`.
+intactes, + **dark mode marine** (toggle clair/sombre dans le menu compte, logo S blanc). Build 28 routes
+vert, tsc+lint propres, **rien poussé**. Aperçu public : `/demo/ds`. Reste (polish) : normaliser tu/vous, sort de `Branding/`.
 
 _Session précédente :_
 
