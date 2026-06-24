@@ -9,8 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
       "Transforme tes notes en coordination d'équipe : tâches, accusés de lecture, rapport de passation.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0f172a",
-    theme_color: "#0f172a",
+    // Paper chaud du design system Scribe IA (plus de résidu sombre #0f172a).
+    background_color: "#f8f7f4",
+    theme_color: "#f8f7f4",
     lang: "fr",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

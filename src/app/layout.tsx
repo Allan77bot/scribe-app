@@ -21,15 +21,13 @@ export const metadata: Metadata = {
     title: "Scribe",
     statusBarStyle: "default",
   },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/icons/apple-touch-icon.png",
-  },
+  // Icônes servies par les conventions de fichiers Next : src/app/icon.svg
+  // (favicon vectoriel net) + src/app/apple-icon.png (180px). PWA : manifest.ts.
 };
 
 export const viewport: Viewport = {
-  // Fond clair du design system (DESIGN.md §2.2 — surface #f7fafd).
-  themeColor: "#f7fafd",
+  // Paper chaud du design system Scribe IA (surface #f8f7f4).
+  themeColor: "#f8f7f4",
   width: "device-width",
   initialScale: 1,
   // Mobile-first strict : on évite le zoom involontaire sur les formulaires.

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getValidInvitationByToken } from "@/lib/invitations/service";
 import AcceptInviteForm from "@/components/AcceptInviteForm";
+import { Logo } from "@/components/Logo";
 
 // Page publique d'acceptation : /invite/accept?token=xxx
 // Jamais d'org_id en URL — seulement le jeton secret. On le valide côté serveur
@@ -13,7 +14,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-surface px-5 py-10 text-on-surface">
       <div className="w-full max-w-sm">
-        <p className="mb-6 text-center text-lg font-bold tracking-tight text-secondary">Scribe</p>
+        <Logo size={36} className="mb-6 justify-center" />
         {children}
       </div>
     </main>
