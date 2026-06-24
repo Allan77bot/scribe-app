@@ -24,7 +24,7 @@
   --color-surface-bright: #f8f7f4;
   --color-surface-container-lowest: #ffffff; /* cartes */
   --color-surface-container-low: #f1f4fb; /* champs / sunken (cobalt-050) */
-  --color-surface-container: #ffffff; /* nav (blanc + hairline) */
+  --color-surface-container: #f0f1f3; /* chips / nav — gris neutre visible sur blanc */
   --color-surface-container-high: #efeee9;
   --color-surface-container-highest: #e7e5df;
   --color-surface-variant: #e6ecf8; /* tint cobalt-100 (lignes sélectionnées) */
