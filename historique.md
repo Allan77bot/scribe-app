@@ -1,3 +1,45 @@
+## 2026-06-24 — Brand guide → design system « Scribe IA » implémenté (feat/design-system) ✅
+
+### Contexte
+Allan livre un **design system complet** qu'il a construit lui-même dans un projet Claude Design
+(« Scribe IA Design System »), importé via le MCP **DesignSync**. Source de vérité = ce projet
+(tokens, 9 composants, guidelines de marque, logo, ui_kit). Demande : l'implémenter dans l'app.
+Le DS final reste sur **Manrope** (le « Inter » des planches logo a été abandonné).
+
+### Branche
+`feat/design-system` créée depuis `fix/stabilite-prod` (rappel : `main` est quasi vide, tout le
+produit vit sur les branches feature). Le lot stabilité était **déjà commité** (le snapshot du
+2026-06-21 était périmé : working tree propre sauf `Branding/`).
+
+### Fait — 4 stages, 4 commits, build 28 routes vert, tsc + lint propres. Rien poussé.
+- **Stage 1 — Foundation** (`globals.css`, `layout.tsx`, `manifest.ts`) : remap des tokens @theme
+  vers la palette DS (paper chaud `#F8F7F4`, cobalt désaturé `#2A4FB0`, **accent CYAN `#22D3EE`**
+  = signature « validé/actif », ambre rare, statuts proposed/validated/done/rejected, hairlines
+  chaudes, ombres basses). themeColor + background paper (fin du résidu sombre `#0f172a`). Markup
+  inchangé → re-skin par les seules valeurs des tokens. (commit `e3faf43`)
+- **Stage 2 — Logo** : le vrai logo (S « fleuve » + coche de validation cyan) vectorisé depuis
+  `uploads/…svg` du DS, fond retiré, couleurs mappées sur la palette. Composants `Logo`/`ScribeMark`
+  (SVG inline), favicon `src/app/icon.svg` + `apple-icon.png` + icônes PWA régénérées (sharp),
+  câblé landing + invite. Anciennes icônes Atelier Klar supprimées (accord Allan). (commit `e3faf43`)
+- **Stage 3/4 — Composants + écran Tâches (preuve)** : `components/ui/StatusBadge` (4 statuts,
+  cyan = Active) + `components/ui/Button` (pilule, ≥44px, 4 variantes). `TaskValidationCard` refondu
+  au look DS — **logique / RLS / server actions intactes**. Page publique `/demo/ds` (aperçu réel
+  des composants sans login). Fix token `surface-container` (blanc → gris, pastille invisible).
+  (commit `0ce8e95`)
+- **Stage 4 — Rollout 5 écrans** (5 sous-agents en parallèle) : chrome (logo dans le layout, nav
+  basse hairline, UserMenu), Accueil (cartes hub, `.tnum`, eyebrows), Capture (segmented control,
+  Button, couleurs waveform sur tokens — **waveform réelle préservée**), Passation (sections rapport
+  lisibles, accusés de lecture sans cadrage surveillance), Équipe (cartes membres, invitations,
+  badge rôle ambre). Logique partout préservée. (commit `1f4bcdb`)
+
+### Reste / à surveiller
+- **Stage 5 — dark mode marine** (`data-theme="dark"`, shifts de nuit) : NON fait → prochaine
+  session. Nécessite aussi un **logo blanc** (variante dark à générer).
+- **Incohérence voix tu/vous** : l'écran Capture est passé en « vous », le reste tutoie → normaliser en « tu ».
+- **Muted `#8A93A3`** (choix du DS) frôle l'AA sur très petit texte — à surveiller au cas par cas.
+- **`Branding/`** (4 planches concept logo) toujours non suivi — à committer (référence) ou retirer.
+- Rien poussé, pas de PR. Migration prod `0013` toujours = ops Allan (inchangé).
+
 ## 2026-06-21 — Lot stabilité codé + design produit (onboarding & assignation) maquetté ✅
 
 ### 1. Lot `fix/stabilite-prod` IMPLÉMENTÉ (branche dédiée, non commité)

@@ -4,19 +4,31 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-21 (session design produit)
-**Phase :** BUILD. Lot stabilité **codé** (`fix/stabilite-prod`). Design produit avancé avec Allan :
-**onboarding refondu** (manager + employé) + **assignation de tâches** maquettés et **validés en démo**,
-**2 specs écrits** (`docs/specs/2026-06-21-*.md`). 4 skills maison prêts.
-**Branche active :** `fix/stabilite-prod` (contient aussi, **non commité** : MAJ docs + maquettes `/demo` + specs)
+| **Dernière mise à jour :** 2026-06-24 (session design system implémenté)
+**Phase :** BUILD. **Design system « Scribe IA » implémenté** sur `feat/design-system` (Stages 1-4 :
+palette cobalt + **cyan**, logo officiel + favicon/icônes, composants DS, re-skin des 5 écrans).
+Build 28 routes vert, tsc+lint propres, **rien poussé**. Avant : lot stabilité **commité** sur
+`fix/stabilite-prod`, onboarding + assignation maquettés/validés (specs `docs/specs/2026-06-21-*.md`).
+**Branche active :** `feat/design-system` (4 commits design ; `Branding/` non suivi).
 
-> ▶ **PROCHAINES ACTIONS** (détail en bas) : (1) **Allan exécute la migration `0013` en prod** (snapshot DB
-> avant) → débloque le produit cassé ; (2) implémenter **`feat/onboarding`** ; (3) implémenter
-> **`feat/tasks-assignment`**. Maquettes de réf : `/demo` (jetable). Specs : `docs/specs/2026-06-21-*.md`.
+> ▶ **PROCHAINES ACTIONS** : (0) **design : Stage 5 dark mode marine** + logo blanc + normaliser tu/vous
+> (sur `feat/design-system`) ; décider du sort de `Branding/` ; (1) **Allan exécute la migration `0013`
+> en prod** (snapshot DB avant) → débloque le produit cassé ; (2) **`feat/onboarding`** ; (3)
+> **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`. Aucune PR ouverte.
 
 ---
 
 **TL;DR (pour Discord)**
+
+**Session design system (2026-06-24) — brand guide → app, Stages 1-4.**
+Le design system « Scribe IA » d'Allan (projet Claude Design, importé via DesignSync) est implémenté
+sur `feat/design-system` : palette paper chaud + cobalt `#2A4FB0` + **accent cyan `#22D3EE`** (signature
+« validé/actif »), **logo officiel** (S + coche cyan) + favicon/icônes PWA, composants `ui/Button` +
+`ui/StatusBadge`, et **re-skin des 5 écrans** (chrome, accueil, capture, passation, équipe) — logique/RLS
+intactes. Build 28 routes vert, tsc+lint propres, **rien poussé**. Aperçu public : `/demo/ds`. Reste :
+Stage 5 dark mode marine + logo blanc, normaliser tu/vous, sort de `Branding/`.
+
+_Session précédente :_
 
 **Session design produit (2026-06-21) — onboarding refondu + assignation de tâches.**
 Maquettes cliquables construites et **validées** dans un espace démo public sans login
