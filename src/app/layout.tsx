@@ -26,8 +26,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Paper chaud du design system Scribe IA (surface #f8f7f4).
-  themeColor: "#f8f7f4",
+  // Chrome navigateur : paper en clair, marine en sombre (dark mode shifts de nuit).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f7f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#12132a" },
+  ],
   width: "device-width",
   initialScale: 1,
   // Mobile-first strict : on évite le zoom involontaire sur les formulaires.
@@ -43,6 +46,13 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`h-full antialiased ${manrope.variable}`}>
       <body className="flex min-h-full flex-col bg-surface text-on-surface">
+        {/* Anti-flash : applique data-theme (stocké ou préférence système) avant
+            le premier rendu, pour éviter un flash clair sur un shift de nuit. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
         {children}
       </body>
     </html>

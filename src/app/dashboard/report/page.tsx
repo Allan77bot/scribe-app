@@ -121,7 +121,7 @@ export default async function ReportPage() {
           />
         ) : (
           // État vide = onboarding : icône + titre + une phrase + le CTA de génération.
-          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
+          <div className="flex flex-col items-center gap-3 rounded-card bg-card px-6 py-10 text-center shadow-card">
             <svg
               className="h-6 w-6 text-primary"
               viewBox="0 0 24 24"

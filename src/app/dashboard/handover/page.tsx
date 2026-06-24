@@ -116,7 +116,7 @@ export default async function HandoverPage() {
             <h1 className="mt-1 text-xl font-semibold text-secondary">Passation</h1>
           </header>
           {/* Carte « indisponible » — ton calme, jamais une 500 brute (clé service_role absente). */}
-          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+          <div className="flex flex-col items-center gap-3 rounded-card bg-card px-6 py-12 text-center shadow-card">
             <span className="flex h-12 w-12 items-center justify-center rounded-field bg-amber-tint text-amber">
               <svg
                 className="h-6 w-6"
@@ -171,7 +171,7 @@ export default async function HandoverPage() {
           </div>
         ) : (
           // État vide = onboarding : icône + titre + une phrase + le CTA de génération.
-          <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+          <div className="flex flex-col items-center gap-3 rounded-card bg-card px-6 py-12 text-center shadow-card">
             <span className="flex h-12 w-12 items-center justify-center rounded-field bg-azure text-primary">
               <svg
                 className="h-6 w-6"

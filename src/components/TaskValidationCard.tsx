@@ -64,7 +64,7 @@ export default function TaskValidationCard({ task }: { task: Task }) {
 
   return (
     <div
-      className={`mb-3 overflow-hidden rounded-card bg-white shadow-card ${
+      className={`mb-3 overflow-hidden rounded-card bg-card shadow-card ${
         isDone || isRejected ? "opacity-60" : ""
       }`}
     >

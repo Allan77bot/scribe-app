@@ -47,7 +47,7 @@ export default function ReportCard({
   });
 
   return (
-    <div className="flex flex-col gap-5 rounded-card bg-white p-6 shadow-card">
+    <div className="flex flex-col gap-5 rounded-card bg-card p-6 shadow-card">
       {/* En-tête — eyebrow (type de document) + date lisible, pastille shift à droite. */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

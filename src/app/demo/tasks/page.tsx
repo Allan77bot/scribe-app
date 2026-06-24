@@ -95,7 +95,7 @@ export default function DemoTasks() {
   return (
     <main className="mx-auto w-full max-w-md px-5 pb-16 pt-5">
       {/* ── Bandeau de contrôle DÉMO : rôle + réglage admin ── */}
-      <div className="mb-5 rounded-card bg-white p-4 shadow-card">
+      <div className="mb-5 rounded-card bg-card p-4 shadow-card">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
           Aperçu en tant que
         </p>
@@ -192,7 +192,7 @@ export default function DemoTasks() {
           const p = PRIORITY[t.priority];
           const s = STATUS[t.status];
           return (
-            <li key={t.id} className={`overflow-hidden rounded-card bg-white shadow-card ${t.status === "done" ? "opacity-70" : ""}`}>
+            <li key={t.id} className={`overflow-hidden rounded-card bg-card shadow-card ${t.status === "done" ? "opacity-70" : ""}`}>
               <div className="flex">
                 <span aria-hidden className={`w-[3px] shrink-0 ${t.status === "proposed" ? "bg-primary" : "bg-transparent"}`} />
                 <div className="min-w-0 flex-1 p-4">
@@ -231,7 +231,7 @@ export default function DemoTasks() {
                           <button
                             key={m.id}
                             onClick={() => assign(t.id, m.id)}
-                            className="flex items-center gap-1.5 rounded-pill bg-white px-2 py-1 text-xs font-medium text-on-surface shadow-card active:scale-95"
+                            className="flex items-center gap-1.5 rounded-pill bg-card px-2 py-1 text-xs font-medium text-on-surface shadow-card active:scale-95"
                           >
                             <Initials m={m} size={22} />
                             {m.name.split(" ")[0]}
@@ -246,7 +246,7 @@ export default function DemoTasks() {
           );
         })}
         {shown.length === 0 && (
-          <li className="rounded-card bg-white p-6 text-center text-sm text-on-surface-variant shadow-card">
+          <li className="rounded-card bg-card p-6 text-center text-sm text-on-surface-variant shadow-card">
             Aucune tâche pour ce filtre.
           </li>
         )}
@@ -307,7 +307,7 @@ function NewTask({
   };
 
   return (
-    <div className="rounded-card bg-white p-4 shadow-card">
+    <div className="rounded-card bg-card p-4 shadow-card">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}

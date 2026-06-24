@@ -23,6 +23,7 @@
   --color-surface-dim: #efeee9;
   --color-surface-bright: #f8f7f4;
   --color-surface-container-lowest: #ffffff; /* cartes */
+  --color-card: #ffffff; /* surface de carte (utilitaire bg-card) — flippe en dark */
   --color-surface-container-low: #f1f4fb; /* champs / sunken (cobalt-050) */
   --color-surface-container: #f0f1f3; /* chips / nav — gris neutre visible sur blanc */
   --color-surface-container-high: #efeee9;
@@ -144,6 +145,90 @@ h4 {
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px var(--color-focus-ring);
+}
+
+/* Variables du logo (mark thémable inline) — flippent clair/sombre. */
+:root {
+  --logo-s: #2a4fb0; /* corps du S */
+  --logo-cut: #ffffff; /* découpes internes (se fondent sur surface claire) */
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark mode « marine » — secondaire, pensé pour les shifts de nuit (DS). On
+   surcharge les valeurs des tokens : les utilitaires Tailwind (var(--color-…))
+   basculent automatiquement. Sélecteur html[data-theme] = spécificité > :root.
+   ────────────────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] {
+  /* Surfaces — marine */
+  --color-surface: #12132a;
+  --color-surface-dim: #0e0f24;
+  --color-surface-bright: #1a1a2e;
+  --color-surface-container-lowest: #1a1a2e;
+  --color-surface-container-low: #1b1d38;
+  --color-surface-container: #23284a;
+  --color-surface-container-high: #23284a;
+  --color-surface-container-highest: #2a2c47;
+  --color-surface-variant: #23284a;
+  --color-card: #1a1a2e;
+
+  /* Texte */
+  --color-on-surface: #d7dce6;
+  --color-on-surface-variant: #8a93a3;
+  --color-inverse-surface: #eef1f4;
+  --color-inverse-on-surface: #1a1a2e;
+  --color-outline: #8a93a3;
+  --color-outline-variant: #2a2c47;
+
+  /* Cobalt remonté pour le contraste sur marine */
+  --color-primary: #4f73d6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #5e80de;
+  --color-on-primary-container: #ffffff;
+
+  /* Titres clairs */
+  --color-secondary: #eaeef6;
+  --color-on-secondary: #12132a;
+
+  /* Tint cobalt sombre */
+  --color-azure: #23284a;
+  --color-on-azure: #adc7ff;
+
+  /* Cyan texte lisible sur tint sombre */
+  --color-cyan-text: #5fd4e8;
+
+  /* Statuts — fonds sombres */
+  --color-status-proposed-bg: #23253e;
+  --color-status-validated-bg: #14323a;
+  --color-status-done-bg: #14301f;
+  --color-status-rejected-bg: #3a1b1f;
+  --color-status-rejected: #f87171;
+
+  /* Erreur sur marine */
+  --color-error: #f87171;
+  --color-error-container: #3a1b1f;
+  --color-on-error-container: #ffdad6;
+
+  /* Hairlines */
+  --color-line: #2a2c47;
+  --color-line-soft: #23253e;
+
+  /* Focus + ombres (sur fond sombre, teintées noir) */
+  --color-focus-ring: rgba(79, 115, 214, 0.5);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 14px 38px rgba(0, 0, 0, 0.48);
+
+  /* Logo : S blanc, découpes marine */
+  --logo-s: #ffffff;
+  --logo-cut: #12132a;
+}
+
+/* Bascule douce du thème (respecte prefers-reduced-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition: background-color 200ms ease, color 200ms ease;
+  }
 }
 
 /* Respecte la préférence utilisateur : pas d'animation forcée. */

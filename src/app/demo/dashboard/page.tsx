@@ -146,7 +146,7 @@ export default function DemoDashboard() {
         </svg>
       </Link>
 
-      <section className="mt-4 rounded-card bg-white p-6 shadow-card">
+      <section className="mt-4 rounded-card bg-card p-6 shadow-card">
         <h2 className="mb-3 text-sm font-medium text-secondary">Météo des tâches</h2>
         <dl className="grid grid-cols-3 gap-3 text-center">
           {[
@@ -187,7 +187,7 @@ export default function DemoDashboard() {
           className="fixed inset-x-0 z-50 mx-auto max-w-md"
           style={{ bottom: "calc(56px + env(safe-area-inset-bottom) + 16px)" }}
         >
-          <div key={idx} className="scribe-pop relative mx-4 rounded-card bg-white p-4 shadow-modal">
+          <div key={idx} className="scribe-pop relative mx-4 rounded-card bg-card p-4 shadow-modal">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-primary">
                 {idx + 1} / {NAV.length} · {NAV[idx].label}
@@ -216,7 +216,7 @@ export default function DemoDashboard() {
           </div>
           {/* Caret pointant vers l'onglet en cours */}
           <div
-            className="absolute h-3 w-3 -translate-x-1/2 rotate-45 bg-white"
+            className="absolute h-3 w-3 -translate-x-1/2 rotate-45 bg-card"
             style={{ left: `${((idx + 0.5) / NAV.length) * 100}%`, bottom: "-5px" }}
             aria-hidden
           />

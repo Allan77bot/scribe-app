@@ -30,7 +30,7 @@ export default function CapturePage() {
               onClick={() => setTab(t)}
               className={`min-h-[44px] flex-1 rounded-pill text-sm font-semibold transition-all ${
                 tab === t
-                  ? "bg-white text-primary shadow-card"
+                  ? "bg-card text-primary shadow-card"
                   : "text-on-surface-variant"
               }`}
             >

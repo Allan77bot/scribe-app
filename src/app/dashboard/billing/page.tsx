@@ -46,7 +46,7 @@ export default async function BillingPage({
   if (error || !profile) {
     return (
       <main className="flex min-h-screen flex-1 items-center justify-center bg-surface px-6 text-center">
-        <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
+        <div className="w-full max-w-sm rounded-card bg-card p-6 shadow-card">
           <h1 className="text-lg font-semibold text-secondary">
             Profil introuvable
           </h1>
@@ -113,7 +113,7 @@ export default async function BillingPage({
         )}
 
         {/* Informations actuelles */}
-        <section className="mb-6 rounded-card bg-white p-5 shadow-card">
+        <section className="mb-6 rounded-card bg-card p-5 shadow-card">
           <h2 className="text-sm font-medium text-on-surface-variant">Plan actuel</h2>
 
           <div className="mt-3 space-y-4">
@@ -157,7 +157,7 @@ export default async function BillingPage({
         </section>
 
         {/* Quotas et usage */}
-        <section className="mb-6 rounded-card bg-white p-5 shadow-card">
+        <section className="mb-6 rounded-card bg-card p-5 shadow-card">
           <h2 className="text-sm font-medium text-on-surface-variant">Usage ce mois</h2>
 
           <div className="mt-3 space-y-4">
@@ -203,7 +203,7 @@ export default async function BillingPage({
 
         {/* Message pour non-admin */}
         {profile.role !== "admin" && (
-          <section className="rounded-card bg-white p-5 shadow-card">
+          <section className="rounded-card bg-card p-5 shadow-card">
             <p className="text-sm text-on-surface-variant">
               Seuls les administrateurs peuvent modifier le plan de facturation.
             </p>

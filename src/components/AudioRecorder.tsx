@@ -254,7 +254,7 @@ export default function AudioRecorder() {
     // micro), simple retour à l'état initial.
     const canRetryUpload = hasRecording;
     return (
-      <div className="flex flex-col items-center gap-4 rounded-card bg-white p-6 shadow-card">
+      <div className="flex flex-col items-center gap-4 rounded-card bg-card p-6 shadow-card">
         <p className="w-full rounded-field bg-error-container px-4 py-3 text-center text-sm text-on-error-container">
           {errorMsg}
         </p>
@@ -284,7 +284,7 @@ export default function AudioRecorder() {
   // ── État upload en cours ─────────────────────────────────────────────────
   if (state === "uploading") {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-card bg-white p-10 shadow-card">
+      <div className="flex flex-col items-center gap-4 rounded-card bg-card p-10 shadow-card">
         <div
           className="h-10 w-10 animate-spin rounded-full border-2 border-primary"
           style={{ borderTopColor: "transparent" }}
@@ -297,7 +297,7 @@ export default function AudioRecorder() {
   // ── État enregistrement terminé — prévisualisation ───────────────────────
   if (state === "recorded" && audioUrl) {
     return (
-      <div className="flex flex-col gap-5 rounded-card bg-white p-6 shadow-card">
+      <div className="flex flex-col gap-5 rounded-card bg-card p-6 shadow-card">
         {recovered && (
           <p className="w-full rounded-field bg-azure px-4 py-3 text-center text-sm text-primary">
             Enregistrement non envoyé récupéré. Vous pouvez l&apos;envoyer
@@ -322,7 +322,7 @@ export default function AudioRecorder() {
 
   // ── États idle + recording ───────────────────────────────────────────────
   return (
-    <div className="flex flex-col items-center gap-7 rounded-card bg-white p-8 shadow-card">
+    <div className="flex flex-col items-center gap-7 rounded-card bg-card p-8 shadow-card">
       {state === "recording" && (
         <div className="flex flex-col items-center gap-4">
           {/* Waveform live — hauteurs/couleurs pilotées par la boucle loop().

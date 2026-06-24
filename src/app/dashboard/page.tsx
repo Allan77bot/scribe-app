@@ -54,7 +54,7 @@ export default async function DashboardPage() {
     if (!org) {
       return (
         <main className="flex min-h-screen flex-1 items-center justify-center overflow-x-hidden bg-surface px-6 text-center text-on-surface">
-          <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
+          <div className="w-full max-w-sm rounded-card bg-card p-6 shadow-card">
             <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
             <p className="mt-2 text-sm text-on-surface-variant">
               La création du profil a échoué. Réessaie, ou contacte le support si
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
   if (error || !profile) {
     return (
       <main className="flex min-h-screen flex-1 items-center justify-center overflow-x-hidden bg-surface px-6 text-center text-on-surface">
-        <div className="w-full max-w-sm rounded-card bg-white p-6 shadow-card">
+        <div className="w-full max-w-sm rounded-card bg-card p-6 shadow-card">
           <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
           <p className="mt-2 text-sm text-on-surface-variant">
             Ton compte existe, mais son profil d&apos;équipe n&apos;a pas pu être
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
         {/* Carte d'accès rapide : météo des tâches (compteurs vers /tasks). */}
         <Link
           href="/dashboard/tasks"
-          className="mt-4 block rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+          className="mt-4 block rounded-card bg-card p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
         >
           <h2 className="eyebrow mb-4">Météo des tâches</h2>
           <dl className="grid grid-cols-3 gap-3 text-center">
@@ -208,7 +208,7 @@ export default async function DashboardPage() {
         </Link>
 
         {/* Synthèse de l'org : minutes consommées sur le quota du mois. */}
-        <section className="mt-4 rounded-card bg-white p-6 shadow-card">
+        <section className="mt-4 rounded-card bg-card p-6 shadow-card">
           <div className="flex items-center justify-between">
             <h2 className="eyebrow">Minutes ce mois</h2>
             <span className="tnum text-xs text-on-surface-variant">
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
         {/* Carte d'accès rapide : dernière passation générée. */}
         <Link
           href="/dashboard/handover"
-          className="mt-4 flex items-center justify-between rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+          className="mt-4 flex items-center justify-between rounded-card bg-card p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
         >
           <div className="min-w-0">
             <h2 className="eyebrow">Dernière passation</h2>
@@ -253,7 +253,7 @@ export default async function DashboardPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="rounded-card bg-white p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
+              className="rounded-card bg-card p-6 shadow-card transition-all hover:shadow-md active:scale-[0.99]"
             >
               <p className="text-sm font-semibold text-secondary">{m.title}</p>
               <p className="mt-1 text-xs text-on-surface-variant">{m.desc}</p>

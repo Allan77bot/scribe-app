@@ -120,7 +120,7 @@ export default function DemoOnboarding() {
         Étape {step + 1} / 4 · {labels[step]}
       </p>
 
-      <div className="rounded-card bg-white p-6 shadow-card">
+      <div className="rounded-card bg-card p-6 shadow-card">
         {/* ───────── Étape 1 ───────── */}
         {step === 0 && role === "manager" && (
           <div key="m0" className="scribe-in flex flex-col gap-4">

@@ -9,7 +9,7 @@ export default async function LoginPage({
   const { error, message } = await searchParams;
 
   return (
-    <div className="rounded-card bg-white p-6 shadow-card">
+    <div className="rounded-card bg-card p-6 shadow-card">
       <h1 className="text-xl font-semibold text-secondary">Se connecter</h1>
       <p className="mt-1 text-sm text-on-surface-variant">
         Accède à la coordination de ton équipe.

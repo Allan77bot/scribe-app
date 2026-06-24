@@ -12,7 +12,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         <span>DÉMO · sans connexion</span>
         <Link
           href="/demo"
-          className="rounded-pill bg-white/15 px-2.5 py-1 transition-colors hover:bg-white/25"
+          className="rounded-pill bg-card/15 px-2.5 py-1 transition-colors hover:bg-card/25"
         >
           Écrans démo
         </Link>

@@ -49,7 +49,7 @@ export default function OnboardingWizard({ initialOrgName }: Props) {
   };
 
   return (
-    <div className="rounded-card bg-white p-6 shadow-card">
+    <div className="rounded-card bg-card p-6 shadow-card">
       {/* Progression */}
       <div className="mb-6 flex items-center gap-2" aria-hidden>
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (

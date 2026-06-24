@@ -36,7 +36,7 @@ export default function DemoIndex() {
           <Link
             key={s.href}
             href={s.href}
-            className="rounded-card bg-white p-5 shadow-card transition-all hover:brightness-95 active:scale-[0.98]"
+            className="rounded-card bg-card p-5 shadow-card transition-all hover:brightness-95 active:scale-[0.98]"
           >
             <p className="text-sm font-semibold text-secondary">{s.title}</p>
             <p className="mt-0.5 text-xs text-on-surface-variant">{s.desc}</p>

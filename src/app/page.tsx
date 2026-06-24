@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-surface px-6 py-12 text-center">
       {/* Carte blanche flottante (élévation niveau 1). */}
-      <div className="w-full max-w-md rounded-card bg-white p-6 shadow-card">
+      <div className="w-full max-w-md rounded-card bg-card p-6 shadow-card">
         {/* Marque officielle — mark (S + coche de validation) + mot-marque. */}
         <h1 className="sr-only">Scribe IA</h1>
         <Logo size={48} className="mb-6 justify-center" />

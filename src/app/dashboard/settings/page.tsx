@@ -59,7 +59,7 @@ export default async function SettingsPage({
           </p>
         )}
 
-        <div className="rounded-card bg-white p-6 shadow-card">
+        <div className="rounded-card bg-card p-6 shadow-card">
           <AvatarUpload
             name={me.display_name || ""}
             email={me.email}
@@ -107,7 +107,7 @@ export default async function SettingsPage({
         </div>
 
         {/* Compte — e-mail en lecture seule + déconnexion. */}
-        <div className="mt-4 rounded-card bg-white p-6 shadow-card">
+        <div className="mt-4 rounded-card bg-card p-6 shadow-card">
           <p className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
             Compte
           </p>

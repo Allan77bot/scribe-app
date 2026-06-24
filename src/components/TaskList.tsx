@@ -15,7 +15,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   // État vide = onboarding (brand guide §5) : titre + une phrase + un CTA.
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-12 text-center shadow-card">
+      <div className="flex flex-col items-center gap-3 rounded-card bg-card px-6 py-12 text-center shadow-card">
         <svg
           width="24"
           height="24"

@@ -130,7 +130,7 @@ export default function InviteMemberButton({
 
           {/* Feuille */}
           <div
-            className="relative w-full max-w-md rounded-t-card bg-white px-5 pb-8 pt-3 shadow-modal"
+            className="relative w-full max-w-md rounded-t-card bg-card px-5 pb-8 pt-3 shadow-modal"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}
           >
             {/* Poignée */}

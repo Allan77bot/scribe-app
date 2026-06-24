@@ -23,7 +23,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-card bg-white p-6 shadow-card">
+    <div className="rounded-card bg-card p-6 shadow-card">
       {children}
     </div>
   );

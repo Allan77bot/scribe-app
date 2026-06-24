@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
+import ThemeToggle from "@/components/ThemeToggle";
 import { logout } from "@/lib/auth/actions";
 
 // Pastille de profil en haut à droite du dashboard. Tap → petit menu : Réglages
@@ -65,7 +66,7 @@ export default function UserMenu({ name, email, color, avatarUrl, isAdmin }: Pro
         <div
           role="menu"
           // Carte calme DS : rayon lg, ombre modale seule (jamais ombre+bordure).
-          className="absolute right-0 top-11 w-52 overflow-hidden rounded-lg bg-white py-2 shadow-modal"
+          className="absolute right-0 top-11 w-52 overflow-hidden rounded-lg bg-card py-2 shadow-modal"
         >
           <div className="px-4 pb-2 pt-1">
             <p className="truncate text-sm font-semibold text-on-surface">
@@ -86,6 +87,8 @@ export default function UserMenu({ name, email, color, avatarUrl, isAdmin }: Pro
             </svg>
             Réglages
           </Link>
+          <ThemeToggle className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-on-surface transition-colors hover:bg-surface-container-low" />
+          <div className="h-px bg-line" />
           <form action={logout}>
             <button
               type="submit"

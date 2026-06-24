@@ -101,7 +101,7 @@ export default async function TeamPage() {
             return (
               <li
                 key={m.id}
-                className="flex items-center gap-3 rounded-card bg-white p-3.5 shadow-card"
+                className="flex items-center gap-3 rounded-card bg-card p-3.5 shadow-card"
               >
                 <Avatar
                   name={m.display_name}
@@ -143,7 +143,7 @@ export default async function TeamPage() {
                   className="flex items-center gap-3 rounded-card bg-azure p-3.5"
                 >
                   <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-primary"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-card text-primary"
                     aria-hidden
                   >
                     {/* Signal en transit : enveloppe au trait fin. */}
@@ -157,7 +157,7 @@ export default async function TeamPage() {
                       {inv.email}
                     </p>
                     <p className="mt-0.5 flex items-center gap-1.5 text-xs text-on-surface-variant">
-                      <span className="inline-flex items-center rounded-pill bg-white px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      <span className="inline-flex items-center rounded-pill bg-card px-2 py-0.5 text-[11px] font-semibold text-primary">
                         En attente
                       </span>
                       <span>{expiresIn(inv.expires_at)}</span>
@@ -172,7 +172,7 @@ export default async function TeamPage() {
 
         {/* Membre non-admin et seul : on explique sans frustrer. */}
         {!isAdmin && members.length === 1 && (
-          <p className="mt-6 rounded-card bg-white p-4 text-sm text-on-surface-variant shadow-card">
+          <p className="mt-6 rounded-card bg-card p-4 text-sm text-on-surface-variant shadow-card">
             Seul un administrateur peut inviter de nouveaux coéquipiers.
           </p>
         )}
