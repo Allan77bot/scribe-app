@@ -147,10 +147,15 @@ h4 {
   box-shadow: 0 0 0 4px var(--color-focus-ring);
 }
 
-/* Variables du logo (mark thémable inline) — flippent clair/sombre. */
-:root {
-  --logo-s: #2a4fb0; /* corps du S */
-  --logo-cut: #ffffff; /* découpes internes (se fondent sur surface claire) */
+/* Logo : bascule de variante selon le thème (color en clair, white-cyan en dark). */
+.logo-dark {
+  display: none;
+}
+html[data-theme="dark"] .logo-light {
+  display: none;
+}
+html[data-theme="dark"] .logo-dark {
+  display: block;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -218,10 +223,6 @@ html[data-theme="dark"] {
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 14px 38px rgba(0, 0, 0, 0.48);
-
-  /* Logo : S blanc, découpes marine */
-  --logo-s: #ffffff;
-  --logo-cut: #12132a;
 }
 
 /* Bascule douce du thème (respecte prefers-reduced-motion). */
