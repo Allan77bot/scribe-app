@@ -241,3 +241,21 @@ html[data-theme="dark"] {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Orbe de capture vocale (AudioRecorder) ───────────────────────────────
+   Au repos : respiration douce (le garde reduced-motion ci-dessus la coupe).
+   Pendant l'enregistrement : le scale du cœur et l'opacité/couleur du halo
+   sont pilotés en JS (refs) au volume réel du micro — voir AudioRecorder.tsx. */
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.045); }
+}
+@keyframes orb-halo-idle {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.7; }
+}
+/* Échos : ondes concentriques qui s'écartent pendant l'enregistrement. */
+@keyframes orb-echo {
+  0%   { transform: scale(0.85); opacity: 0.5; }
+  100% { transform: scale(1.7); opacity: 0; }
+}

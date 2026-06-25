@@ -7,30 +7,21 @@ import { Button } from "@/components/ui/Button";
 
 type RecState = "idle" | "recording" | "recorded" | "uploading" | "error";
 
-// ── Waveform live (FEATURE 3) ─────────────────────────────────────────────
-// 7 barres dont la hauteur suit le volume réel du micro (Web Audio API). Le
-// rendu est piloté en direct via des refs DOM dans une boucle requestAnimation-
-// Frame → aucun re-render React à 60 fps (cf. bonnes pratiques perf).
-const BAR_COUNT = 7;
-const MAX_BAR_HEIGHT = 48; // px — hauteur du conteneur
-const MIN_RATIO = 0.05; // silence = 5 % (les barres ne disparaissent jamais)
+// ── Orbe de capture vocale ────────────────────────────────────────────────
+// L'orbe = un ANNEAU lumineux (centre vide), dégradé cyan→bleu→violet, sur un
+// stage sombre pour faire ressortir le néon. Pendant l'enregistrement, l'anneau
+// se dilate et son bloom s'intensifie au volume RÉEL du micro (Web Audio API),
+// piloté en direct via des refs DOM dans une boucle requestAnimationFrame →
+// aucun re-render React à 60 fps. Pas de WebGL : tourne sur tout mobile.
 
-// Couleur des barres par niveau, calée sur les tokens DS « Scribe IA ».
-// On lit les variables CSS au runtime → la waveform suit toujours le thème :
-// primary (cobalt) au calme, cyan quand la voix monte, error à la saturation.
-const cssVar = (name: string, fallback: string): string => {
-  if (typeof window === "undefined") return fallback;
-  const v = getComputedStyle(document.documentElement)
-    .getPropertyValue(name)
-    .trim();
-  return v || fallback;
-};
-
-function levelColor(level: number): string {
-  if (level >= 0.9) return cssVar("--color-error", "#dc2626"); // saturation
-  if (level >= 0.5) return cssVar("--color-cyan", "#22d3ee"); // voix soutenue
-  return cssVar("--color-primary", "#2a4fb0"); // voix normale
-}
+// Dégradé conique de l'anneau : cyan (haut) → bleu → violet clair (bas, le plus
+// lumineux) → violet → cyan. Le centre est rendu transparent par un masque.
+const RING_GRADIENT =
+  "conic-gradient(from 0deg at 50% 50%, #67e8f9 0deg, #60a5fa 80deg, #818cf8 138deg, #e9d5ff 180deg, #c4b5fd 224deg, #a78bfa 286deg, #67e8f9 360deg)";
+// Masque « anneau fin » : ne révèle qu'un trait circulaire fin près du bord
+// (grand centre vide). Le même masque sert au trait net ET au glow flouté.
+const RING_MASK =
+  "radial-gradient(closest-side, transparent 0 84%, #000 89%, #000 92%, transparent 97%)";
 
 export default function AudioRecorder() {
   const [state, setState] = useState<RecState>("idle");
@@ -53,14 +44,16 @@ export default function AudioRecorder() {
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const dataRef = useRef<Uint8Array | null>(null);
   const rafRef = useRef<number | null>(null);
-  const barsRef = useRef<(HTMLDivElement | null)[]>([]);
+  // Éléments de l'orbe pilotés en direct (sans re-render).
+  const orbCoreRef = useRef<HTMLDivElement | null>(null);
+  const haloRef = useRef<HTMLDivElement | null>(null);
 
   const startMeter = useCallback((stream: MediaStream) => {
     const Ctx =
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext })
         .webkitAudioContext;
-    if (!Ctx) return; // pas de Web Audio → on reste sans waveform, sans crash
+    if (!Ctx) return; // pas de Web Audio → l'orbe reste statique, sans crash
     const ctx = new Ctx();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
@@ -74,28 +67,22 @@ export default function AudioRecorder() {
     const data = new Uint8Array(analyser.frequencyBinCount);
     dataRef.current = data;
 
-    // Boucle d'animation : lit le spectre, le replie en 4 bandes (grave → aigu)
-    // affichées en miroir autour du centre → silhouette de voix symétrique.
+    // Boucle d'animation : moyenne la bande de la voix en un niveau global
+    // (0 → 1), puis dilate le cœur de l'orbe et fait respirer un halo coloré.
     const loop = () => {
       analyser.getByteFrequencyData(data);
 
-      const usable = Math.floor(data.length * 0.45); // bande de la voix (grave)
-      const bandSize = Math.max(1, Math.floor(usable / 4));
-      const bands = [0, 1, 2, 3].map((b) => {
-        let sum = 0;
-        for (let i = b * bandSize; i < (b + 1) * bandSize; i++) sum += data[i];
-        // Gain doux : l'entrée micro est souvent basse, on la rend vivante.
-        return Math.min(1, (sum / bandSize / 255) * 1.6);
-      });
+      const usable = Math.floor(data.length * 0.6); // bande voix (grave→médium)
+      let sum = 0;
+      for (let i = 0; i < usable; i++) sum += data[i];
+      // Gain doux : l'entrée micro est souvent basse, on la rend vivante.
+      const level = Math.min(1, (sum / usable / 255) * 1.9);
 
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const el = barsRef.current[i];
-        if (!el) continue;
-        const level = bands[Math.abs(i - 3)]; // centre = grave (le plus fort)
-        const ratio = Math.max(MIN_RATIO, level);
-        el.style.height = `${ratio * MAX_BAR_HEIGHT}px`;
-        el.style.backgroundColor = levelColor(level);
-      }
+      const core = orbCoreRef.current;
+      const halo = haloRef.current;
+      // L'anneau se dilate et son bloom s'intensifie quand la voix monte.
+      if (core) core.style.transform = `scale(${1 + level * 0.14})`;
+      if (halo) halo.style.opacity = String(0.55 + level * 0.45);
 
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -154,7 +141,7 @@ export default function AudioRecorder() {
 
       recorderRef.current = recorder;
       recorder.start();
-      startMeter(stream); // waveform branchée sur le même flux
+      startMeter(stream); // orbe branché sur le même flux micro
       setState("recording");
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
@@ -320,81 +307,84 @@ export default function AudioRecorder() {
     );
   }
 
-  // ── États idle + recording ───────────────────────────────────────────────
+  // ── États idle + recording — l'ORBE ──────────────────────────────────────
+  const recording = state === "recording";
   return (
-    <div className="flex flex-col items-center gap-7 rounded-card bg-card p-8 shadow-card">
-      {state === "recording" && (
-        <div className="flex flex-col items-center gap-4">
-          {/* Waveform live — hauteurs/couleurs pilotées par la boucle loop().
-              Barres de fond posées sur bg-surface-container ; au repos primary,
-              cyan/error quand la voix monte (cf. levelColor + tokens DS). */}
-          <div
-            className="flex items-end justify-center gap-1.5 rounded-field bg-surface-container px-4 py-3"
-            style={{ height: MAX_BAR_HEIGHT + 24 }}
-            aria-hidden
-          >
-            {Array.from({ length: BAR_COUNT }).map((_, i) => (
-              <div
-                key={i}
-                ref={(el) => {
-                  barsRef.current[i] = el;
-                }}
-                className="w-2 rounded-full bg-primary"
-                style={{
-                  height: `${MIN_RATIO * MAX_BAR_HEIGHT}px`,
-                  transition: "height 100ms ease-out",
-                }}
-              />
-            ))}
-          </div>
-          <p className="tnum text-3xl font-semibold text-secondary">
-            {fmt(seconds)}
-          </p>
-        </div>
+    <div className="flex flex-col items-center gap-8 rounded-card bg-card p-8 shadow-card">
+      {/* Chrono visible uniquement pendant l'enregistrement. */}
+      {recording && (
+        <p className="tnum text-3xl font-semibold text-secondary">
+          {fmt(seconds)}
+        </p>
       )}
 
-      {/* Bouton principal micro / stop — action principale, cible 64px. */}
-      <button
-        onClick={state === "idle" ? startRecording : stopRecording}
-        className={`flex size-20 items-center justify-center rounded-full shadow-card transition-transform active:scale-95 ${
-          // Enregistrement = error (signal d'arrêt) ; repos = primary.
-          state === "recording"
-            ? "bg-error text-on-error"
-            : "bg-primary text-on-primary"
-        }`}
-        aria-label={
-          state === "idle"
-            ? "Commencer l'enregistrement"
-            : "Arrêter l'enregistrement"
-        }
-      >
-        {state === "idle" ? (
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden
+      {/* L'orbe : un ANNEAU néon (centre vide) sur un stage sombre, sans icône.
+          Tap pour démarrer/arrêter. Au repos : respiration + bloom qui pulse
+          (CSS). Recording : scale de l'anneau + bloom pilotés par loop() au
+          volume réel du micro. */}
+      <div className="relative flex size-64 items-center justify-center">
+        {/* Échos : ondes concentriques qui s'écartent quand on parle. */}
+        {recording &&
+          [0, 1, 2].map((i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="pointer-events-none absolute size-52 rounded-full border"
+              style={{
+                borderColor: "rgba(129,140,248,0.5)",
+                animation: `orb-echo 2.4s ease-out ${i * 0.8}s infinite`,
+              }}
+            />
+          ))}
+
+        <button
+          type="button"
+          onClick={recording ? stopRecording : startRecording}
+          className="relative rounded-full outline-none transition-transform active:scale-95 focus-visible:ring-4 focus-visible:ring-cyan/60"
+          aria-label={
+            recording ? "Arrêter l'enregistrement" : "Commencer l'enregistrement"
+          }
+        >
+          <div
+            ref={orbCoreRef}
+            className={`relative size-52 ${
+              recording ? "" : "animate-[orb-breathe_6s_ease-in-out_infinite]"
+            }`}
           >
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
-          </svg>
-        ) : (
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden
-          >
-            <rect x="6" y="6" width="12" height="12" rx="2" />
-          </svg>
-        )}
-      </button>
+            {/* Glow : le MÊME trait fin, flouté → halo néon qui épouse l'anneau
+                (pas une bande large). Pulse au volume (ref). */}
+            <div
+              ref={haloRef}
+              aria-hidden
+              className={`absolute inset-0 rounded-full ${
+                recording ? "" : "animate-[orb-halo-idle_5s_ease-in-out_infinite]"
+              }`}
+              style={{
+                background: RING_GRADIENT,
+                WebkitMask: RING_MASK,
+                mask: RING_MASK,
+                filter: "blur(11px)",
+                opacity: 0.6,
+              }}
+            />
+            {/* Anneau NET : trait fin coloré + néon serré (drop-shadow). */}
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: RING_GRADIENT,
+                WebkitMask: RING_MASK,
+                mask: RING_MASK,
+                filter:
+                  "blur(0.5px) drop-shadow(0 0 5px rgba(96,165,250,0.7)) drop-shadow(0 0 12px rgba(167,139,250,0.45))",
+              }}
+            />
+          </div>
+        </button>
+      </div>
 
       <p className="text-sm text-on-surface-variant">
-        {state === "idle"
-          ? "Appuyez pour enregistrer"
-          : "Appuyez pour arrêter"}
+        {recording ? "Appuyez pour arrêter" : "Appuyez pour parler"}
       </p>
     </div>
   );
