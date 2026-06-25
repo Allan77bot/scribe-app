@@ -48,7 +48,7 @@ export default function AcceptInviteForm({
 
       <label className="flex flex-col gap-1.5">
         <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-          Ton nom
+          Votre nom
         </span>
         <input
           type="text"

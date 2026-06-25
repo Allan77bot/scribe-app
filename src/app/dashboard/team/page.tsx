@@ -114,7 +114,7 @@ export default async function TeamPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-on-surface">
                     {m.display_name || m.email.split("@")[0]}
-                    {isMe && <span className="font-medium text-on-surface-variant"> · toi</span>}
+                    {isMe && <span className="font-medium text-on-surface-variant"> · vous</span>}
                   </p>
                   <p className="truncate text-xs text-on-surface-variant">{m.email}</p>
                 </div>

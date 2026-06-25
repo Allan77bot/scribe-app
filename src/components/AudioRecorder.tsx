@@ -159,7 +159,7 @@ export default function AudioRecorder() {
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     } catch {
-      setErrorMsg("Micro inaccessible. Vérifie les permissions du navigateur.");
+      setErrorMsg("Micro inaccessible. Vérifiez les permissions du navigateur.");
       setState("error");
     }
   }, [startMeter, stopMeter]);

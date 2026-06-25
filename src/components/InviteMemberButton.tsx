@@ -65,14 +65,14 @@ export default function InviteMemberButton({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "L'envoi a échoué. Réessaie.");
+        setError(data.error ?? "L'envoi a échoué. Réessayez.");
         return;
       }
       setSent({ email: data.email, link: data.link, emailSent: data.emailSent });
       // Rafraîchit la liste des invitations en attente sur la page Équipe.
       router.refresh();
     } catch {
-      setError("Connexion impossible. Vérifie ta connexion et réessaie.");
+      setError("Connexion impossible. Vérifiez votre connexion et réessayez.");
     } finally {
       setPending(false);
     }
@@ -143,7 +143,7 @@ export default function InviteMemberButton({
                     Inviter un coéquipier
                   </h2>
                   <p className="mt-1 text-sm text-on-surface-variant">
-                    Scribe envoie un lien d&apos;invitation. Il rejoint ton équipe
+                    Scribe envoie un lien d&apos;invitation. Il rejoint votre équipe
                     en quelques secondes — le lien expire sous 72 h.
                   </p>
                 </div>
@@ -190,7 +190,7 @@ export default function InviteMemberButton({
                   <p className="mt-1 text-sm text-on-surface-variant">
                     {sent.emailSent
                       ? `Scribe a envoyé le lien à ${sent.email}.`
-                      : `On n'a pas pu envoyer l'e-mail à ${sent.email}. Copie le lien et transmets-le toi-même.`}
+                      : `On n'a pas pu envoyer l'e-mail à ${sent.email}. Copiez le lien et transmettez-le vous-même.`}
                   </p>
                 </div>
 

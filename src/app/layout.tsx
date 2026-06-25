@@ -14,7 +14,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Scribe — coordination d'équipe",
   description:
-    "Transforme tes notes vocales et écrites en coordination d'équipe : tâches suivies, accusés de lecture, rapport de passation automatique.",
+    "Transformez vos notes vocales et écrites en coordination d'équipe : tâches suivies, accusés de lecture, rapport de passation automatique.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

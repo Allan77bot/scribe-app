@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   const rawEmail = String(body.email ?? "");
   if (!isValidEmail(rawEmail)) {
     return NextResponse.json(
-      { error: "Entre une adresse e-mail valide." },
+      { error: "Entrez une adresse e-mail valide." },
       { status: 400 },
     );
   }

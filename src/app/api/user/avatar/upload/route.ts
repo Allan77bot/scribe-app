@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       const body = await uploadRes.text();
       console.error("[avatar:upload]", uploadRes.status, body.slice(0, 300));
       return NextResponse.json(
-        { error: "L'envoi a échoué. Réessaie." },
+        { error: "L'envoi a échoué. Réessayez." },
         { status: 500 },
       );
     }

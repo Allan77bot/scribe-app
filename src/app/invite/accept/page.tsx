@@ -47,8 +47,8 @@ export default async function AcceptInvitePage({
           </h1>
           <p className="mt-2 text-sm text-on-surface-variant">
             Ce lien d&apos;invitation n&apos;est plus valide — il a peut-être
-            expiré (72 h) ou déjà été utilisé. Demande à l&apos;équipe de
-            t&apos;en renvoyer un.
+            expiré (72 h) ou déjà été utilisé. Demandez à l&apos;équipe de
+            vous en renvoyer un.
           </p>
           <Link
             href="/signup"
@@ -78,11 +78,11 @@ export default async function AcceptInvitePage({
       <Shell>
         <Card>
           <h1 className="text-lg font-semibold text-secondary">
-            Tu es déjà connecté
+            Vous êtes déjà connecté
           </h1>
           <p className="mt-2 text-sm text-on-surface-variant">
             Pour rejoindre « {invite.orgName} » avec l&apos;adresse {invite.email},
-            déconnecte-toi d&apos;abord, puis rouvre ce lien.
+            déconnectez-vous d&apos;abord, puis rouvrez ce lien.
           </p>
           <Link
             href="/dashboard"
@@ -102,11 +102,11 @@ export default async function AcceptInvitePage({
           Invitation
         </p>
         <h1 className="mt-1 text-xl font-bold text-secondary">
-          Rejoins « {invite.orgName} »
+          Rejoignez « {invite.orgName} »
         </h1>
         <p className="mt-1 text-sm text-on-surface-variant">
-          Crée ton accès pour coordonner les tâches, les accusés de lecture et la
-          passation avec ton équipe.
+          Créez votre accès pour coordonner les tâches, les accusés de lecture et la
+          passation avec votre équipe.
         </p>
 
         {error && (

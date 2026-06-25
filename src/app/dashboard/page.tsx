@@ -57,7 +57,7 @@ export default async function DashboardPage() {
           <div className="w-full max-w-sm rounded-card bg-card p-6 shadow-card">
             <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
             <p className="mt-2 text-sm text-on-surface-variant">
-              La création du profil a échoué. Réessaie, ou contacte le support si
+              La création du profil a échoué. Réessayez, ou contactez le support si
               le problème persiste.
             </p>
             <form action={logout} className="mt-5">
@@ -98,8 +98,8 @@ export default async function DashboardPage() {
         <div className="w-full max-w-sm rounded-card bg-card p-6 shadow-card">
           <h1 className="text-lg font-semibold text-secondary">Profil introuvable</h1>
           <p className="mt-2 text-sm text-on-surface-variant">
-            Ton compte existe, mais son profil d&apos;équipe n&apos;a pas pu être
-            chargé. Déconnecte-toi puis reconnecte-toi.
+            Votre compte existe, mais son profil d&apos;équipe n&apos;a pas pu être
+            chargé. Déconnectez-vous puis reconnectez-vous.
           </p>
           <form action={logout} className="mt-5">
             <Button type="submit" variant="secondary" size="lg" fullWidth>

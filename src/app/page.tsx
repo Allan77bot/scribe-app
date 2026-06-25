@@ -10,7 +10,7 @@ export default function Home() {
         <h1 className="sr-only">Scribe IA</h1>
         <Logo size={48} className="mb-6 justify-center" />
         <p className="mt-4 text-base leading-relaxed text-on-surface-variant">
-          Transforme tes notes vocales en coordination d&apos;équipe&nbsp;:
+          Transformez vos notes vocales en coordination d&apos;équipe&nbsp;:
           tâches suivies, accusés de lecture, rapport de passation automatique.
         </p>
 

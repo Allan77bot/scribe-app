@@ -35,7 +35,7 @@ export async function signup(formData: FormData) {
     redirect(
       "/signup?error=" +
         encodeURIComponent(
-          "La création du compte a échoué. Vérifie tes informations, ou connecte-toi si tu as déjà un compte.",
+          "La création du compte a échoué. Vérifiez vos informations, ou connectez-vous si vous avez déjà un compte.",
         ),
     );
   }

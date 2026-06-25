@@ -12,12 +12,12 @@ export default async function LoginPage({
     <div className="rounded-card bg-card p-6 shadow-card">
       <h1 className="text-xl font-semibold text-secondary">Se connecter</h1>
       <p className="mt-1 text-sm text-on-surface-variant">
-        Accède à la coordination de ton équipe.
+        Accédez à la coordination de votre équipe.
       </p>
 
       {message === "confirm-email" && (
         <p className="mt-4 rounded-field bg-azure px-3 py-2 text-sm text-on-azure">
-          Compte créé. Confirme ton e-mail, puis connecte-toi.
+          Compte créé. Confirmez votre e-mail, puis connectez-vous.
         </p>
       )}
       {error && (

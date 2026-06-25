@@ -53,14 +53,14 @@ export default function AvatarUpload({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "L'envoi a échoué. Réessaie.");
+        setError(data.error ?? "L'envoi a échoué. Réessayez.");
         setPreview(null);
         return;
       }
       // La photo est en base : on rafraîchit pour la propager (menu, équipe…).
       router.refresh();
     } catch {
-      setError("Connexion impossible. Réessaie.");
+      setError("Connexion impossible. Réessayez.");
       setPreview(null);
     } finally {
       setUploading(false);

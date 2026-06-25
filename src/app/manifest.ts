@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Scribe — coordination d'équipe",
     short_name: "Scribe",
     description:
-      "Transforme tes notes en coordination d'équipe : tâches, accusés de lecture, rapport de passation.",
+      "Transformez vos notes en coordination d'équipe : tâches, accusés de lecture, rapport de passation.",
     start_url: "/",
     display: "standalone",
     // Paper chaud du design system Scribe IA (plus de résidu sombre #0f172a).

@@ -43,7 +43,7 @@ export default async function SettingsPage({
       <header className="px-5 pt-8">
         <h1 className="text-xl font-semibold text-secondary">Réglages</h1>
         <p className="mt-1 text-xs text-on-surface-variant">
-          Ton identité dans l&apos;équipe — photo, nom et couleur.
+          Votre identité dans l&apos;équipe — photo, nom et couleur.
         </p>
       </header>
 
@@ -79,17 +79,17 @@ export default async function SettingsPage({
                 defaultValue={me.display_name || ""}
                 required
                 maxLength={80}
-                placeholder="Ton prénom"
+                placeholder="Votre prénom"
                 className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </label>
 
             <div className="flex flex-col gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-                Ta couleur
+                Votre couleur
               </span>
               <p className="text-xs text-on-surface-variant">
-                Elle t&apos;identifie partout — tâches, passation, équipe. Une
+                Elle vous identifie partout — tâches, passation, équipe. Une
                 couleur par personne.
               </p>
               <div className="mt-1">

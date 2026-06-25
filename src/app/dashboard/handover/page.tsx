@@ -136,8 +136,8 @@ export default async function HandoverPage() {
               Passation momentanément indisponible
             </h2>
             <p className="max-w-xs text-sm text-on-surface-variant">
-              On ne parvient pas à charger le relais en ce moment. Reviens dans
-              un instant — tes notes et tes tâches sont bien là.
+              On ne parvient pas à charger le relais en ce moment. Revenez dans
+              un instant — vos notes et vos tâches sont bien là.
             </p>
           </div>
         </div>

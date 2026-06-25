@@ -52,7 +52,7 @@ function layout(opts: {
             </td></tr>
           </table>
           <p style="margin:16px 0 0;font-family:system-ui,sans-serif;font-size:12px;line-height:1.5;color:#F0E8D6;opacity:0.5;word-break:break-all;">
-            Ou copie ce lien : ${opts.ctaUrl}
+            Ou copiez ce lien : ${opts.ctaUrl}
           </p>
         </td></tr>
         <tr><td style="padding:24px 4px 0;font-family:system-ui,sans-serif;font-size:12px;line-height:1.5;color:#F0E8D6;opacity:0.4;">
@@ -112,19 +112,19 @@ export async function sendVerificationEmail(
   await send({
     to,
     toName: displayName,
-    subject: "Confirme ton adresse e-mail — Scribe",
+    subject: "Confirmez votre adresse e-mail — Scribe",
     tag: "verification",
     html: layout({
-      preheader: "Confirme ton adresse pour activer ton équipe Scribe.",
-      heading: "Confirme ton adresse e-mail",
+      preheader: "Confirmez votre adresse pour activer votre équipe Scribe.",
+      heading: "Confirmez votre adresse e-mail",
       body: `<p style="margin:0 0 12px;">${hello}</p>
-             <p style="margin:0;">Bienvenue sur Scribe. Confirme ton adresse pour activer ton équipe et commencer à coordonner les passations.</p>`,
+             <p style="margin:0;">Bienvenue sur Scribe. Confirmez votre adresse pour activer votre équipe et commencer à coordonner les passations.</p>`,
       ctaLabel: "Confirmer mon adresse",
       ctaUrl: confirmUrl,
       footer:
-        "Tu n'as pas créé de compte Scribe ? Ignore simplement cet e-mail.",
+        "Vous n'avez pas créé de compte Scribe ? Ignorez simplement cet e-mail.",
     }),
-    text: `${hello}\n\nBienvenue sur Scribe. Confirme ton adresse pour activer ton équipe :\n${confirmUrl}\n\nTu n'as pas créé de compte ? Ignore cet e-mail.`,
+    text: `${hello}\n\nBienvenue sur Scribe. Confirmez votre adresse pour activer votre équipe :\n${confirmUrl}\n\nVous n'avez pas créé de compte ? Ignorez cet e-mail.`,
   });
 }
 
@@ -135,21 +135,21 @@ export async function sendInvitationEmail(
   inviteUrl: string,
   inviterName?: string,
 ): Promise<void> {
-  const who = inviterName ? `${inviterName} t'invite` : "Tu es invité";
+  const who = inviterName ? `${inviterName} vous invite` : "Vous êtes invité";
   await send({
     to,
-    subject: `Rejoins « ${orgName} » sur Scribe`,
+    subject: `Rejoignez « ${orgName} » sur Scribe`,
     tag: "invitation",
     html: layout({
       preheader: `${who} à rejoindre ${orgName} sur Scribe.`,
-      heading: `Rejoins « ${orgName} »`,
-      body: `<p style="margin:0;">${who} à rejoindre l'équipe <strong style="color:#A8804D;">${orgName}</strong> sur Scribe, l'outil de coordination d'équipe. Accepte l'invitation pour créer ton accès.</p>`,
+      heading: `Rejoignez « ${orgName} »`,
+      body: `<p style="margin:0;">${who} à rejoindre l'équipe <strong style="color:#A8804D;">${orgName}</strong> sur Scribe, l'outil de coordination d'équipe. Acceptez l'invitation pour créer votre accès.</p>`,
       ctaLabel: "Rejoindre l'équipe",
       ctaUrl: inviteUrl,
       footer:
-        "Cette invitation t'était destinée. Si ce n'est pas le cas, ignore cet e-mail.",
+        "Cette invitation vous était destinée. Si ce n'est pas le cas, ignorez cet e-mail.",
     }),
-    text: `${who} à rejoindre « ${orgName} » sur Scribe.\n\nAccepte l'invitation :\n${inviteUrl}`,
+    text: `${who} à rejoindre « ${orgName} » sur Scribe.\n\nAcceptez l'invitation :\n${inviteUrl}`,
   });
 }
 
@@ -163,18 +163,18 @@ export async function sendPasswordResetEmail(
   await send({
     to,
     toName: displayName,
-    subject: "Réinitialise ton mot de passe — Scribe",
+    subject: "Réinitialisez votre mot de passe — Scribe",
     tag: "password-reset",
     html: layout({
-      preheader: "Lien pour réinitialiser ton mot de passe Scribe.",
-      heading: "Réinitialise ton mot de passe",
+      preheader: "Lien pour réinitialiser votre mot de passe Scribe.",
+      heading: "Réinitialisez votre mot de passe",
       body: `<p style="margin:0 0 12px;">${hello}</p>
              <p style="margin:0;">Une réinitialisation de mot de passe a été demandée pour ce compte. Ce lien est valable une heure.</p>`,
       ctaLabel: "Choisir un nouveau mot de passe",
       ctaUrl: resetUrl,
       footer:
-        "Tu n'as rien demandé ? Ton mot de passe reste inchangé, ignore cet e-mail.",
+        "Vous n'avez rien demandé ? Votre mot de passe reste inchangé, ignorez cet e-mail.",
     }),
-    text: `${hello}\n\nRéinitialise ton mot de passe (lien valable 1 h) :\n${resetUrl}\n\nTu n'as rien demandé ? Ignore cet e-mail.`,
+    text: `${hello}\n\nRéinitialisez votre mot de passe (lien valable 1 h) :\n${resetUrl}\n\nVous n'avez rien demandé ? Ignorez cet e-mail.`,
   });
 }

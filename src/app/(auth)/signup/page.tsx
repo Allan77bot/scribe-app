@@ -12,7 +12,7 @@ export default async function SignupPage({
     <div className="rounded-card bg-card p-6 shadow-card">
       <h1 className="text-xl font-semibold text-secondary">Créer une équipe</h1>
       <p className="mt-1 text-sm text-on-surface-variant">
-        Tu deviens administrateur de ton organisation.
+        Vous devenez administrateur de votre organisation.
       </p>
 
       {error && (
@@ -36,7 +36,7 @@ export default async function SignupPage({
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-on-surface-variant">Ton nom</span>
+          <span className="text-sm font-medium text-on-surface-variant">Votre nom</span>
           <input
             type="text"
             name="display_name"

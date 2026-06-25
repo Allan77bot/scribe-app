@@ -21,7 +21,7 @@ export async function acceptInvitation(formData: FormData) {
 
   if (!token) redirect("/invite/accept?error=" + encodeURIComponent("Lien invalide."));
   if (!password || password.length < 8) {
-    fail("Choisis un mot de passe d'au moins 8 caractères.");
+    fail("Choisissez un mot de passe d'au moins 8 caractères.");
   }
 
   // Défense en profondeur : on revalide le jeton côté serveur avant le signUp
@@ -29,7 +29,7 @@ export async function acceptInvitation(formData: FormData) {
   // du formulaire → impossible de détourner l'invitation vers une autre adresse.
   const invite = await getValidInvitationByToken(token);
   if (!invite) {
-    fail("Cette invitation n'est plus valide. Demande un nouveau lien.");
+    fail("Cette invitation n'est plus valide. Demandez un nouveau lien.");
     return;
   }
 
@@ -46,7 +46,7 @@ export async function acceptInvitation(formData: FormData) {
 
   if (error) {
     console.error("[invite:accept]", error.message);
-    fail("La création du compte a échoué. Réessaie, ou connecte-toi si tu as déjà un compte.");
+    fail("La création du compte a échoué. Réessayez, ou connectez-vous si vous avez déjà un compte.");
     return;
   }
 

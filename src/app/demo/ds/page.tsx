@@ -61,7 +61,7 @@ export default function DesignPreview() {
           </h1>
           <p className="mt-1 text-sm text-on-surface-variant">
             Rendu réel des composants DS. La carte de validation est le vrai
-            composant produit — ne clique pas (pas de session ici).
+            composant produit — ne cliquez pas (pas de session ici).
           </p>
           <ThemeToggle className="mt-4 inline-flex items-center gap-2 rounded-pill bg-azure px-4 py-2 text-sm font-semibold text-primary transition-all active:scale-[0.98]" />
         </header>

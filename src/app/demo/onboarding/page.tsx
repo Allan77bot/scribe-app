@@ -145,7 +145,7 @@ export default function DemoOnboarding() {
           <div key="e0" className="scribe-in flex flex-col gap-4 text-center">
             <div className="mx-auto grid size-16 place-items-center rounded-full bg-azure text-2xl">👋</div>
             <div>
-              <h2 className="text-lg font-semibold text-secondary">Tu rejoins une équipe</h2>
+              <h2 className="text-lg font-semibold text-secondary">Vous rejoignez une équipe</h2>
               <p className="mt-1 text-sm text-on-surface-variant">
                 <span className="font-semibold text-on-surface">Atelier du Port — relais nuit</span>
                 <br />
@@ -197,14 +197,14 @@ export default function DemoOnboarding() {
         {step === 1 && role === "employe" && (
           <div key="e1" className="scribe-in flex flex-col gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-secondary">Ton profil</h2>
+              <h2 className="text-lg font-semibold text-secondary">Votre profil</h2>
               <p className="mt-1 text-sm text-on-surface-variant">
-                Ton nom et ta couleur — c&apos;est comme ça que l&apos;équipe te reconnaît sur les tâches et les passations.
+                Votre nom et votre couleur — c&apos;est comme ça que l&apos;équipe vous reconnaît sur les tâches et les passations.
               </p>
             </div>
-            <input value={myName} onChange={(e) => setMyName(e.target.value)} placeholder="Ton prénom et nom (ex. Sarah Diallo)" className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input value={myName} onChange={(e) => setMyName(e.target.value)} placeholder="Votre prénom et nom (ex. Sarah Diallo)" className="w-full rounded-field bg-surface-container-low px-4 py-3 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary" />
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Ta couleur</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Votre couleur</p>
               <div className="flex flex-wrap gap-2">
                 {PALETTE.map((c) => (
                   <button key={c} onClick={() => setMyColor(c)} aria-label={`Couleur ${c}`} style={{ background: c }} className={`size-9 rounded-full transition-transform active:scale-90 ${myColor === c ? "ring-2 ring-secondary ring-offset-2" : ""}`} />

@@ -73,7 +73,7 @@ export async function updateProfile(formData: FormData) {
     console.error("[user:updateProfile]", error.message);
     redirect(
       "/dashboard/settings?error=" +
-        encodeURIComponent("La mise à jour a échoué. Réessaie."),
+        encodeURIComponent("La mise à jour a échoué. Réessayez."),
     );
   }
 

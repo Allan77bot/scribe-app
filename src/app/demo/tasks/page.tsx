@@ -136,8 +136,8 @@ export default function DemoTasks() {
         ) : (
           <p className="mt-3 border-t border-outline-variant pt-3 text-xs text-on-surface-variant">
             {canAssign
-              ? "Le manager a ouvert l'assignation à tous : tu peux t'attribuer/réassigner des tâches."
-              : "Seul le manager assigne les tâches (réglage actuel). Tu vois les tiennes et l'avancement."}
+              ? "Le manager a ouvert l'assignation à tous : vous pouvez vous attribuer/réassigner des tâches."
+              : "Seul le manager assigne les tâches (réglage actuel). Vous voyez les vôtres et l'avancement."}
           </p>
         )}
       </div>
