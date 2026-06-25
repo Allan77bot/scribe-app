@@ -1,3 +1,51 @@
+## 2026-06-25 — Clôture feat/design-system : vouvoiement + Branding/ ignoré + push & PR #8 ✅
+
+### Concern du jour
+Boucler `feat/design-system` (ACTION 0 du snapshot) : normaliser tu/vous, trancher
+le sort de `Branding/`, puis intégration. Une seule préoccupation, branche en cours.
+
+### Fait
+- **Copy unifiée en VOUVOIEMENT** (décision Allan : `vous` partout — déjà la langue
+  du cœur de l'app : capture/tâches/rapport ; plus sûr pour un outil B2B en équipe
+  industrielle). Audit grep (pronoms + impératifs singuliers), puis conversion de
+  **23 fichiers** via 3 sous-agents parallèles pilotés par une table de conversion
+  stricte (cohérence de conjugaison garantie). Périmètre : landing, auth, invitations,
+  réglages, équipe, messages d'erreur, démo, **et copy des e-mails** (`send.ts` ;
+  re-brand visuel e-mail toujours réservé à `feat/email-brand`). **Exclus** : prompts
+  IA (`Tu es un assistant…` = on parle au modèle), « Ton » au sens *tonalité* dans ces
+  prompts, commentaires de code, label « Capture ». Vérif grep finale : zéro tutoiement
+  résiduel hors exclusions. (commit `193ebe7`)
+- **`Branding/` ignoré** (décision Allan) : l'export brut du handoff (817 K, 76 fichiers :
+  composants JSX déjà ré-implémentés, cartes HTML guidelines, logos en double) est généré
+  et redondant. Les logos/icônes sont déjà dans `public/logos` + `public/icons`, le design
+  system dans `DESIGN.md`, la source dans le projet Claude Design. Ajouté au `.gitignore`,
+  gardé en local. (commit `0d5f521`)
+
+### Constat majeur — topologie des branches
+`feat/design-system` n'est PAS une fine branche de design : **73 commits / 240 fichiers /
++24 930 lignes** en avance sur `main` — elle porte **tout le produit** (Phases 1-5, stabilité,
+design). Surtout : la chaîne `prototype → fix/stabilite-prod → feat/design-system` **n'était
+poussée nulle part** (pas d'upstream → produit entier sur le seul disque local d'Allan).
+`main` diverge de 1 commit (`docs(hermes)` auth VPS) → merge 3-way, pas un fast-forward.
+
+### Intégration (décision Allan : pousser + PR)
+- `git push -u origin feat/design-system` → **branche sauvegardée sur GitHub** (fin du risque
+  de perte locale).
+- **PR #8** ouverte vers `main` : https://github.com/Allan77bot/scribe-app/pull/8 — décrit
+  honnêtement l'ampleur (intègre tout le produit) + les prérequis avant merge.
+
+### Vérifs
+`tsc --noEmit` ✅ · `eslint` ✅ · `next build` ✅ (**30 routes**). Working tree clean.
+
+### À savoir avant de merger la PR
+- **Migration `0013` à appliquer en prod** (`kgbxxzujlubflsvprmef`, snapshot DB avant) = ACTION 1,
+  ops Allan. Merger le code ≠ migrer la base ; tant que `0013` n'est pas passée, validation de
+  tâche + passation plantent en prod.
+- Merge 3-way (main diverge de 1 commit). Pas de Vercel branché sur `main` → intégration de code,
+  pas une mise en prod.
+
+---
+
 ## 2026-06-24 — Brand guide → design system « Scribe IA » implémenté (feat/design-system) ✅
 
 ### Contexte

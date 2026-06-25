@@ -4,21 +4,34 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-24 (session design system implémenté)
-**Phase :** BUILD. **Design system « Scribe IA » implémenté** sur `feat/design-system` (Stages 1-5 :
-palette cobalt + **cyan**, logo officiel + favicon/icônes, composants DS, re-skin des 5 écrans, **dark mode marine**).
-Build 28 routes vert, tsc+lint propres, **rien poussé**. Avant : lot stabilité **commité** sur
-`fix/stabilite-prod`, onboarding + assignation maquettés/validés (specs `docs/specs/2026-06-21-*.md`).
-**Branche active :** `feat/design-system` (4 commits design ; `Branding/` non suivi).
+| **Dernière mise à jour :** 2026-06-25 (clôture feat/design-system : vouvoiement + PR #8)
+**Phase :** BUILD. **`feat/design-system` bouclée et poussée** : design system « Scribe IA » (Stages 1-5)
++ polish de clôture — copy unifiée en **vouvoiement** (tu → vous, 23 fichiers, e-mails inclus) et export
+handoff `Branding/` **ignoré** (assets déjà dans `public/`, source = projet Claude Design). Build **30 routes**
+vert, tsc+lint propres. **PR #8 ouverte vers `main`** (https://github.com/Allan77bot/scribe-app/pull/8).
+**Topologie (corrige le snapshot précédent)** : `feat/design-system` = **73 commits / 240 fichiers** en
+avance sur `main` (tout le produit y vit) ; `main` diverge de 1 commit → merge 3-way. Le lot stabilité est
+un **ancêtre commité** de cette branche (pas « non commité »).
+**Branche active :** `feat/design-system` (poussée, upstream `origin/feat/design-system`).
 
-> ▶ **PROCHAINES ACTIONS** : (0) **design (polish)** : normaliser tu/vous + décider du sort de `Branding/`
-> + (option) renvoyer le master SVG du logo dans le projet Claude Design ; **review/merge `feat/design-system`** ;
-> (1) **Allan exécute la migration `0013` en prod** (snapshot DB avant) → débloque le produit cassé ;
-> (2) **`feat/onboarding`** ; (3) **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`. Aucune PR ouverte.
+> ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute la migration `0013` en prod** (snapshot DB avant) →
+> débloque validation/passation cassées en prod ; (2) **review + merge de la PR #8** (3-way ; idéalement
+> après `0013`) ; (3) **`feat/onboarding`** ; (4) **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`.
 
 ---
 
 **TL;DR (pour Discord)**
+
+**Session clôture design (2026-06-25) — vouvoiement + Branding/ ignoré + PR #8.**
+On a bouclé `feat/design-system` : (1) toute la copy passe au **vouvoiement** (`vous` partout —
+décision Allan ; c'était déjà la langue du cœur de l'app), 23 fichiers convertis (e-mails inclus),
+prompts IA et commentaires exclus ; (2) l'export handoff `Branding/` est **ignoré** (assets déjà
+dans `public/`, source = projet Claude Design). Build **30 routes** vert, tsc+lint propres.
+Gros constat : la branche portait **tout le produit non poussé** (73 commits, sur le seul disque
+local) → **poussée sur GitHub** + **PR #8** vers `main`. Reste : Allan applique `0013` en prod,
+puis review/merge de la PR.
+
+_Session précédente :_
 
 **Session design system (2026-06-24) — brand guide → app, Stages 1-4.**
 Le design system « Scribe IA » d'Allan (projet Claude Design, importé via DesignSync) est implémenté
@@ -211,19 +224,18 @@ minutes réel ; règle d'or n°5 réparée, XSS fermé. Migration `0006`._
 
 ## En cours / bloqué
 
-- **Lot `fix/stabilite-prod` CODÉ (2026-06-21), non commité** : migration `0013` idempotente/défensive
-  (réconcilie `task_validations` + `reports.kind` + trigger `0007`), `AudioRecorder` (blob persistant
-  IndexedDB, « Réessayer » ne perd plus l'enregistrement, renvoi auto au retour réseau),
-  `/api/admin/migrate` (token statique retiré → garde session admin). `lint` + `build` **verts** (23 routes).
-  ⚠️ `check:rls` / `test:isolation` non rejoués (DB live = ops Allan). **Bloqué sur** : exécution de `0013`
-  en prod par Allan (snapshot DB avant) + son OK pour commit/PR.
+- **Lot stabilité — COMMITÉ et intégré à `feat/design-system`** (ancêtre de la branche, commit `7a99220`) :
+  migration `0013` idempotente/défensive (réconcilie `task_validations` + `reports.kind` + trigger `0007`),
+  `AudioRecorder` (blob persistant IndexedDB, « Réessayer » ne perd plus l'enregistrement, renvoi auto au
+  retour réseau), `/api/admin/migrate` (token statique retiré → garde session admin). Inclus dans la **PR #8**.
+  ⚠️ **Reste bloqué sur** : exécution de `0013` en prod par Allan (snapshot DB avant) — c'est ACTION 1.
 - **Design produit avancé + maquetté (2026-06-21)** : onboarding 2 parcours (manager/employé) + guide
   onglets « première fois » + assignation de tâches construits dans `/demo` (public, sans login,
   **jetable**) et **validés** par Allan. **2 specs** dans `docs/specs/2026-06-21-*.md`. Reste à **porter
   dans la vraie app** (`feat/onboarding`, `feat/tasks-assignment`).
-- **Hygiène branche à faire** : `fix/stabilite-prod` porte pour l'instant TOUT en working tree non commité
-  (lot stabilité + MAJ docs + maquettes `/demo` + specs). Au moment de commiter : séparer proprement
-  (`fix:` stabilité / `docs:` / retirer le `/demo`).
+- **Sort des maquettes `/demo` à trancher** : `/demo/*` (onboarding, ds, tasks, dashboard, capture) sont des
+  maquettes jetables, publiques sans login. Elles partent dans la PR #8 (routes statiques). À décider avant
+  prod : retirer, ou garder derrière un flag de dev. Pas bloquant pour la review.
 - **Vidéos assimilées (2026-06-19)** : 4 reçues, 3 analysées en visuel + 1 (cours Claude
   Code) en transcript. **2 skills forgés** (`~/.claude/skills/design-ui` + `retention`).
   **Audit global FAIT** (2026-06-19) → plan priorisé Route B dans `docs/audit-global.md`.
