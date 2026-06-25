@@ -1,3 +1,50 @@
+## 2026-06-25 (après-midi) — Skill hook-model installé + orbe vocal (feat/capture-orb) ✅
+
+### Skill `hook-model` (niveau utilisateur, remplace `retention`)
+Allan a fourni un skill construit depuis le livre *Hooked* de Nir Eyal (dossier Second Brain :
+`…/Claude Code/Skills/hook-model`). Décision : **hook-model remplace `retention`** (sur-ensemble).
+- **Installé** dans `~/.claude/skills/hook-model/` : `SKILL.md` + `references/` (hook-model-framework.md,
+  b2b-adaptation.md, et patterns-retention.md **récupéré de l'ancien `retention`** — rien perdu).
+- **Fusion** : le SKILL.md garde le framework complet (4 phases, B=MAT de Fogg, adaptation B2B, garde-fou
+  éthique = matrice de manipulation, Habit Testing) ET y fond le concret de `retention` (mécaniques :
+  completion drive, streak avec agence, micro-compétitions gagnables ; anti-patterns ; time-to-value ;
+  + un **mode rapide** « 3 mécaniques » qui préserve le format de sortie de `retention`).
+- **Corrigé** : `skill.md` → `SKILL.md` (convention) ; les liens `references/…` étaient cassés dans la
+  source d'origine → réparés.
+- **`retention` archivé** (non supprimé) dans `~/.claude/skills-archive/retention/` → plus de collision
+  de triggers.
+- **Optimisation de la description** : tentée via le `run_loop.py` de skill-creator, **impossible dans cet
+  environnement** (1. bug encodage Windows cp1252 → contourné en `-X utf8` ; 2. mur dur : le CLI `claude`
+  ne tourne pas en sous-processus imbriqué → `WinError 10038` sur chaque appel). → fait **à la main** :
+  les 10 cas « doit déclencher » sont couverts ; 3 faux positifs durcis dans la description (copywriting de
+  notif, crash technique ≠ churn, dev de feature). Mémoires écrites : `copy-vouvoiement`,
+  `scribe-branch-topology` (+ note de cette limite de tooling).
+
+### Audit rétention de Scribe (via hook-model)
+La boucle Hook de Scribe **ne se referme pas** : action (capture) et récompense (accusé de lecture) sont
+bonnes, mais le **déclencheur externe est absent** (pas de notif) → l'investissement ne recharge aucun
+déclencheur. **3 leviers priorisés** : (1) **notifs au shift entrant** (ferme la boucle ; *bloqué sur le
+choix du canal* — discovery requise) ; (2) **invitation d'équipe obligatoire** à l'onboarding (investissement
+réseau = `feat/onboarding`) ; (3) **accusé de lecture amplifié** en récompense sociale. Anti-patterns à
+fuir : surveillance perçue (B2B/terrain, juridiquement sensible), gamification infantilisante, notif fatigue.
+
+### Orbe vocal — `feat/capture-orb` (branchée sur `feat/design-system`)
+Allan voulait remplacer le bouton « parler » par un orbe (réf 21st.dev *voice-powered-orb*). La source
+exacte est **gatée + sans licence** (risque pour un produit vendu) et en **WebGL** (lourd pour des mobiles
+terrain) → décision : **orbe maison**, CSS pur, zéro dépendance, qui réutilise l'`AnalyserNode` déjà présent.
+- Itérations design (validées par capture d'écran) : sphère vitrée → translucide → **anneau néon** (le bon).
+  Final retenu : **anneau fin** (dégradé conique cyan→bleu→violet, centre **vide** via masque radial),
+  glow qui épouse le trait (drop-shadow). Animation « quand on parle » choisie via une **galerie `/demo/orb`**
+  (4 variantes) → **Pulsation + Échos** : l'anneau pulse au volume réel + ondes concentriques pendant
+  l'enregistrement. **Stage sombre retiré** (rendait un disque gris sale en mode clair).
+- Rendu piloté par refs DOM dans la boucle rAF existante (aucun re-render à 60 fps). Dark mode +
+  `prefers-reduced-motion` gérés. **Machinerie capture/IndexedDB/upload intacte** (seul le visuel idle/recording
+  change). `tsc`/`lint`/`build` **verts** (30 routes).
+- **2 commits locaux** (`1c9b0d9` orbe, `628eaac` galerie demo throwaway), **non poussés**. Branche à
+  intégrer **après** la PR #8 (elle en descend).
+
+---
+
 ## 2026-06-25 — Clôture feat/design-system : vouvoiement + Branding/ ignoré + push & PR #8 ✅
 
 ### Concern du jour

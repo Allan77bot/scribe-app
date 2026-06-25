@@ -4,23 +4,40 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-25 (clôture feat/design-system : vouvoiement + PR #8)
-**Phase :** BUILD. **`feat/design-system` bouclée et poussée** : design system « Scribe IA » (Stages 1-5)
-+ polish de clôture — copy unifiée en **vouvoiement** (tu → vous, 23 fichiers, e-mails inclus) et export
-handoff `Branding/` **ignoré** (assets déjà dans `public/`, source = projet Claude Design). Build **30 routes**
-vert, tsc+lint propres. **PR #8 ouverte vers `main`** (https://github.com/Allan77bot/scribe-app/pull/8).
-**Topologie (corrige le snapshot précédent)** : `feat/design-system` = **73 commits / 240 fichiers** en
-avance sur `main` (tout le produit y vit) ; `main` diverge de 1 commit → merge 3-way. Le lot stabilité est
-un **ancêtre commité** de cette branche (pas « non commité »).
-**Branche active :** `feat/design-system` (poussée, upstream `origin/feat/design-system`).
+| **Dernière mise à jour :** 2026-06-25 (après-midi : skill hook-model + orbe vocal)
+**Phase :** BUILD. Trois avancées aujourd'hui : (1) **`feat/design-system` bouclée et poussée**
+(vouvoiement 23 fichiers + `Branding/` ignoré) → **PR #8 ouverte** ; (2) **skill `hook-model` installé**
+(niveau utilisateur, **remplace `retention`** qui est archivé) + **audit rétention de Scribe** fait
+(3 leviers, cf. plus bas) ; (3) **`feat/capture-orb`** : le bouton « parler » devient un **orbe vocal**
+(anneau néon qui pulse à la voix + échos), **commité en local, NON poussé**.
+**Topologie** : `main` = squelette ; tout le produit vit sur `feat/design-system` (PR #8, 73 commits /
+240 fichiers d'avance, merge 3-way) ; `feat/capture-orb` est branchée **dessus** (donc à intégrer après #8).
+**Branche active :** `feat/capture-orb` (2 commits locaux, pas d'upstream).
 
 > ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute la migration `0013` en prod** (snapshot DB avant) →
-> débloque validation/passation cassées en prod ; (2) **review + merge de la PR #8** (3-way ; idéalement
-> après `0013`) ; (3) **`feat/onboarding`** ; (4) **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`.
+> débloque validation/passation cassées en prod ; (2) **review + merge PR #8** (idéalement après `0013`) ;
+> (3) **`feat/onboarding`** = invitation d'équipe **obligatoire** (levier rétention n°1, spec + maquette
+> `/demo` prêtes) ; (4) accusé de lecture **amplifié** (levier 3) ; (5) **notifications** shift entrant
+> (levier 1) — **BLOQUÉ** sur le choix du canal (discovery). Optionnel : pousser `feat/capture-orb` + PR.
 
 ---
 
 **TL;DR (pour Discord)**
+
+**Session après-midi (2026-06-25) — skill hook-model + orbe vocal.**
+Deux choses. (1) **Skill `hook-model`** installé (niveau utilisateur) à partir du livre *Hooked* d'Allan :
+il **remplace** l'ancien `retention` (archivé dans `~/.claude/skills-archive/`), en fusionnant le
+framework complet (4 phases, B=MAT, B2B, garde-fou éthique, Habit Testing) avec les mécaniques concrètes
+de `retention`. On l'a appliqué à Scribe → **audit rétention** : la boucle Hook **ne se referme pas** car le
+déclencheur externe (notifs) est absent. **3 leviers priorisés** : (1) **notifs au shift entrant** (ferme la
+boucle — *bloqué sur le choix du canal*), (2) **invitation d'équipe obligatoire** (investissement réseau,
+= `feat/onboarding`), (3) **accusé de lecture amplifié** (récompense sociale). (2) **Orbe vocal** : sur
+`feat/capture-orb`, le bouton « parler » devient un **anneau néon** (dégradé cyan→bleu→violet, centre vide)
+qui **pulse au volume réel** du micro + **échos** concentriques ; CSS pur, zéro dépendance, dark mode +
+reduced-motion gérés ; capture/IndexedDB/upload intacts. 2 commits **locaux** (orbe + galerie `/demo/orb`
+throwaway), **non poussés**. Validé visuellement par Allan.
+
+_Plus tôt aujourd'hui :_
 
 **Session clôture design (2026-06-25) — vouvoiement + Branding/ ignoré + PR #8.**
 On a bouclé `feat/design-system` : (1) toute la copy passe au **vouvoiement** (`vous` partout —
