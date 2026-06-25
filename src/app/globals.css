@@ -1,5 +1,105 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Design system « Scribe IA » (source de vérité : projet Claude Design
+   "Scribe IA Design System"). Direction : Fiable · Calme · Lisible —
+   pro mais chaleureux, jamais corporate.
+   Fond paper chaud (jamais blanc clinique), cobalt désaturé (anti-MS-blue),
+   accent CYAN signature (validé/actif/accusés/pointes du logo), ambre rare.
+   Roundness = chaleur. Ombres basses et chaudes, jamais glossy.
+
+   Tailwind v4 : ces tokens @theme génèrent les utilitaires (bg-surface,
+   text-primary, text-cyan, shadow-card, rounded-card, …). On GARDE les noms
+   de tokens existants (surface/primary/secondary/azure…) → le markup ne casse
+   pas, seules les VALEURS changent ; on AJOUTE cyan/ambre/statuts/hairlines.
+   ────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Police unique : Manrope (chargée dans layout.tsx via next/font, self-host). */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* ── Surfaces — paper chaud, jamais blanc clinique (DS colors.css) ── */
+  --color-surface: #f8f7f4; /* fond app — warm off-white */
+  --color-surface-dim: #efeee9;
+  --color-surface-bright: #f8f7f4;
+  --color-surface-container-lowest: #ffffff; /* cartes */
+  --color-card: #ffffff; /* surface de carte (utilitaire bg-card) — flippe en dark */
+  --color-surface-container-low: #f1f4fb; /* champs / sunken (cobalt-050) */
+  --color-surface-container: #f0f1f3; /* chips / nav — gris neutre visible sur blanc */
+  --color-surface-container-high: #efeee9;
+  --color-surface-container-highest: #e7e5df;
+  --color-surface-variant: #e6ecf8; /* tint cobalt-100 (lignes sélectionnées) */
+
+  /* ── Texte sur surfaces ── */
+  --color-on-surface: #3a4658; /* corps — ink */
+  --color-on-surface-variant: #8a93a3; /* muted / métadonnées */
+  --color-inverse-surface: #1a1a2e;
+  --color-inverse-on-surface: #f8f7f4;
+  --color-outline: #8a93a3; /* hint / désactivé */
+  --color-outline-variant: #e7e5df; /* séparateurs (hairline chaud) */
+
+  /* ── Primary — cobalt désaturé (délibérément PAS le #007BFF Microsoft) ── */
+  --color-primary: #2a4fb0;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2f58c2; /* hover / plein plus clair */
+  --color-on-primary-container: #ffffff;
+
+  /* ── Secondary — cobalt-deep : titres, texte fort contraste ── */
+  --color-secondary: #1a2a4a;
+  --color-on-secondary: #ffffff;
+
+  /* ── Azure — tint cobalt : boutons secondary, hover, fonds d'icônes ── */
+  --color-azure: #e6ecf8;
+  --color-on-azure: #2a4fb0;
+
+  /* ── CYAN — accent SIGNATURE (validé / actif / accusés / pointes du logo).
+        JAMAIS en texte courant ; version foncée pour texte AA sur tint cyan. ── */
+  --color-cyan: #22d3ee;
+  --color-cyan-tint: #daf6fb;
+  --color-cyan-text: #0e7c92; /* cyan assombri = AA sur tint clair */
+
+  /* ── AMBRE — accent chaud, rare, humanise (jamais dominant) ── */
+  --color-amber: #e8975a;
+  --color-amber-tint: #fbebdd;
+
+  /* ── Statuts de tâche (règle d'or n°4 : proposé → validé → terminé) ── */
+  --color-status-proposed: #8a93a3; /* « À confirmer » */
+  --color-status-validated: #22d3ee; /* « Active » */
+  --color-status-done: #16a34a; /* « Terminé » */
+  --color-status-rejected: #dc2626; /* rejeté / erreur */
+  --color-status-proposed-bg: #f0f1f3;
+  --color-status-validated-bg: #daf6fb;
+  --color-status-done-bg: #e4f4ea;
+  --color-status-rejected-bg: #fbe6e6;
+
+  /* ── Erreur (= statut rejeté) ── */
+  --color-error: #dc2626;
+  --color-on-error: #ffffff;
+  --color-error-container: #fbe6e6;
+  --color-on-error-container: #93000a;
+
+  /* ── Hairlines chaudes (DS : bordure OU ombre, jamais les deux) ── */
+  --color-line: #e7e5df;
+  --color-line-soft: #efeee9;
+
+  /* ── Rayons — roundness = chaleur, anti-corporate (DS radius.css) ── */
+  --radius-sm: 0.75rem; /* 12px */
+  --radius-field: 1.125rem; /* 18px — inputs, petites tuiles */
+  --radius-lg: 1.5rem; /* 24px — cartes imbriquées */
+  --radius-card: 2rem; /* 32px — cartes principales (signature) */
+  --radius-pill: 9999px; /* boutons & chips pilule */
+
+  /* ── Élévation — ombres basses et chaudes (rgba 26,42,74), jamais glossy
+        (DS radius.css : cartes au repos = shadow-card, lift au survol = md) ── */
+  --shadow-xs: 0 1px 2px rgba(26, 42, 74, 0.05);
+  --shadow-card: 0 2px 8px rgba(26, 42, 74, 0.06); /* niveau 1 : cartes */
+  --shadow-md: 0 6px 20px rgba(26, 42, 74, 0.08); /* lift interactif au survol */
+  --shadow-modal: 0 14px 38px rgba(26, 42, 74, 0.1); /* niveau 2 : modales / sheets */
+
+  /* ── Focus visible — anneau cobalt doux ── */
+  --color-focus-ring: rgba(42, 79, 176, 0.4);
+}
+
 /* Mobile-first strict : rien ne dépasse jamais en largeur. */
 html,
 body {
@@ -9,6 +109,135 @@ body {
 
 body {
   -webkit-tap-highlight-color: transparent;
-  font-family:
-    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Titres : cobalt-deep, serrés (DS base.css). Les classes Tailwind explicites
+   (text-secondary, text-white sur fond coloré…) restent prioritaires. */
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-secondary);
+  letter-spacing: -0.02em;
+}
+
+/* Chiffres tabulaires — timers, quotas, accusés (« Lu par 9 / 12 », « 00:48 »). */
+.tnum {
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Micro-label majuscule (eyebrows, étiquettes de section). */
+.eyebrow {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+}
+
+/* Focus clavier visible — anneau cobalt doux (jamais d'outline brut). */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
+}
+
+/* Logo : bascule de variante selon le thème (color en clair, white-cyan en dark). */
+.logo-dark {
+  display: none;
+}
+html[data-theme="dark"] .logo-light {
+  display: none;
+}
+html[data-theme="dark"] .logo-dark {
+  display: block;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark mode « marine » — secondaire, pensé pour les shifts de nuit (DS). On
+   surcharge les valeurs des tokens : les utilitaires Tailwind (var(--color-…))
+   basculent automatiquement. Sélecteur html[data-theme] = spécificité > :root.
+   ────────────────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] {
+  /* Surfaces — marine */
+  --color-surface: #12132a;
+  --color-surface-dim: #0e0f24;
+  --color-surface-bright: #1a1a2e;
+  --color-surface-container-lowest: #1a1a2e;
+  --color-surface-container-low: #1b1d38;
+  --color-surface-container: #23284a;
+  --color-surface-container-high: #23284a;
+  --color-surface-container-highest: #2a2c47;
+  --color-surface-variant: #23284a;
+  --color-card: #1a1a2e;
+
+  /* Texte */
+  --color-on-surface: #d7dce6;
+  --color-on-surface-variant: #8a93a3;
+  --color-inverse-surface: #eef1f4;
+  --color-inverse-on-surface: #1a1a2e;
+  --color-outline: #8a93a3;
+  --color-outline-variant: #2a2c47;
+
+  /* Cobalt remonté pour le contraste sur marine */
+  --color-primary: #4f73d6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #5e80de;
+  --color-on-primary-container: #ffffff;
+
+  /* Titres clairs */
+  --color-secondary: #eaeef6;
+  --color-on-secondary: #12132a;
+
+  /* Tint cobalt sombre */
+  --color-azure: #23284a;
+  --color-on-azure: #adc7ff;
+
+  /* Cyan texte lisible sur tint sombre */
+  --color-cyan-text: #5fd4e8;
+
+  /* Statuts — fonds sombres */
+  --color-status-proposed-bg: #23253e;
+  --color-status-validated-bg: #14323a;
+  --color-status-done-bg: #14301f;
+  --color-status-rejected-bg: #3a1b1f;
+  --color-status-rejected: #f87171;
+
+  /* Erreur sur marine */
+  --color-error: #f87171;
+  --color-error-container: #3a1b1f;
+  --color-on-error-container: #ffdad6;
+
+  /* Hairlines */
+  --color-line: #2a2c47;
+  --color-line-soft: #23253e;
+
+  /* Focus + ombres (sur fond sombre, teintées noir) */
+  --color-focus-ring: rgba(79, 115, 214, 0.5);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 14px 38px rgba(0, 0, 0, 0.48);
+}
+
+/* Bascule douce du thème (respecte prefers-reduced-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+}
+
+/* Respecte la préférence utilisateur : pas d'animation forcée. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

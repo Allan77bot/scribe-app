@@ -9,21 +9,21 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-      <h1 className="text-xl font-semibold text-slate-900">Créer une équipe</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Tu deviens administrateur de ton organisation.
+    <div className="rounded-card bg-card p-6 shadow-card">
+      <h1 className="text-xl font-semibold text-secondary">Créer une équipe</h1>
+      <p className="mt-1 text-sm text-on-surface-variant">
+        Vous devenez administrateur de votre organisation.
       </p>
 
       {error && (
-        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="mt-4 rounded-field bg-error-container px-3 py-2 text-sm text-on-error-container">
           {error}
         </p>
       )}
 
       <form action={signup} className="mt-5 flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-sm font-medium text-on-surface-variant">
             Nom de l&apos;équipe
           </span>
           <input
@@ -32,52 +32,52 @@ export default async function SignupPage({
             required
             maxLength={120}
             placeholder="Ex. Réception Hôtel Meaux"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-field bg-surface-container-low px-3 py-2.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">Ton nom</span>
+          <span className="text-sm font-medium text-on-surface-variant">Votre nom</span>
           <input
             type="text"
             name="display_name"
             autoComplete="name"
             maxLength={80}
             placeholder="Ex. Allan"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-field bg-surface-container-low px-3 py-2.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">E-mail</span>
+          <span className="text-sm font-medium text-on-surface-variant">E-mail</span>
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-field bg-surface-container-low px-3 py-2.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">Mot de passe</span>
+          <span className="text-sm font-medium text-on-surface-variant">Mot de passe</span>
           <input
             type="password"
             name="password"
             required
             minLength={8}
             autoComplete="new-password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-field bg-surface-container-low px-3 py-2.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
         <button
           type="submit"
-          className="mt-1 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-base font-medium text-white transition-colors hover:bg-slate-700 active:bg-slate-800"
+          className="mt-1 flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"
         >
           Créer mon équipe
         </button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-slate-500">
+      <p className="mt-5 text-center text-sm text-on-surface-variant">
         Déjà un compte ?{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline">
+        <Link href="/login" className="font-medium text-primary underline">
           Se connecter
         </Link>
       </p>

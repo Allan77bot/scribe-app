@@ -2,6 +2,10 @@
 presentation-scribe.html
 presentation-*.html
 
+# Export handoff du design system (généré, source = projet Claude Design ;
+# logos/icônes déjà dans public/, design system dans DESIGN.md) — local only
+Branding/
+
 # Secrets / env (jamais commiter les clés Supabase, Anthropic, OpenAI, Stripe)
 .env
 .env.*
@@ -36,6 +40,19 @@ yarn-error.log*
 
 # Cache de recherche web (firecrawl) — local, ne jamais versionner
 .firecrawl/
+.firecrawl_key
+
+# Scripts / fichiers parasites à la racine (ne pas versionner)
+__pycache__/
+*.pyc
+mission_*.md
+mission_*.py
+enrich_emails.py
+fix_phones.py
+plan_cleanup.md
+cc_cleanup_plan.md
+cc_cleanup_prompt.txt
+skills-lock.json
 
 # Système
 .DS_Store

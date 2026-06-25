@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Référence/archive — pas du code applicatif, jamais linté :
+    "Branding/**", // handoff du design system (mockups, globals window…)
+    "legacy/**", // prototype figé
   ]),
 ]);
 
