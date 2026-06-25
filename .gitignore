@@ -2,6 +2,10 @@
 presentation-scribe.html
 presentation-*.html
 
+# Export handoff du design system (généré, source = projet Claude Design ;
+# logos/icônes déjà dans public/, design system dans DESIGN.md) — local only
+Branding/
+
 # Secrets / env (jamais commiter les clés Supabase, Anthropic, OpenAI, Stripe)
 .env
 .env.*
