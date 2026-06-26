@@ -1,3 +1,61 @@
+## 2026-06-26 — feat/onboarding implémentée (ultracode, 7 agents) ✅
+
+### Concern du jour
+Allan valide : démarrer `feat/onboarding` (levier rétention n°1 de l'audit hook-model). Branche créée
+depuis `feat/design-system` (le produit y vit), l'orbe reste séparé sur `feat/capture-orb`. Brainstorm +
+design validé **avant** tout code (skill brainstorming).
+
+### Découverte d'audit (hors spec du 21/06)
+Le drapeau `onboarding_complete` était sur **l'organisation** (0006). Un employé invité rejoint une org
+déjà onboardée → renvoyé au dashboard → **le parcours employé ne se déclenchait jamais**. Décision (Allan,
+via AskUserQuestion) : **onboarding par-personne** → migration `0014` (`users.onboarding_complete`).
+
+### Méthode — ultracode (workflow, 7 agents)
+Spec d'implémentation écrit d'abord (contrats d'interface figés : signatures actions, props composants, nom
+de colonne) pour permettre le parallélisme sans conflit. Puis workflow :
+- **Build** (3 agents parallèles, fichiers DISJOINTS → zéro conflit) : couche serveur (`0014` + actions +
+  factorisation `inviteOne`/`loadInviteContext` + refactor de l'API route), `OnboardingTour`, `FirstRunNavGuide`.
+- **Integrate** (1 agent) : `OnboardingWizard` refondu (2 parcours) + pages + layout + `ReplayGuideButton`,
+  calé sur les interfaces réelles ; `tsc` vert.
+- **Review** (3 agents adversariaux, read-only) : sécurité/RLS, correctness, UI/a11y/vouvoiement → **18 findings**.
+
+### Findings traités (les 4 réels ; convergence des dimensions)
+1. **Guide nav par-dessus le wizard** (HIGH) : `FirstRunNavGuide` (monté dans `dashboard/layout`)
+   s'affichait sur `/dashboard/onboarding` et grillait la clé « vu ». **Corrigé en déplaçant la route**
+   `/dashboard/onboarding` → **`/onboarding`** (hors layout dashboard) → règle AUSSI le chrome visible
+   (finding #4 : plein cadre fidèle à la maquette). Le proxy couvre déjà toutes les routes → pas de modif auth.
+2. **Échecs d'invitation avalés** : le wizard ignorait invalid/already_member/error. → on surface le récap
+   et on **n'avance pas** si rien n'aboutit alors que des champs sont remplis.
+3. **ColorPicker `taken={[]}`** : l'employé voyait les couleurs prises comme libres (mur au submit). →
+   `onboarding/page.tsx` charge les couleurs prises (RLS) et les grise.
+4. **Tap < 44px** (puces du tour, pastilles ColorPicker) → élargis à 44px.
+   \+ quick wins : dédup e-mails (sentCount juste), `completeOnboarding` message générique, backfill `0014`
+   admin-only (les employés existants jamais onboardés verront leur parcours), pulse du guide via token
+   (suit le dark mode), focus clavier initial.
+
+### Dette notée (non corrigée — hors scope / pré-existant)
+- Policy `inv_insert` (0012) n'exige pas `role=admin` au niveau DB (défense en profondeur entamée ; l'app
+  vérifie déjà admin via `loadInviteContext` → **non exploitable** via le code). À traiter en branche dédiée.
+- Pas de contrainte `UNIQUE(org_id, color)` → TOCTOU couleur (déjà le cas dans `updateProfile`).
+- `inviterName` affiché = admin le plus ancien, pas l'inviteur réel (`invitations.created_by`).
+
+### Vérifs
+`tsc` ✅ · `lint` ✅ · `next build` ✅ **30 routes** (`/onboarding` présent, `/dashboard/onboarding`
+supprimé). `check:rls` non rejouable ici (`SUPABASE_DB_URL` absent du `.env.local` de ce poste) — `0014`
+n'ajoute aucune table à `org_id` → RLS inchangée par construction (confirmé par la review sécurité).
+
+### Commits (3, locaux, NON poussés)
+`e33fa26` docs (spec d'implémentation) · `f62fce9` feat back (`0014` + actions + service) · `4da1fc7`
+feat front (wizard + tour + guide + déplacement de route).
+
+### Reste / next
+- **Ops Allan** : appliquer `0013` PUIS `0014` en prod (snapshot DB avant). Sans `0014`, le déclencheur est
+  défensif (app utilisable, wizard non imposé tant que la colonne n'existe pas).
+- Décider **push + PR** de `feat/onboarding` (et `feat/capture-orb`), après/avec la PR #8.
+- `/demo` toujours en place (à retirer ou mettre derrière un flag, à la PR).
+
+---
+
 ## 2026-06-25 — Clôture feat/design-system : vouvoiement + Branding/ ignoré + push & PR #8 ✅
 
 ### Concern du jour

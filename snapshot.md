@@ -4,23 +4,48 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-25 (clôture feat/design-system : vouvoiement + PR #8)
-**Phase :** BUILD. **`feat/design-system` bouclée et poussée** : design system « Scribe IA » (Stages 1-5)
-+ polish de clôture — copy unifiée en **vouvoiement** (tu → vous, 23 fichiers, e-mails inclus) et export
-handoff `Branding/` **ignoré** (assets déjà dans `public/`, source = projet Claude Design). Build **30 routes**
-vert, tsc+lint propres. **PR #8 ouverte vers `main`** (https://github.com/Allan77bot/scribe-app/pull/8).
-**Topologie (corrige le snapshot précédent)** : `feat/design-system` = **73 commits / 240 fichiers** en
-avance sur `main` (tout le produit y vit) ; `main` diverge de 1 commit → merge 3-way. Le lot stabilité est
-un **ancêtre commité** de cette branche (pas « non commité »).
-**Branche active :** `feat/design-system` (poussée, upstream `origin/feat/design-system`).
+| **Dernière mise à jour :** 2026-06-26 (feat/onboarding implémentée — ultracode)
+**Phase :** BUILD. **`feat/onboarding` codée** (levier rétention n°1) : onboarding **par-personne**
+(migration `0014` : `users.onboarding_complete` — le flag était par-org, donc l'employé invité ne voyait
+**jamais** son parcours), wizard **2 parcours** (manager : nommer l'équipe → inviter en lot dédupliqué ;
+employé : bienvenue → profil nom+couleur), **mini-tour** + **guide des 6 onglets** (vu une fois, rejouable).
+Route déplacée `/dashboard/onboarding` → **`/onboarding`** (plein cadre, hors chrome dashboard).
+Construite en **ultracode** (7 agents : build parallèle + intégration + review adversariale 3 dimensions
+→ 18 findings, **les 4 réels traités**). `tsc`/`lint`/`build` **verts (30 routes)** ; `check:rls` non
+rejouable ici (DB hors-ligne) mais **aucune table neuve → RLS inchangée**. **3 commits locaux, NON poussés.**
+**Topologie** : `main` = squelette ; tout le produit vit sur `feat/design-system` (PR #8) ;
+**`feat/onboarding`** (cette branche) et **`feat/capture-orb`** (orbe vocal, autre branche) descendent de
+design-system → à intégrer après #8. _NB : cette branche descend de design-system → elle n'a PAS l'orbe ni
+l'entrée snapshot « hook-model » de `feat/capture-orb` (réconciliation au merge)._
+**Branche active :** `feat/onboarding` (3 commits locaux, pas d'upstream).
 
-> ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute la migration `0013` en prod** (snapshot DB avant) →
-> débloque validation/passation cassées en prod ; (2) **review + merge de la PR #8** (3-way ; idéalement
-> après `0013`) ; (3) **`feat/onboarding`** ; (4) **`feat/tasks-assignment`**. Specs : `docs/specs/2026-06-21-*.md`.
+> ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute `0013` PUIS `0014` en prod** (snapshot DB avant ;
+> `0014` APRÈS `0013`) — sans ça l'onboarding par-personne ne s'active pas (déclencheur défensif = app
+> utilisable mais wizard non imposé) ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
+> `feat/onboarding` (et `feat/capture-orb`) ; (4) **dette** : policy `inv_insert` (0012) sans `role=admin`
+> au niveau DB (défense en profondeur — app déjà protégée applicativement) + contrainte `UNIQUE(org_id,color)`
+> (TOCTOU couleur) ; (5) leviers rétention restants : accusé de lecture amplifié, notifs shift entrant (**bloqué** canal).
 
 ---
 
 **TL;DR (pour Discord)**
+
+**Session 2026-06-26 — `feat/onboarding` implémentée (ultracode, 7 agents).**
+Concern validé par Allan : porter l'onboarding (levier rétention n°1) en auth réelle. **Découverte
+d'audit** : le flag d'onboarding était sur l'**org** → un employé invité (org déjà onboardée) ne voyait
+**jamais** son parcours. Corrigé en **onboarding par-personne** (migration `0014`, idempotente, backfill
+admin-only). Construit en **ultracode** : build parallèle (serveur + mini-tour + guide, fichiers disjoints)
+→ intégration → **review adversariale 3 dimensions** (sécurité/RLS, correctness, UI/a11y/vouvoiement) =
+**18 findings**, les **4 réels traités** : (1) le guide des onglets s'affichait par-dessus le wizard →
+route déplacée `/dashboard/onboarding` → **`/onboarding`** (plein cadre) ; (2) échecs d'invitation
+**surfacés** (plus jamais avalés) ; (3) couleurs prises **grisées** dès l'UI ; (4) tap ≥ 44px. Wizard
+**2 parcours** (manager nomme + invite en lot dédupliqué ; employé profil nom+couleur), mini-tour + guide
+des 6 onglets (vu une fois, rejouable depuis Réglages). Logique d'invitation factorisée (`inviteOne`,
+API route + onboarding, **tout session/RLS — zéro fuite cross-org** confirmé par la review). `tsc`/`lint`/
+`build` **verts (30 routes)**. **3 commits locaux, non poussés.** **Reste** : appliquer `0013` puis `0014`
+en prod (Allan) ; décider push/PR ; dette sécu notée (policy `inv_insert` 0012 sans admin au niveau DB).
+
+_Session précédente :_
 
 **Session clôture design (2026-06-25) — vouvoiement + Branding/ ignoré + PR #8.**
 On a bouclé `feat/design-system` : (1) toute la copy passe au **vouvoiement** (`vous` partout —
