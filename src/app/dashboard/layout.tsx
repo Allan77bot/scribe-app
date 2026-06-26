@@ -1,4 +1,5 @@
 import DashboardNav from "@/components/DashboardNav";
+import FirstRunNavGuide from "@/components/FirstRunNavGuide";
 import UserMenu from "@/components/UserMenu";
 import { Logo } from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
@@ -49,6 +50,9 @@ export default async function DashboardLayout({
           pb-24 garde le dernier contenu au-dessus de la nav basse. */}
       <div className="mx-auto w-full max-w-[1200px] pb-24 pt-16">{children}</div>
       <DashboardNav />
+      {/* Guide « première fois » des onglets (client). S'auto-gère : ne s'affiche
+          qu'à la 1re visite (localStorage) et écoute l'évènement de rejeu. */}
+      <FirstRunNavGuide />
     </div>
   );
 }

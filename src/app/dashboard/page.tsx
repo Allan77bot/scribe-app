@@ -111,6 +111,19 @@ export default async function DashboardPage() {
     );
   }
 
+  // Onboarding par-personne (migration 0014). Si ce membre ne l'a pas terminé,
+  // on l'envoie au wizard. Lecture DÉFENSIVE : si la colonne onboarding_complete
+  // est absente (0014 pas appliquée), on considère `true` et on NE redirige PAS
+  // (pas de boucle, pas de blocage sur un schéma pas à jour).
+  const onboardingRes = await supabase
+    .from("users")
+    .select("onboarding_complete")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!onboardingRes.error && onboardingRes.data?.onboarding_complete === false) {
+    redirect("/onboarding");
+  }
+
   const org = (profile as unknown as { organizations?: Org }).organizations;
 
   // Météo des tâches — aggrégation depuis les entrées (RLS).

@@ -32,7 +32,7 @@ export default function ColorPicker({ current, taken }: Props) {
               onClick={() => setSelected(color)}
               aria-label={isTaken ? "Couleur déjà prise" : "Choisir cette couleur"}
               aria-pressed={isSelected}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full transition-transform active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
               style={{
                 backgroundColor: color,
                 boxShadow: isSelected ? "0 0 0 2px #002b5b" : undefined,

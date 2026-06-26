@@ -5,6 +5,7 @@ import { updateProfile } from "@/lib/user/actions";
 import { fetchOwnProfile } from "@/lib/user/profile";
 import AvatarUpload from "@/components/AvatarUpload";
 import ColorPicker from "@/components/ColorPicker";
+import ReplayGuideButton from "@/components/ReplayGuideButton";
 
 // Réglages du compte : photo, nom affiché, couleur distinctive. Lecture par
 // SESSION (RLS). La photo s'envoie immédiatement ; nom + couleur via le bouton.
@@ -104,6 +105,17 @@ export default async function SettingsPage({
               Enregistrer
             </button>
           </form>
+        </div>
+
+        {/* Aide — relancer le guide des onglets (coachmark de 1re visite). */}
+        <div className="mt-4 rounded-card bg-card p-6 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+            Aide
+          </p>
+          <p className="mb-4 mt-1 text-sm text-on-surface-variant">
+            Revoyez la visite guidée des onglets quand vous voulez.
+          </p>
+          <ReplayGuideButton />
         </div>
 
         {/* Compte — e-mail en lecture seule + déconnexion. */}
