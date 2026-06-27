@@ -1,5 +1,7 @@
 import "server-only";
 
+import { escapeHtml } from "@/lib/sanitize";
+
 // ── Client Brevo (ex-SendinBlue) — API REST transactionnelle ───────────────
 // On gère nous-mêmes les e-mails transactionnels via Brevo (France, RGPD,
 // 9k/mois gratuits) plutôt que via le SMTP intégré de Supabase. Cela nous donne
@@ -108,7 +110,10 @@ export async function sendVerificationEmail(
   confirmUrl: string,
   displayName?: string,
 ): Promise<void> {
-  const hello = displayName ? `Bonjour ${displayName},` : "Bonjour,";
+  // FAILLE AS-06 : display_name est échappé avant toute interpolation HTML (version
+  // texte laissée brute). Belt-and-suspenders avec cleanLine appliqué à la source.
+  const helloHtml = displayName ? `Bonjour ${escapeHtml(displayName)},` : "Bonjour,";
+  const helloText = displayName ? `Bonjour ${displayName},` : "Bonjour,";
   await send({
     to,
     toName: displayName,
@@ -117,14 +122,14 @@ export async function sendVerificationEmail(
     html: layout({
       preheader: "Confirmez votre adresse pour activer votre équipe Scribe.",
       heading: "Confirmez votre adresse e-mail",
-      body: `<p style="margin:0 0 12px;">${hello}</p>
+      body: `<p style="margin:0 0 12px;">${helloHtml}</p>
              <p style="margin:0;">Bienvenue sur Scribe. Confirmez votre adresse pour activer votre équipe et commencer à coordonner les passations.</p>`,
       ctaLabel: "Confirmer mon adresse",
       ctaUrl: confirmUrl,
       footer:
         "Vous n'avez pas créé de compte Scribe ? Ignorez simplement cet e-mail.",
     }),
-    text: `${hello}\n\nBienvenue sur Scribe. Confirmez votre adresse pour activer votre équipe :\n${confirmUrl}\n\nVous n'avez pas créé de compte ? Ignorez cet e-mail.`,
+    text: `${helloText}\n\nBienvenue sur Scribe. Confirmez votre adresse pour activer votre équipe :\n${confirmUrl}\n\nVous n'avez pas créé de compte ? Ignorez cet e-mail.`,
   });
 }
 
@@ -135,21 +140,27 @@ export async function sendInvitationEmail(
   inviteUrl: string,
   inviterName?: string,
 ): Promise<void> {
-  const who = inviterName ? `${inviterName} vous invite` : "Vous êtes invité";
+  // FAILLE AS-06 : org_name + nom de l'invitant échappés pour le HTML, bruts pour
+  // le sujet et la version texte (qui ne sont pas du HTML).
+  const safeOrg = escapeHtml(orgName);
+  const whoHtml = inviterName
+    ? `${escapeHtml(inviterName)} vous invite`
+    : "Vous êtes invité";
+  const whoText = inviterName ? `${inviterName} vous invite` : "Vous êtes invité";
   await send({
     to,
     subject: `Rejoignez « ${orgName} » sur Scribe`,
     tag: "invitation",
     html: layout({
-      preheader: `${who} à rejoindre ${orgName} sur Scribe.`,
-      heading: `Rejoignez « ${orgName} »`,
-      body: `<p style="margin:0;">${who} à rejoindre l'équipe <strong style="color:#A8804D;">${orgName}</strong> sur Scribe, l'outil de coordination d'équipe. Acceptez l'invitation pour créer votre accès.</p>`,
+      preheader: `${whoHtml} à rejoindre ${safeOrg} sur Scribe.`,
+      heading: `Rejoignez « ${safeOrg} »`,
+      body: `<p style="margin:0;">${whoHtml} à rejoindre l'équipe <strong style="color:#A8804D;">${safeOrg}</strong> sur Scribe, l'outil de coordination d'équipe. Acceptez l'invitation pour créer votre accès.</p>`,
       ctaLabel: "Rejoindre l'équipe",
       ctaUrl: inviteUrl,
       footer:
         "Cette invitation vous était destinée. Si ce n'est pas le cas, ignorez cet e-mail.",
     }),
-    text: `${who} à rejoindre « ${orgName} » sur Scribe.\n\nAcceptez l'invitation :\n${inviteUrl}`,
+    text: `${whoText} à rejoindre « ${orgName} » sur Scribe.\n\nAcceptez l'invitation :\n${inviteUrl}`,
   });
 }
 
@@ -159,7 +170,9 @@ export async function sendPasswordResetEmail(
   resetUrl: string,
   displayName?: string,
 ): Promise<void> {
-  const hello = displayName ? `Bonjour ${displayName},` : "Bonjour,";
+  // FAILLE AS-06 : display_name échappé pour le HTML, brut pour la version texte.
+  const helloHtml = displayName ? `Bonjour ${escapeHtml(displayName)},` : "Bonjour,";
+  const helloText = displayName ? `Bonjour ${displayName},` : "Bonjour,";
   await send({
     to,
     toName: displayName,
@@ -168,13 +181,13 @@ export async function sendPasswordResetEmail(
     html: layout({
       preheader: "Lien pour réinitialiser votre mot de passe Scribe.",
       heading: "Réinitialisez votre mot de passe",
-      body: `<p style="margin:0 0 12px;">${hello}</p>
+      body: `<p style="margin:0 0 12px;">${helloHtml}</p>
              <p style="margin:0;">Une réinitialisation de mot de passe a été demandée pour ce compte. Ce lien est valable une heure.</p>`,
       ctaLabel: "Choisir un nouveau mot de passe",
       ctaUrl: resetUrl,
       footer:
         "Vous n'avez rien demandé ? Votre mot de passe reste inchangé, ignorez cet e-mail.",
     }),
-    text: `${hello}\n\nRéinitialisez votre mot de passe (lien valable 1 h) :\n${resetUrl}\n\nVous n'avez rien demandé ? Ignorez cet e-mail.`,
+    text: `${helloText}\n\nRéinitialisez votre mot de passe (lien valable 1 h) :\n${resetUrl}\n\nVous n'avez rien demandé ? Ignorez cet e-mail.`,
   });
 }

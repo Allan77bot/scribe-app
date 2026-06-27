@@ -18,6 +18,32 @@ const ALLOWED_TAGS = new Set([
   "br",
 ]);
 
+// Échappe les caractères HTML dangereux pour interpoler une valeur utilisateur dans du
+// HTML (e-mails transactionnels notamment — faille AS-06). NE PAS utiliser pour le HTML
+// produit par le LLM : pour ça, voir sanitizeReportHtml (liste blanche de balises).
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Nettoie une valeur « une ligne » saisie par l'utilisateur (display_name, org_name) :
+// remplace les caractères de contrôle C0 (0–31) et DEL (127) — dont les retours-ligne,
+// ce qui neutralise l'injection d'en-têtes/CRLF —, compacte les espaces et tronque à
+// `max` (faille AS-13). Parcours par code-point pour éviter tout regex sur des
+// caractères de contrôle.
+export function cleanLine(value: string, max: number): string {
+  let out = "";
+  for (const ch of value) {
+    const code = ch.codePointAt(0) ?? 0;
+    out += code < 32 || code === 127 ? " " : ch;
+  }
+  return out.replace(/\s+/g, " ").trim().slice(0, max);
+}
+
 export function sanitizeReportHtml(html: string): string {
   if (!html) return "";
   return (

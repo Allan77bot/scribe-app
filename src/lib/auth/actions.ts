@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { dispatchVerificationEmail } from "@/lib/email/auth-links";
+import { cleanLine } from "@/lib/sanitize";
 
 // ── Inscription ──────────────────────────────────────────────────────────
 // Crée le compte Supabase. Le trigger SQL handle_new_user() crée alors l'org
@@ -11,11 +12,22 @@ import { dispatchVerificationEmail } from "@/lib/email/auth-links";
 export async function signup(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const orgName = String(formData.get("org_name") ?? "").trim();
-  const displayName = String(formData.get("display_name") ?? "").trim();
+  // FAILLE AS-13 : valeurs « une ligne » bornées + nettoyées côté serveur (la
+  // validation HTML est contournable) — anti-injection e-mail/UI et cohérence.
+  const orgName = cleanLine(String(formData.get("org_name") ?? ""), 120);
+  const displayName = cleanLine(String(formData.get("display_name") ?? ""), 80);
 
   if (!email || !password || !orgName) {
     redirect("/signup?error=" + encodeURIComponent("Tous les champs sont requis."));
+  }
+
+  // FAILLE AS-11 : la longueur du mot de passe n'était imposée que par l'attribut
+  // HTML minlength (contournable par POST direct). On la revalide côté serveur.
+  if (password.length < 8) {
+    redirect(
+      "/signup?error=" +
+        encodeURIComponent("Le mot de passe doit faire au moins 8 caractères."),
+    );
   }
 
   const supabase = await createClient();
