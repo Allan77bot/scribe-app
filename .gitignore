@@ -21,6 +21,14 @@ dist/
 build/
 /coverage
 
+# Playwright (sorties de tests — garder tests/ et playwright.config.ts)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+# Artefacts du pilotage navigateur via le MCP Playwright (snapshots, console, captures)
+/.playwright-mcp/
+
 # Next.js / TypeScript / Vercel
 next-env.d.ts
 *.tsbuildinfo
