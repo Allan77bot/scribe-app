@@ -40,6 +40,8 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // Ne pas divulguer la stack (header X-Powered-By: Next.js) — faille AS-21.
+  poweredByHeader: false,
   images: {
     // Photos de profil servies depuis le bucket public Supabase Storage.
     remotePatterns: [

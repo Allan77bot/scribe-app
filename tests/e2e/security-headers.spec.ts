@@ -3,14 +3,13 @@ import { EXPECTED_SECURITY_HEADERS } from "./payloads";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // En-têtes de sécurité HTTP.
-// FAILLE AS-21 (missing-security-headers) : aucun header de sécurité n'est
-// actuellement émis (next.config.ts ne définit pas de async headers()).
-// Ces tests passeront une fois les en-têtes ajoutés.
+// FAILLE AS-21 (missing-security-headers) : corrigée le 2026-06-27 (next.config.ts
+// async headers() + poweredByHeader: false). Ces tests sont désormais des garde-fous.
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe("En-têtes de sécurité", () => {
   for (const header of EXPECTED_SECURITY_HEADERS) {
-    test.fixme(`la réponse expose ${header}`, async ({ request }) => {
+    test(`la réponse expose ${header}`, async ({ request }) => {
       const res = await request.get("/login");
       const headers = res.headers();
       expect(headers[header], `${header} manquant`).toBeTruthy();
