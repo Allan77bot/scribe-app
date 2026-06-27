@@ -1,3 +1,44 @@
+## 2026-06-27 (suite 3) — Reste des failles faisable sans backend (fix/) ✅
+
+### Concern
+« Tout le reste que tu peux faire » en attendant le Supabase payant → corriger en code/migration
+le maximum de failles MEDIUM/LOW de l'audit, sur `fix/failles-securite-high`. Suivi via TaskList (10 tâches).
+
+### Corrigées (8 commits séparés, build vert, lint OK)
+- **AS-21** (headers) — `next.config.ts` `headers()` : CSP, HSTS, X-Frame-Options, X-Content-Type-Options,
+  Referrer-Policy, Permissions-Policy (`microphone=(self)` conservé pour le micro) + `poweredByHeader:false`.
+  **Vérifié en runtime** : 0 violation CSP sur `/login` et `/signup` ; les 5 tests `security-headers` passent
+  de `fixme` à actifs → **6/6 verts** en local.
+- **AS-11** — politique mot de passe ≥ 8 **côté serveur** (signup).
+- **AS-13** — `display_name`/`org_name` bornés + nettoyés (`cleanLine`) au signup + **trigger 0016** (clamp en base).
+- **AS-06** — `escapeHtml` sur `org_name`/`display_name`/invitant dans les e-mails (`send.ts`).
+- **AS-07** — prompt injection : données utilisateur déplacées dans le message **user**, délimiteur
+  ALÉATOIRE (`randomUUID`) + neutralisation + consigne anti-injection (rapport, passation, extraction).
+- **AS-08** — `raw_text` et `transcript` bornés (~12k) avant l'appel IA (anti « wallet DoS » par appel).
+- **AS-15** — validation de schéma de la sortie Haiku (`validateExtractedTasks` : priorité ∈ enum, titres
+  tronqués, max 50 tâches) → plus de tâche forgée stockée.
+- **AS-20** — sniff des **magic bytes** à l'upload avatar (JPEG/PNG/GIF/WebP) ; refus SVG / Content-Type spoofé.
+- Utils partagés : `escapeHtml` + `cleanLine` (boucle code-point) dans `lib/sanitize.ts`.
+
+### Migration écrite (à appliquer en prod APRÈS 0015)
+- **0016** — trigger `clamp_user_display_name` (BEFORE INSERT/UPDATE, indépendant de `handle_new_user`).
+
+### REPORTÉES (raison explicite)
+- **AS-04/05/10/14** (rate-limit) + captcha : besoin d'**infra partagée** (Upstash/Vercel KV) + clés Turnstile
+  qu'Allan doit provisionner ; un limiteur en mémoire serait faux sur serverless.
+- **AS-09/16/17/19** (policies storage) : RLS storage **non testable sans backend**, historique de policies
+  emmêlé (0003/0009/0011/0012, 0011 droppe tout) à réconcilier, + décision « chemins org-préfixés ».
+  AS-02 (déjà corrigée) ferme l'exploit principal. À faire avec le backend vivant.
+- **AS-18** (rapport/passation admin-only) : **décision produit** — en 3×8 le chef d'équipe sortant n'est
+  pas forcément admin ; restreindre casserait le flux. Org-scoping déjà correct (pas de cross-org).
+- **AS-12** (invitation acceptée avant preuve e-mail) : à traiter avec la couche invitations.
+
+### Vérifs
+`npm run build` ✅ **30 routes**, lint OK. Suite `security-headers` **6/6 verte** (rejouée en local).
+Migrations en attente d'application prod, dans l'ordre : **0013 → 0014 → 0015 → 0016**. **Rien poussé.**
+
+---
+
 ## 2026-06-27 (suite 2) — Correctifs sécurité : 3 failles HIGH (branche `fix/`) ✅
 
 ### Concern

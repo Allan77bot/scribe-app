@@ -4,7 +4,20 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-27 (suite 2 — correctifs 3 failles HIGH, branche `fix/failles-securite-high`)
+| **Dernière mise à jour :** 2026-06-27 (suite 3 — reste des failles MEDIUM/LOW faisable sans backend)
+
+**Session 2026-06-27 (suite 3) — reste des failles faisable sans backend (toujours `fix/failles-securite-high`).**
+« Tout le reste que tu peux faire » → corrigé en code/migration le max de MEDIUM/LOW. **8 failles corrigées**
+(commits séparés, build vert, lint OK) : **AS-21** headers + `poweredByHeader:false` (CSP **vérifiée runtime**,
+0 violation ; tests `security-headers` **6/6 verts**) · **AS-11** mdp ≥8 serveur · **AS-13** `display_name`/`org_name`
+bornés (signup + trigger **0016**) · **AS-06** `escapeHtml` e-mails · **AS-07** prompt injection (données en
+message user + délimiteur aléatoire, rapport/passation/extraction) · **AS-08** `raw_text`/transcript bornés ~12k ·
+**AS-15** validation schéma sortie Haiku · **AS-20** sniff magic bytes upload avatar. **Migration `0016`** (clamp
+display_name) à appliquer après 0015. **REPORTÉ** (raisons dans `historique.md`) : rate-limit AS-04/05/10/14 +
+captcha (besoin Upstash/KV + Turnstile), policies storage AS-09/16/17/19 (RLS non testable + historique emmêlé ;
+AS-02 ferme déjà l'exploit), AS-18 (décision produit admin-only), AS-12, AS-19. **Rien poussé.**
+
+_Session précédente :_
 
 **Session 2026-06-27 (suite 2) — correctifs sécurité, 3 failles HIGH (branche `fix/failles-securite-high`).**
 Concern : avancer pendant l'attente du Supabase payant → corriger les failles de l'audit, les 3 HIGH
@@ -73,10 +86,10 @@ l'entrée snapshot « hook-model » de `feat/capture-orb` (réconciliation au me
 **Branche active :** `chore/audit-securite` (depuis `feat/onboarding`) — audit + tests + plan, non commité.
 _(feat/onboarding : 3 commits locaux non poussés ; feat/design-system = PR #8 ; feat/capture-orb = orbe.)_
 
-> ▶ **PROCHAINES ACTIONS** : (1) **Allan applique en prod, DANS L'ORDRE : `0013` → `0014` → `0015`**
+> ▶ **PROCHAINES ACTIONS** : (1) **Allan applique en prod, DANS L'ORDRE : `0013` → `0014` → `0015` → `0016`**
 > (snapshot DB avant chaque). `0013` = débloque l'inscription (**PROUVÉ : sans elle, toute inscription
 > échoue** — enum `org_plan` rejette `plan='free'`) ; `0014` = onboarding par-personne ; `0015` = correctif
-> faille **AS-01** (escalade member→admin — sans elle, l'escalade reste possible) ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
+> faille **AS-01** (escalade member→admin) ; `0016` = clamp `display_name` (AS-13) ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
 > `feat/onboarding` (et `feat/capture-orb`) ; (4) **dette** : policy `inv_insert` (0012) sans `role=admin`
 > au niveau DB (défense en profondeur — app déjà protégée applicativement) + contrainte `UNIQUE(org_id,color)`
 > (TOCTOU couleur) ; (5) leviers rétention restants : accusé de lecture amplifié, notifs shift entrant (**bloqué** canal).
