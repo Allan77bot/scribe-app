@@ -1,3 +1,37 @@
+## 2026-06-27 (suite 2) — Correctifs sécurité : 3 failles HIGH (branche `fix/`) ✅
+
+### Concern
+Avancer pendant l'attente du Supabase payant. Choix d'Allan : corriger les failles de l'audit, **les 3
+HIGH d'abord**. Setup git : travail d'audit du jour committé sur `chore/audit-securite` (`dd34020`
+suite e2e + `4f95892` docs), puis branche **`fix/failles-securite-high`** créée depuis là.
+
+### Correctifs (3 commits séparés, reviewables)
+- **AS-03** (`85375ad`) — `src/lib/pipeline/actions.ts` : `"use server"` → `import "server-only"`.
+  `processEntry` n'est plus une server action (c'était un IDOR : appelable avec un `entryId` arbitraire,
+  traitement en service_role sans contrôle d'org). Vérifié : appelé **uniquement** depuis
+  `entries/actions.ts` via `after()`.
+- **AS-02** (`5354c4b`) — `src/lib/entries/actions.ts` (`createEntry`) : valide que `storage_path`
+  commence par `${user.id}/` (préfixe imposé par `getSignedUploadUrl`) + rejet de `..`. Bloque
+  l'exfiltration d'audio cross-org (le pipeline téléchargeait le chemin en service_role, hors RLS).
+- **AS-01** (`63323a7`) — migration **`0015_lock_user_privileges.sql`** : `revoke update on
+  public.users from authenticated` + `grant update (display_name, color, avatar_url,
+  onboarding_complete)`. Bloque l'escalade member→admin via `PATCH /rest/v1/users {"role":"admin"}`
+  direct sur PostgREST. DO block **défensif/idempotent** (ne grant que les colonnes présentes).
+  **Recensé toutes les écritures session sur `users`** (updateProfile, onboarding employé,
+  markOnboardingComplete, avatar) → aucune n'écrit `role`/`org_id`/`email` → le grant ne casse rien.
+
+### Vérifs
+`npm run build` ✅ **30 routes** (`server-only` résout, AS-02/03 compilent, pipeline n'est plus une
+server action). AS-01 = SQL, non exécutable ici. **Rien poussé.**
+
+### Reste (pour reprise)
+- 🔴 **Appliquer en prod, dans l'ordre : `0013` → `0014` → `0015`** (snapshot DB avant). `0015` = AS-01.
+- ⏳ Vérif backend des 3 quand Supabase payant prêt (`PATCH role=admin` → **403** ; upload cross-path → rejet).
+- Tests de non-régression AS-01/02/03 (reportés) ; MEDIUM + LOW restants → `docs/audit-securite-2026-06-27.md`
+  §« Ordre de correction recommandé ». AS-21 (headers) 100% faisable sans backend.
+
+---
+
 ## 2026-06-27 (suite) — Tests Playwright EN DIRECT sur les formulaires (sandbox vivant) ✅
 
 ### Concern du jour

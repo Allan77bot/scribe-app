@@ -4,7 +4,22 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-27 (suite — tests Playwright EN DIRECT sur les formulaires + correctif suite e2e)
+| **Dernière mise à jour :** 2026-06-27 (suite 2 — correctifs 3 failles HIGH, branche `fix/failles-securite-high`)
+
+**Session 2026-06-27 (suite 2) — correctifs sécurité, 3 failles HIGH (branche `fix/failles-securite-high`).**
+Concern : avancer pendant l'attente du Supabase payant → corriger les failles de l'audit, les 3 HIGH
+d'abord. Travail d'audit du jour **committé** sur `chore/audit-securite` (`dd34020` suite e2e + `4f95892`
+docs), puis branche **`fix/failles-securite-high`** (depuis audit-securite). **3 HIGH corrigées, 3 commits
+séparés** : **AS-03** (`85375ad`) — `pipeline/actions.ts` passé en `server-only` (`processEntry` n'est plus
+une server action → IDOR fermé) ; **AS-02** (`5354c4b`) — `createEntry` valide `storage_path` (préfixe
+`${user.id}/`, rejet `..`) → exfil audio cross-org fermée ; **AS-01** (`63323a7`) — migration **`0015`** :
+`revoke update` + `grant update` colonnes profil only (`display_name/color/avatar_url/onboarding_complete`)
+→ escalade member→admin via PATCH PostgREST fermée (DO block défensif). `npm run build` ✅ **30 routes**.
+AS-01 = migration **à appliquer en prod**. **Rien poussé.** Reste : appliquer `0013→0014→0015` en prod,
+vérif backend des 3, puis MEDIUM/LOW (cf. `docs/audit-securite-2026-06-27.md` §ordre recommandé ; AS-21
+headers 100% faisable sans backend) + tests de non-régression AS-01/02/03.
+
+_Session précédente :_
 
 **Session 2026-06-27 (suite) — tests Playwright EN DIRECT sur les formulaires (sandbox vivant).**
 Pilotage navigateur réel (MCP Playwright) sur `/signup` + `/login`, mobile-first (393px). **Couche client
@@ -58,10 +73,10 @@ l'entrée snapshot « hook-model » de `feat/capture-orb` (réconciliation au me
 **Branche active :** `chore/audit-securite` (depuis `feat/onboarding`) — audit + tests + plan, non commité.
 _(feat/onboarding : 3 commits locaux non poussés ; feat/design-system = PR #8 ; feat/capture-orb = orbe.)_
 
-> ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute `0013` PUIS `0014` en prod** (snapshot DB avant ;
-> `0014` APRÈS `0013`) — **PROUVÉ en direct le 2026-06-27 : sans `0013`, TOUTE inscription échoue**
-> (« Database error saving new user » → enum `org_plan` rejette `plan='free'`), et l'onboarding
-> par-personne ne s'active pas ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
+> ▶ **PROCHAINES ACTIONS** : (1) **Allan applique en prod, DANS L'ORDRE : `0013` → `0014` → `0015`**
+> (snapshot DB avant chaque). `0013` = débloque l'inscription (**PROUVÉ : sans elle, toute inscription
+> échoue** — enum `org_plan` rejette `plan='free'`) ; `0014` = onboarding par-personne ; `0015` = correctif
+> faille **AS-01** (escalade member→admin — sans elle, l'escalade reste possible) ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
 > `feat/onboarding` (et `feat/capture-orb`) ; (4) **dette** : policy `inv_insert` (0012) sans `role=admin`
 > au niveau DB (défense en profondeur — app déjà protégée applicativement) + contrainte `UNIQUE(org_id,color)`
 > (TOCTOU couleur) ; (5) leviers rétention restants : accusé de lecture amplifié, notifs shift entrant (**bloqué** canal).
