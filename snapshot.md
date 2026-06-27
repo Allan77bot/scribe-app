@@ -6,6 +6,13 @@
 
 | **Dernière mise à jour :** 2026-06-27 (suite 3 — reste des failles MEDIUM/LOW faisable sans backend)
 
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : le **Supabase payant n'est PAS prêt** → la prod et
+> les migrations (`0013→0014→0015→0016`) **attendent**, ne pas s'y attaquer. **Choisir un chantier NON
+> bloqué** et demander à Allan lequel : **conformité RGPD** (le gros trou pour vendre, ~8 %) · **images de
+> bienvenue** (onboarding/OG) · **design/polish** · OU **push + PR** des branches sécu. Tout le travail sécu
+> est commité **en LOCAL** (rien poussé) sur **`fix/failles-securite-high`** (← `chore/audit-securite` ←
+> `feat/onboarding`). Détail des correctifs : entrée du jour dans `historique.md`.
+
 **Session 2026-06-27 (suite 3) — reste des failles faisable sans backend (toujours `fix/failles-securite-high`).**
 « Tout le reste que tu peux faire » → corrigé en code/migration le max de MEDIUM/LOW. **8 failles corrigées**
 (commits séparés, build vert, lint OK) : **AS-21** headers + `poweredByHeader:false` (CSP **vérifiée runtime**,
