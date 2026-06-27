@@ -1,4 +1,9 @@
-"use server";
+// FAILLE AS-03 (audit 2026-06-27) : ce module était `"use server"`, donc `processEntry`
+// était exposé comme server action appelable par N'IMPORTE QUEL client avec un `entryId`
+// arbitraire → lecture/écriture en service_role sans contrôle d'appartenance org (IDOR +
+// abus de coût IA cross-org). On le passe en `server-only` : `processEntry` n'est plus une
+// server action, il n'est appelé QUE côté serveur depuis `entries/actions.ts` via `after()`.
+import "server-only";
 
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import OpenAI from "openai";
