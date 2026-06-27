@@ -10,6 +10,7 @@ import {
 } from "@/lib/onboarding/actions";
 import OnboardingTour from "@/components/OnboardingTour";
 import ColorPicker from "@/components/ColorPicker";
+import OnboardingHero from "@/components/OnboardingHero";
 
 // ════════════════════════════════════════════════════════════════════════
 // Wizard d'onboarding — DEUX parcours selon le rôle (porté fidèlement de la
@@ -183,8 +184,13 @@ export default function OnboardingWizard({
         {/* ───────── Étape 1 — Manager : nommer l'équipe ───────── */}
         {step === 0 && role === "admin" && (
           <div key="m0" className="scribe-in flex flex-col gap-4">
+            <OnboardingHero
+              srcLight="/illustrations/onb-welcome-light2.png"
+              srcDark="/illustrations/onb-welcome-dark.png"
+              alt="Bienvenue sur Scribe"
+            />
             <div>
-              <h2 className="text-xl font-semibold text-secondary">Bienvenue 👋</h2>
+              <h2 className="text-xl font-semibold text-secondary">Bienvenue</h2>
               <p className="mt-1 text-sm text-on-surface-variant">
                 Donnons un nom à votre équipe — c&apos;est ce que verront vos
                 coéquipiers.
@@ -210,9 +216,11 @@ export default function OnboardingWizard({
         {/* ───────── Étape 1 — Employé : bienvenue ───────── */}
         {step === 0 && role === "member" && (
           <div key="e0" className="scribe-in flex flex-col gap-4 text-center">
-            <div className="mx-auto grid size-16 place-items-center rounded-full bg-azure text-2xl">
-              👋
-            </div>
+            <OnboardingHero
+              srcLight="/illustrations/onb-welcome-light2.png"
+              srcDark="/illustrations/onb-welcome-dark.png"
+              alt="Vous rejoignez une équipe sur Scribe"
+            />
             <div>
               <h2 className="text-lg font-semibold text-secondary">
                 Vous rejoignez une équipe
@@ -375,9 +383,11 @@ export default function OnboardingWizard({
         {/* ───────── Étape 4 — Prêt (partagé) ───────── */}
         {step === 3 && (
           <div key="s3" className="scribe-in flex flex-col gap-4 text-center">
-            <div className="mx-auto grid size-16 place-items-center rounded-full bg-azure text-2xl">
-              🚀
-            </div>
+            <OnboardingHero
+              srcLight="/illustrations/onb-ready-light.png"
+              srcDark="/illustrations/onb-ready-dark.png"
+              alt="Tout est prêt sur Scribe"
+            />
             <div>
               <h2 className="text-lg font-semibold text-secondary">
                 {role === "admin"
