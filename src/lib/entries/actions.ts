@@ -61,7 +61,11 @@ export async function createEntry(formData: FormData) {
   if (!profile?.org_id) redirect("/dashboard?error=no-org");
 
   const type = String(formData.get("type") ?? "text") as "audio" | "text";
-  const rawText = String(formData.get("raw_text") ?? "").trim() || null;
+  // FAILLE AS-08 : on borne raw_text (coût IA par appel plafonné — anti « wallet DoS »).
+  const rawText =
+    String(formData.get("raw_text") ?? "")
+      .trim()
+      .slice(0, 12_000) || null;
   const storagePath =
     String(formData.get("storage_path") ?? "").trim() || null;
 
