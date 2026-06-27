@@ -9,12 +9,36 @@ import { createClient } from "@/lib/supabase/server";
 // dans SUPABASE_SERVICE_ROLE_KEY sur Vercel.
 
 const MAX_BYTES = 5 * 1024 * 1024;
-const ALLOWED: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
+
+// FAILLE AS-20 : détermine le VRAI type d'image d'après les magic bytes (le Content-Type
+// déclaré par le client est spoofable). Renvoie null pour tout ce qui n'est pas une image
+// raster supportée — ce qui REFUSE notamment les SVG (vecteur d'XSS) et le HTML déguisé.
+function sniffImageType(buf: Buffer): { ext: string; mime: string } | null {
+  if (buf.length < 12) return null;
+  // JPEG : FF D8 FF
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+    return { ext: "jpg", mime: "image/jpeg" };
+  }
+  // PNG : 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47 &&
+    buf[4] === 0x0d && buf[5] === 0x0a && buf[6] === 0x1a && buf[7] === 0x0a
+  ) {
+    return { ext: "png", mime: "image/png" };
+  }
+  // GIF : "GIF8" (87a / 89a)
+  if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x38) {
+    return { ext: "gif", mime: "image/gif" };
+  }
+  // WebP : "RIFF"...."WEBP"
+  if (
+    buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
+    buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50
+  ) {
+    return { ext: "webp", mime: "image/webp" };
+  }
+  return null;
+}
 
 async function ensureBucket(baseUrl: string, key: string): Promise<void> {
   // Crée le bucket avatars s'il n'existe pas (idempotent).
@@ -57,14 +81,6 @@ export async function POST(request: Request) {
     if (file.size > MAX_BYTES) {
       return NextResponse.json({ error: "Image trop lourde (5 Mo max)." }, { status: 400 });
     }
-    const ext = ALLOWED[file.type];
-    if (!ext) {
-      return NextResponse.json(
-        { error: "Format non supporté. JPG, PNG, WebP ou GIF." },
-        { status: 400 },
-      );
-    }
-
     const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!baseUrl || !key) {
@@ -75,11 +91,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // FAILLE AS-20 : on ne se fie PAS au Content-Type déclaré. On lit le contenu et on
+    // sniffe les magic bytes → vrai type. SVG / HTML déguisé / fichier non-image = refusés.
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const sniffed = sniffImageType(buffer);
+    if (!sniffed) {
+      return NextResponse.json(
+        { error: "Format non supporté ou image invalide. JPG, PNG, WebP ou GIF." },
+        { status: 400 },
+      );
+    }
+
     // Crée le bucket si absent (idempotent).
     await ensureBucket(baseUrl, key);
 
-    const path = `${user.id}/avatar.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const path = `${user.id}/avatar.${sniffed.ext}`;
 
     // Upload via REST API + service_role (pas de RLS storage).
     const uploadUrl = `${baseUrl}/storage/v1/object/avatars/${path}`;
@@ -87,7 +113,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key}`,
-        "Content-Type": file.type,
+        "Content-Type": sniffed.mime,
         "x-upsert": "true",
       },
       body: buffer,
