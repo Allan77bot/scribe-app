@@ -16,10 +16,28 @@ export const metadata: Metadata = {
   description:
     "Transformez vos notes vocales et écrites en coordination d'équipe : tâches suivies, accusés de lecture, rapport de passation automatique.",
   manifest: "/manifest.webmanifest",
+  // URL absolue de référence pour résoudre les aperçus (og:image, etc.).
+  // Repli sur le domaine Vercel de prod si la variable n'est pas posée.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://scribe-app-beta.vercel.app",
+  ),
   appleWebApp: {
     capable: true,
     title: "Scribe",
     statusBarStyle: "default",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Scribe",
+    locale: "fr_FR",
+    url: "/",
+    title: "Scribe — l'IA transforme vos notes en tâches suivies pour l'équipe",
+    description: "Dictez, l'IA extrait et suit — rien ne se perd.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scribe — coordination d'équipe par l'IA",
+    description: "Dictez, l'IA extrait et suit — rien ne se perd.",
   },
   // Icônes servies par les conventions de fichiers Next : src/app/icon.svg
   // (favicon vectoriel net) + src/app/apple-icon.png (180px). PWA : manifest.ts.
