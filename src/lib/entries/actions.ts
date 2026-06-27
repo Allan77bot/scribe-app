@@ -65,6 +65,24 @@ export async function createEntry(formData: FormData) {
   const storagePath =
     String(formData.get("storage_path") ?? "").trim() || null;
 
+  // FAILLE AS-02 (audit 2026-06-27) : `storage_path` vient du client, et le pipeline le
+  // télécharge ensuite en service_role (hors RLS). Un chemin pointant vers l'audio d'un
+  // AUTRE utilisateur/org exfiltrait sa transcription. On n'accepte donc QUE les chemins
+  // du dossier de l'appelant — `getSignedUploadUrl` impose `${user.id}/...`. Tout autre
+  // préfixe (ou `..`) est refusé. Pour une note texte, on ignore tout chemin fourni.
+  let safeStoragePath: string | null = null;
+  if (type === "audio") {
+    if (
+      !storagePath ||
+      !storagePath.startsWith(`${user.id}/`) ||
+      storagePath.includes("..")
+    ) {
+      console.error("[entries:createEntry] storage_path rejeté:", storagePath);
+      redirect("/dashboard/capture?error=upload-invalide");
+    }
+    safeStoragePath = storagePath;
+  }
+
   const { data: entry, error: insertError } = await supabase
     .from("entries")
     .insert({
@@ -72,7 +90,7 @@ export async function createEntry(formData: FormData) {
       user_id: user.id,
       type,
       raw_text: rawText,
-      storage_path: storagePath,
+      storage_path: safeStoragePath,
     })
     .select("id")
     .single();
