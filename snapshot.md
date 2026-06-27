@@ -4,7 +4,45 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-26 (feat/onboarding implémentée — ultracode)
+| **Dernière mise à jour :** 2026-06-27 (suite — tests Playwright EN DIRECT sur les formulaires + correctif suite e2e)
+
+**Session 2026-06-27 (suite) — tests Playwright EN DIRECT sur les formulaires (sandbox vivant).**
+Pilotage navigateur réel (MCP Playwright) sur `/signup` + `/login`, mobile-first (393px). **Couche client
+tout verte** : validation (`minlength=8` bloque vraiment — prouvé par frappe), types/required, `maxLength`
+120/80, **zéro overflow**, `?error=`/`?message=` reflétés mais **échappés par React** (pas de XSS).
+**Découverte majeure** : l'inscription était **CASSÉE** sur le sandbox — trigger `handle_new_user`
+insérait `plan='free'` (invalide pour l'enum `org_plan` → `22P02`), car **migration `0013` non appliquée**.
+**Allan a exécuté `0013` en direct → inscription OK end-to-end** (compte+org+admin+couleur, vérifié en
+base). **Flux réels** (comptes jetables `@mailinator.com`) : inscription réelle ✅ (→ `confirm-email`) ;
+**XSS stocké neutralisé** (org_name `"><img onerror>` + display_name `<b>` rendus en **texte inerte** sur
+`/dashboard` — échappement React, couvre AS-13/AS-06) ; **anti-énum. connexion ✅** (réponse identique
+e-mail inexistant vs existant+mauvais mdp) ; anti-énum. **inscription ⚠️** générique mais A/B bloqué par
+le **rate-limit e-mail GoTrue actif** (mitige AS-04/10). `@example.com`/`@exemple.com` **rejetés** (pas de
+MX) ; confirmation e-mail active (`mailer_autoconfirm:false`). **Données de test purgées** (2 comptes
+DELETE 200 + 2 orgs 204). **Correctif suite e2e** : helper `uniqueTestEmail()` (domaine MX
+`mailinator.com`) → remplace les `@exemple.com` (6 usages : `auth-signup` ×4, `email-rate-limit` ×2),
+README + commentaires à jour, `npx playwright test --list` ✅. ⚠️ **`.env.local` est passé un instant sur
+la PROD `kgbxxzujlubflsvprmef` → tests REFUSÉS puis corrigé sur le sandbox ; RIEN écrit en prod.** Serveur
+dev sur **:3001**. **Rien commité, rien poussé** (modifs : `tests/e2e/` payloads+2 specs+README).
+
+_Session précédente :_
+
+**Session 2026-06-27 — audit sécurité (ultracode, 37 agents) + suite de tests Playwright + plan chiffré.**
+Branche dédiée **`chore/audit-securite`** (depuis `feat/onboarding`). **Playwright MCP installé** en
+scope user (`~/.claude.json`) — actif au prochain redémarrage de Claude Code. Audit multi-agents 4
+dimensions (formulaires d'inscription · prompt injection pipeline IA · isolation RLS · secrets/endpoints)
+avec **vérification adversariale** : **32 pistes → 21 confirmées, 11 écartées**. **3 HIGH** : (AS-01)
+escalade member→admin via PATCH PostgREST direct (policy `users_update_self` ne protège pas `role`) ;
+(AS-02) exfiltration audio cross-org via `storage_path` client non validé ; (AS-03) `processEntry`
+server action en `service_role` sans autorisation. + 7 MEDIUM (rate-limit email-bombing, prompt
+injection system-prompt, wallet-DoS, etc.) + 11 LOW. **Rapport** : `docs/audit-securite-2026-06-27.md`.
+**Suite de tests** : `tests/e2e/` (Playwright, `playwright.config.ts`, `@playwright/test` ajouté) — les
+`test.fixme` pointent les `AS-xx` (filet de régression). `tsc`/`lint`/`build` **verts (30 routes)**.
+**Plan chiffré** : MVP vendable Route B à **~53%** (moteur ~60-65%, manquent le passage en réel +
+conformité + couche commerciale). **Aucun correctif de faille appliqué** (audit only — à trancher avec Allan).
+**Rien commité, rien poussé.**
+
+_Session précédente :_
 **Phase :** BUILD. **`feat/onboarding` codée** (levier rétention n°1) : onboarding **par-personne**
 (migration `0014` : `users.onboarding_complete` — le flag était par-org, donc l'employé invité ne voyait
 **jamais** son parcours), wizard **2 parcours** (manager : nommer l'équipe → inviter en lot dédupliqué ;
@@ -17,11 +55,13 @@ rejouable ici (DB hors-ligne) mais **aucune table neuve → RLS inchangée**. **
 **`feat/onboarding`** (cette branche) et **`feat/capture-orb`** (orbe vocal, autre branche) descendent de
 design-system → à intégrer après #8. _NB : cette branche descend de design-system → elle n'a PAS l'orbe ni
 l'entrée snapshot « hook-model » de `feat/capture-orb` (réconciliation au merge)._
-**Branche active :** `feat/onboarding` (3 commits locaux, pas d'upstream).
+**Branche active :** `chore/audit-securite` (depuis `feat/onboarding`) — audit + tests + plan, non commité.
+_(feat/onboarding : 3 commits locaux non poussés ; feat/design-system = PR #8 ; feat/capture-orb = orbe.)_
 
 > ▶ **PROCHAINES ACTIONS** : (1) **Allan exécute `0013` PUIS `0014` en prod** (snapshot DB avant ;
-> `0014` APRÈS `0013`) — sans ça l'onboarding par-personne ne s'active pas (déclencheur défensif = app
-> utilisable mais wizard non imposé) ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
+> `0014` APRÈS `0013`) — **PROUVÉ en direct le 2026-06-27 : sans `0013`, TOUTE inscription échoue**
+> (« Database error saving new user » → enum `org_plan` rejette `plan='free'`), et l'onboarding
+> par-personne ne s'active pas ; (2) **review + merge PR #8** ; (3) décider **push + PR** de
 > `feat/onboarding` (et `feat/capture-orb`) ; (4) **dette** : policy `inv_insert` (0012) sans `role=admin`
 > au niveau DB (défense en profondeur — app déjà protégée applicativement) + contrainte `UNIQUE(org_id,color)`
 > (TOCTOU couleur) ; (5) leviers rétention restants : accusé de lecture amplifié, notifs shift entrant (**bloqué** canal).

@@ -1,3 +1,126 @@
+## 2026-06-27 (suite) — Tests Playwright EN DIRECT sur les formulaires (sandbox vivant) ✅
+
+### Concern du jour
+« On fait les tests Playwright en direct sur les formulaires. » Pilotage **navigateur réel** via le
+**MCP Playwright** (désormais actif) sur `/signup` et `/login`, en mobile-first (viewport 393px).
+Serveur dev relancé sur **:3001** (port 3000 occupé). Toujours sur `chore/audit-securite`.
+
+### Couche client / rendu — TOUT VERT (en direct)
+4 champs présents ; `password` `type=password`+`minlength=8` (un mdp 7 car. **réellement** bloqué,
+message FR natif, prouvé par frappe clavier) ; `email` `type=email` ; `org_name`/`email`/`password`
+requis ; `maxLength` 120/80 ; submit vide bloqué ; **zéro overflow horizontal** ; payload XSS dans le
+champ nom d'org = chaîne littérale ; **`?error=`/`?message=` reflétés mais échappés par React** (pas de
+XSS) sur `/login` ET `/signup`.
+
+### Saga `.env.local` (3 itérations)
+(1) pointait sur le sandbox `doorjfxqetoawqnvguvz` avec **clé anon périmée** (401 même avec la clé) →
+soumissions rejetées « Invalid API key », masquées en messages génériques côté UI (bonne hygiène). (2)
+Allan met à jour → `.env.local` pointe alors sur **`kgbxxzujlubflsvprmef` = la PROD** → **refus de
+tester** (créerait comptes/XSS dans la vraie base, viole règle d'or n°2). (3) Allan re-corrige → sandbox
+`doorjfxqetoawqnvguvz`, **clé anon valide** (health 200). Rien n'a été écrit en prod.
+
+### LE GROS TRUC : inscription cassée → corrigée en direct
+Première vraie inscription → `[auth:signup] Database error saving new user`. Sondes lecture seule
+(service_role) : colonnes `onboarding_complete`/`color`/`avatar_url` **présentes** (0010+0014 OK) → pas
+un drift de colonnes. Repro de l'insert org : `plan='free'` → **`22P02 invalid input value for enum
+org_plan: "free"`**. Cause racine = trigger `handle_new_user()` version 0011/0012 (insère `plan='free'`),
+**migration `0013` non appliquée sur le sandbox**. **Allan a exécuté `0013` en direct → l'inscription
+remarche end-to-end** (compte + org + rôle admin + couleur auto, vérifié en base). ⚠️ **C'est l'ACTION 1
+du snapshot, mais pour la PROD** : prouvé que sans `0013`, toute inscription échoue. À prioriser sur
+`kgbxxzujlubflsvprmef`.
+
+### Flux réels (sandbox, comptes jetables `@mailinator.com`)
+- **Inscription réelle** ✅ → redirige `/login?message=confirm-email` (confirmation active,
+  `mailer_autoconfirm:false`). `@example.com`/`@exemple.com` **rejetés** par Supabase (pas de MX).
+- **XSS stocké** ✅ neutralisé : compte créé (via API admin pré-confirmé) avec org_name piégé
+  `"><img src=x onerror=...>` + display_name `<b>AdminX</b>` → après login, sur `/dashboard` les deux
+  s'affichent en **texte inerte** (échappement React), aucune exécution, aucun `<img>`/`<b>` injecté.
+  Couvre AS-13/AS-06 au rendu.
+- **Anti-énum. connexion** ✅ : e-mail inexistant vs existant+mauvais mdp → réponse **identique**
+  (`400 Invalid login credentials`). Pas de fuite d'existence.
+- **Anti-énum. inscription** ⚠️ : message générique, mais A/B propre **bloqué par le rate-limit e-mail**
+  (`email rate limit exceeded` / `you can only request this after N seconds`) — rate-limit GoTrue **actif**
+  (mitige AS-04/10). À reconfirmer hors fenêtre.
+- **Données de test purgées** : 2 comptes Auth (DELETE 200) + 2 orgs (204), vérif post-nettoyage vide.
+
+### Correction de la suite e2e (demandée)
+`payloads.ts` : helper **`uniqueTestEmail(prefix)`** + `TEST_EMAIL_DOMAIN="mailinator.com"` (MX valide).
+Remplacé les 6 `@exemple.com` (`auth-signup` ×4, `email-rate-limit` ×2) ; gardé le `victime@exemple.com`
+de `ABUSE_STRINGS.newlines` (charge d'injection d'en-tête CRLF, intentionnelle). Commentaire anti-énum.
+enrichi (réalité rate-limit + confirmation). `README.md` : prérequis e-mail MX + **0013 sur le sandbox**
++ rate-limit. `npx playwright test --list` ✅ (suite compile, import résout).
+
+### État
+Serveur dev sur **:3001** (laissé tournant). `.env.local` = **sandbox** (à laisser ainsi). Sandbox :
+`0013` désormais appliqué, données de test purgées. **Rien commité, rien poussé** (modifs : 3 fichiers
+`tests/e2e/` + README). Reste : `0013` sur la PROD (critique, prouvé), reconfirmer anti-énum. inscription.
+
+---
+
+## 2026-06-27 — Audit sécurité + suite Playwright + plan chiffré (ultracode, 37 agents) ✅
+
+### Concern du jour
+Allan reprend le projet (Supabase payant en attente). Demandes : (1) que faire des MCP Playwright,
+(2) tests UX/UI des formulaires d'inscription + anti prompt-injection + sécu des données au max,
+(3) plan des étapes suivantes (images de bienvenue, base interne entreprise, domaine acheté) + %
+d'avancement + tâches d'une ligne. Sous-agents demandés : agent sécurité + agent planificateur.
+Branche dédiée **`chore/audit-securite`** créée depuis `feat/onboarding`.
+
+### Playwright MCP
+**Pas installé** dans la session (vérifié : `claude mcp list`, `package.json`, pas de config). Installé
+via sous-agent en scope user : `claude mcp add playwright --scope user -- npx @playwright/mcp@latest`
+(✔ Connected, Chromium 149 téléchargé, bloc écrit dans `C:\Users\allan\.claude.json`). **Actif au
+prochain redémarrage** de Claude Code uniquement.
+
+### Méthode — ultracode (workflow, 37 agents)
+4 dimensions d'audit en parallèle (formulaires-inscription · prompt-injection-pipeline-ia ·
+isolation-donnees-rls · secrets-endpoints-config), chaque finding **vérifié en adversarial** (biais
+défaut = réfuter, effort high). + 1 agent planificateur en parallèle. **32 pistes brutes → 21
+confirmées, 11 écartées** (faux positifs : ex. le mot de passe passé à `dispatchVerificationEmail`
+est normal/server-only ; processEntry-no-auth doublon ; storage-policy-wipe non exploitable).
+
+### Failles confirmées (détail : `docs/audit-securite-2026-06-27.md`)
+- **3 HIGH** : AS-01 escalade member→admin (policy `users_update_self` 0001:111 ne protège pas `role`
+  → `PATCH /rest/v1/users {"role":"admin"}` direct) ; AS-02 exfiltration audio cross-org (`storage_path`
+  client non validé, `entries/actions.ts` + `pipeline/actions.ts`) ; AS-03 `processEntry` server action
+  `service_role` sans autorisation (IDOR write + abus coût).
+- **7 MEDIUM** : email-bombing `/api/auth/confirm` (AS-04/10), spam invitations (AS-05), injection HTML
+  e-mails via org_name/display_name (AS-06), prompt injection system-prompt rapport/passation (AS-07),
+  wallet-DoS notes texte sans quota (AS-08), lecture audio cross-org policy SELECT (AS-09).
+- **11 LOW** : password policy serveur (AS-11), invitation consommée avant preuve e-mail (AS-12),
+  display_name non borné (AS-13), pas d'anti-bruteforce (AS-14), sortie Haiku sans validation schéma
+  (AS-15), policies storage avatars/audio trop permissives (AS-16/17), report/handover insert
+  service_role sans check admin (AS-18), bucket avatars world-readable (AS-19), content-type spoofing
+  upload (AS-20), aucun header de sécurité (AS-21).
+- **Déjà conforme** : anti-énumération, sanitizer HTML, signature webhook Stripe, service_role non
+  exposé, endpoint migrate gardé session+rôle, middleware /dashboard.
+
+### Suite de tests Playwright (`tests/e2e/`)
+`playwright.config.ts` (mobile-first Pixel 5 + desktop, webServer auto `npm run dev`), `@playwright/test`
+ajouté en devDep. Specs : `auth-signup`, `route-protection`, `injection-payloads`, `security-headers`,
+`email-rate-limit` + `payloads.ts` + `README.md`. Les `test.fixme` encodent le comportement sécurisé
+attendu des failles connues (→ deviennent garde-fous au fix). `.gitignore` : sorties Playwright ignorées.
+
+### Plan chiffré (agent planificateur)
+**MVP vendable Route B ~53%** (moteur produit ~60-65%, mais manquent : passage en réel, conformité
+RGPD ~8%, couche commerciale). Modules : auth 82% · capture 85% · pipeline IA 75% · tâches+validation
+55% · rapport/passation 60% · onboarding 80% · équipe 80% · billing 45% · design 90% · sécu/RLS 68% ·
+conformité 8% · infra 38% · contenu 15%. P0 : Supabase payant → 0013 puis 0014 → merge PR #8 → merge
+onboarding → domaine → Stripe live → retirer /demo. P1 : conformité minimale, images onboarding+OG,
+base interne, notif relève, assignation tâches.
+
+### Vérifs
+`tsc` ✅ · `lint` ✅ · `next build` ✅ **30 routes**. **Aucun correctif de faille appliqué** (audit only).
+**Rien commité, rien poussé.**
+
+### Reste / next
+- Trancher avec Allan quels correctifs implémenter (reco : AS-01/02/03 d'abord, puis rate-limit
+  transversal, puis validation serveur ; les correctifs migration s'appliquent en prod par Allan).
+- Au redémarrage Claude Code : Playwright MCP dispo → tests navigateur en direct (app lancée +
+  Supabase sandbox jetable, jamais la prod).
+
+---
+
 ## 2026-06-26 — feat/onboarding implémentée (ultracode, 7 agents) ✅
 
 ### Concern du jour
