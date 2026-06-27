@@ -1,3 +1,56 @@
+## 2026-06-28 — feat/welcome-images : Open Graph + illustrations d'onboarding ✅
+
+### Concern
+Avancer pendant l'attente du Supabase payant. Chantier **« images de bienvenue »** choisi par Allan
+(parmi : conformité RGPD · images de bienvenue · design/polish · push+PR sécu). Branche dédiée
+**`feat/welcome-images`** (depuis `fix/failles-securite-high`). Méthode : brainstorming → spec → plan → exécution.
+
+### Cadrage
+- Périmètre : **les deux** — OG (aperçu de lien) + illustrations onboarding. Fabrication **hybride** (OG en code, onboarding IA).
+- Spec : `docs/specs/2026-06-27-welcome-images-design.md` · Plan : `docs/superpowers/plans/2026-06-27-welcome-images.md`.
+
+### Task 1 — Carte Open Graph (ultracode, 6 agents) — commit `d7ce64a`
+- `src/app/opengraph-image.tsx` + `twitter-image.tsx` (Satori 1200×630, dégradé cobalt #2A4FB0→marine + accent cyan #22D3EE,
+  logo blanc/cyan + slogan). `layout.tsx` : `metadataBase` (`NEXT_PUBLIC_SITE_URL ?? https://scribe-app-beta.vercel.app`)
+  + `openGraph` (fr_FR) + `twitter` (summary_large_image). Test e2e `tests/e2e/og-meta.spec.ts` (TDD rouge→vert).
+- **Review adversariale = 3 pièges réels rattrapés** (le code littéral du plan ne buildait pas sous Next 16 + Turbopack + Satori) :
+  (1) `fetch(new URL(...,import.meta.url))` KO sur `file://` → `readFile(new URL())` ; (2) Satori ne gère pas les polices
+  **variables** → 2 **woff statiques** Manrope (Fontsource) ; (3) `runtime` non ré-exportable → déclaré localement dans `twitter-image`.
+- Vérif indépendante : build/lint/test verts, route OG → 200 `image/png` 1200×630, rendu inspecté.
+- **Slogan retenu** : « L'IA transforme vos notes en tâches suivies pour l'équipe. » + sous-ligne « Dictez, l'IA extrait et
+  suit — rien ne se perd. » → **mène avec le BUT de l'app** (IA + coordination) ; la passation = angle marketing plus tard.
+
+### Task 2/3 — Illustrations onboarding (Higgsfield) — commits `5f454dd` + `fe1a755`
+- Modèle : **Recraft 4.1** (mode `vector` + palette hex verrouillée) — bien meilleur que Nano Banana pour du flat de marque.
+  ~20 crédits utilisés (reste ~53, plan Starter). Sortie SVG vectoriel → rasterisée (sharp/rsvg). **Zéro texte** dans l'image.
+- 4 finales `public/illustrations/onb-{welcome,ready}-{light,dark}.png`. Concepts : accueil = onde vocale → équipe → checklist ;
+  Prêt = ✓ cerclé + flèche d'élan.
+- Composant **`OnboardingHero`** : 2 images/écran, **bascule clair↔sombre via `html[data-theme]`** (convention globals.css),
+  illustration **entière** (`object-contain`) sur fond de marque assorti (crème #F8F7F4 / marine #12132A) → raccord invisible
+  et **dézoomé**, micro-anim de révélation (`prefers-reduced-motion` respecté). Emojis 👋/🚀 remplacés aux **3 écrans**
+  (accueil manager + employé, Prêt) ; le mini-tour garde ses icônes SVG.
+
+### Itérations design (validées en direct par Allan — Playwright MCP + planches-contact)
+- **Dark mode** : 1 image identique (rejetée) → fond cobalt → **2 versions** clair/sombre = **même dessin, couleurs adaptées au fond**.
+- Recolor sombre→clair de l'accueil : l'échange de couleurs SVG (sed) sortait l'**onde buguée** + bloc blanc → version claire
+  **recolorée via Gemini** (prompt « pur remappage de couleurs, zéro redessin »), puis quantizée (~196 KB).
+- **Vidéo** : Allan a demandé si une intro vidéo valait le coup → **non pour l'onboarding** (poids, time-to-value, mobile,
+  crédits, autoplay) → réservée au **marketing** (landing/LinkedIn/cold email) → branche `feat/marketing-video` plus tard.
+
+### Leçon technique (à retenir)
+- **Cache `next/image`** : l'URL `/_next/image` est figée par `sizes` (ici plafonné à 448px → toujours `w=640`). Remplacer un
+  asset sous le même nom ne suffit pas (cache navigateur + cache optimiseur en mémoire) ; `rm .next/cache/images` + restart dev
+  purge le serveur mais **pas** le navigateur. **Solution fiable : renommer l'asset** (d'où les noms `onb-*`). À refaire à chaque
+  remplacement de visuel sous le même nom.
+
+### État / Reste
+- Build **32 routes** vert, lint propre, **rien poussé** (règle d'or respectée). Route de preview temporaire supprimée.
+- **À trancher avec Allan (prochaine session)** : push + PR de `feat/welcome-images` (et des autres branches locales :
+  `fix/failles-securite-high`, `feat/onboarding`, `feat/capture-orb`…). **Supabase payant toujours en attente** (0013→0016).
+  Prochain chantier non bloqué : **conformité RGPD** (gros trou pour vendre) ou design/polish.
+
+---
+
 ## 2026-06-27 (suite 3) — Reste des failles faisable sans backend (fix/) ✅
 
 ### Concern

@@ -4,14 +4,38 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-27 (suite 3 — reste des failles MEDIUM/LOW faisable sans backend)
+| **Dernière mise à jour :** 2026-06-28 (feat/welcome-images — OG + illustrations onboarding)
 
-> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : le **Supabase payant n'est PAS prêt** → la prod et
-> les migrations (`0013→0014→0015→0016`) **attendent**, ne pas s'y attaquer. **Choisir un chantier NON
-> bloqué** et demander à Allan lequel : **conformité RGPD** (le gros trou pour vendre, ~8 %) · **images de
-> bienvenue** (onboarding/OG) · **design/polish** · OU **push + PR** des branches sécu. Tout le travail sécu
-> est commité **en LOCAL** (rien poussé) sur **`fix/failles-securite-high`** (← `chore/audit-securite` ←
-> `feat/onboarding`). Détail des correctifs : entrée du jour dans `historique.md`.
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/welcome-images` est TERMINÉE** (carte Open
+> Graph + illustrations d'onboarding clair/sombre), **committée en LOCAL, rien poussé**. Le **Supabase payant
+> n'est TOUJOURS PAS prêt** → migrations `0013→0014→0015→0016` **attendent**, ne pas s'y attaquer. **À voir
+> avec Allan** : (1) **push + PR** des branches locales (feat/welcome-images, fix/failles-securite-high,
+> feat/onboarding…) — décision explicite requise ; (2) prochain chantier NON bloqué — **conformité RGPD**
+> (le gros trou pour vendre, ~8 %) ou **design/polish**. Détail : entrée **2026-06-28** dans `historique.md`.
+
+**Session 2026-06-28 — `feat/welcome-images` : Open Graph + illustrations d'onboarding (clair/sombre).**
+Branche dédiée `feat/welcome-images` (depuis `fix/failles-securite-high`). Concern « images de bienvenue »
+choisi par Allan. Brainstorming → spec (`docs/specs/2026-06-27-welcome-images-design.md`) → plan
+(`docs/superpowers/plans/2026-06-27-welcome-images.md`). **3 tasks livrées, commits séparés, build 32 routes
+vert, rien poussé** : **(T1) Open Graph** (ultracode 6 agents) — `src/app/opengraph-image.tsx` + `twitter-image.tsx`
+(Satori 1200×630, dégradé cobalt→marine + accent cyan, logo + slogan « L'IA transforme vos notes en tâches
+suivies pour l'équipe. »), bloc `openGraph`/`twitter` + `metadataBase` (`scribe-app-beta.vercel.app`) dans
+`layout.tsx`, test e2e `tests/e2e/og-meta.spec.ts`. La review adversariale a rattrapé **3 pièges Next 16/
+Turbopack/Satori** (le code littéral du plan ne buildait pas) : `readFile(new URL())` au lieu de `fetch()` sur
+`file://`, **2 woff statiques** Manrope (Satori ne gère pas la police variable), `runtime` déclaré localement
+(re-export interdit). **(T2/T3) illustrations onboarding** — 4 PNG `public/illustrations/onb-{welcome,ready}-{light,dark}.png`
+générés via **Higgsfield (Recraft 4.1, mode vector, palette de marque)** ; composant **`OnboardingHero`** :
+2 images/écran, **bascule clair↔sombre via `html[data-theme]`**, illustration **entière** (`object-contain`) sur
+fond assorti crème/marine (raccord invisible), micro-anim de révélation. Emojis 👋/🚀 remplacés aux **3 écrans**
+(accueil manager + employé, Prêt). **Même dessin clair/sombre** (couleurs adaptées au fond) ; la version claire
+de l'accueil a été **recolorée via Gemini** (l'onde était buguée en recolor SVG). **Décisions** : OG = carte de
+marque unique (pas d'aperçu invitation perso, reporté) ; slogan mène avec le **but** de l'app (IA + coordination),
+la passation = angle marketing plus tard ; **pas de vidéo** dans l'onboarding (perf/time-to-value/mobile) → la
+vidéo « intro de lancement » est réservée au **marketing** (branche `feat/marketing-video` plus tard, ~53 crédits
+Higgsfield restants). Galère récurrente notée : **cache d'images next/image** (URL `_next/image` figée par le
+`sizes` à `w=640`) → contournée en **renommant** les assets (`onb-*`).
+
+_Session précédente :_
 
 **Session 2026-06-27 (suite 3) — reste des failles faisable sans backend (toujours `fix/failles-securite-high`).**
 « Tout le reste que tu peux faire » → corrigé en code/migration le max de MEDIUM/LOW. **8 failles corrigées**
