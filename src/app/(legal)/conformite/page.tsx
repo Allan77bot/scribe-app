@@ -26,7 +26,7 @@ export default function ConformitePage() {
         (OpenAI Ireland, Anthropic Ireland), <strong>sans entraînement</strong> sur vos contenus.
       </p>
 
-      <h2>L'IA propose, l'humain valide</h2>
+      <h2>L&apos;IA propose, l&apos;humain valide</h2>
       <p>
         Aucune relance ni escalade n&apos;est déclenchée sans validation humaine. Scribe IA n&apos;est
         pas un outil de surveillance individuelle : il coordonne le travail d&apos;équipe, il ne note
@@ -54,11 +54,11 @@ export default function ConformitePage() {
       <ul>
         <li><a href="/mentions-legales">Mentions légales</a></li>
         <li><a href="/confidentialite">Politique de confidentialité</a></li>
-        <li><a href="/cgu">Conditions générales d'utilisation</a></li>
+        <li><a href="/cgu">Conditions générales d&apos;utilisation</a></li>
         <li><a href="/conformite/dpa">Accord de sous-traitance (DPA) — imprimable</a></li>
       </ul>
 
-      <h2 id="information-salaries">Notice d'information des salariés (modèle)</h2>
+      <h2 id="information-salaries">Notice d&apos;information des salariés (modèle)</h2>
       <p>
         Avant de déployer Scribe IA, l&apos;employeur informe ses salariés (art. L.1222-4 du Code du
         travail) et, le cas échéant, consulte le CSE (art. L.2312-38, à partir de 50 salariés).

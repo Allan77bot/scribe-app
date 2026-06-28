@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function CguPage() {
   return (
     <Prose>
-      <h1 className="text-2xl font-semibold text-secondary">Conditions générales d'utilisation</h1>
+      <h1 className="text-2xl font-semibold text-secondary">Conditions générales d&apos;utilisation</h1>
       <LastUpdated date="28 juin 2026" version="1.0" />
 
       <h2>1. Objet</h2>
