@@ -6,6 +6,7 @@ const PUBLIC_LEGAL = [
   { path: "/confidentialite", marker: "Politique de confidentialité" },
   { path: "/cgu", marker: "Conditions générales" },
   { path: "/conformite", marker: "Conformité" },
+  { path: "/conformite/dpa", marker: "Accord de sous-traitance" },
 ];
 
 test.describe("Pages légales publiques", () => {
