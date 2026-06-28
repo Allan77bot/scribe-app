@@ -10,7 +10,7 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="w-full border-t border-outline-variant px-6 py-8 text-center">
+    <footer className="w-full border-t border-outline-variant px-6 py-8 text-center print:hidden">
       <nav
         aria-label="Liens légaux"
         className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm"

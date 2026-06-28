@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-surface">
-      <header className="border-b border-outline-variant px-6 py-4">
+      <header className="border-b border-outline-variant px-6 py-4 print:hidden">
         <Link href="/" aria-label="Retour à l'accueil" className="inline-flex">
           <Logo size={32} />
         </Link>

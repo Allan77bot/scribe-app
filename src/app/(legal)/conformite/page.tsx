@@ -56,6 +56,7 @@ export default function ConformitePage() {
         <li><a href="/confidentialite">Politique de confidentialité</a></li>
         <li><a href="/cgu">Conditions générales d&apos;utilisation</a></li>
         <li><a href="/conformite/dpa">Accord de sous-traitance (DPA) — imprimable</a></li>
+        <li><a href="#information-salaries">Notice d&apos;information des salariés</a></li>
       </ul>
 
       <h2 id="information-salaries">Notice d&apos;information des salariés (modèle)</h2>
