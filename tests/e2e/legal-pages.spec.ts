@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 // Pages légales publiques — accessibles sans session, footer présent, mobile-first.
 const PUBLIC_LEGAL = [
   { path: "/mentions-legales", marker: "Mentions légales" },
+  { path: "/confidentialite", marker: "Politique de confidentialité" },
 ];
 
 test.describe("Pages légales publiques", () => {
