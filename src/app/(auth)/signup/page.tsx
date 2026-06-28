@@ -67,6 +67,25 @@ export default async function SignupPage({
             className="w-full rounded-field bg-surface-container-low px-3 py-2.5 text-base text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
+        <label className="flex items-start gap-2.5 text-sm text-on-surface-variant">
+          <input
+            type="checkbox"
+            name="accept_terms"
+            required
+            className="mt-0.5 h-5 w-5 shrink-0 rounded accent-primary"
+          />
+          <span>
+            J&apos;accepte les{" "}
+            <Link href="/cgu" target="_blank" className="font-medium text-primary underline">
+              CGU
+            </Link>{" "}
+            et la{" "}
+            <Link href="/confidentialite" target="_blank" className="font-medium text-primary underline">
+              politique de confidentialité
+            </Link>
+            .
+          </span>
+        </label>
         <button
           type="submit"
           className="mt-1 flex h-14 w-full items-center justify-center rounded-pill bg-primary px-6 text-base font-semibold text-on-primary transition-all hover:bg-primary-container active:scale-[0.98]"

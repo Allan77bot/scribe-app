@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { dispatchVerificationEmail } from "@/lib/email/auth-links";
 import { cleanLine } from "@/lib/sanitize";
+import { isTermsAccepted } from "@/lib/auth/terms";
 
 // ── Inscription ──────────────────────────────────────────────────────────
 // Crée le compte Supabase. Le trigger SQL handle_new_user() crée alors l'org
@@ -27,6 +28,14 @@ export async function signup(formData: FormData) {
     redirect(
       "/signup?error=" +
         encodeURIComponent("Le mot de passe doit faire au moins 8 caractères."),
+    );
+  }
+
+  // Acceptation des CGU obligatoire (la case HTML `required` est contournable par POST direct).
+  if (!isTermsAccepted(formData.get("accept_terms"))) {
+    redirect(
+      "/signup?error=" +
+        encodeURIComponent("Vous devez accepter les CGU et la politique de confidentialité."),
     );
   }
 
