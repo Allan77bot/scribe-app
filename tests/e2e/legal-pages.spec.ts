@@ -4,6 +4,7 @@ import { test, expect } from "@playwright/test";
 const PUBLIC_LEGAL = [
   { path: "/mentions-legales", marker: "Mentions légales" },
   { path: "/confidentialite", marker: "Politique de confidentialité" },
+  { path: "/cgu", marker: "Conditions générales" },
 ];
 
 test.describe("Pages légales publiques", () => {
@@ -31,6 +32,11 @@ test.describe("Pages légales publiques", () => {
       expect(overflow).toBe(false);
     });
   }
+});
+
+test("les CGU mentionnent explicitement le fonctionnement de l'IA", async ({ page }) => {
+  await page.goto("/cgu");
+  await expect(page.getByText(/l['']IA propose, l['']humain valide/i)).toBeVisible();
 });
 
 test("la landing montre le footer légal", async ({ page }) => {
