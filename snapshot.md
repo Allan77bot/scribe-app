@@ -4,14 +4,33 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-28 (feat/welcome-images — OG + illustrations onboarding)
+| **Dernière mise à jour :** 2026-06-28 (feat/conformite-rgpd — socle RGPD contenu + push de 4 branches)
 
-> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/welcome-images` est TERMINÉE** (carte Open
-> Graph + illustrations d'onboarding clair/sombre), **committée en LOCAL, rien poussé**. Le **Supabase payant
-> n'est TOUJOURS PAS prêt** → migrations `0013→0014→0015→0016` **attendent**, ne pas s'y attaquer. **À voir
-> avec Allan** : (1) **push + PR** des branches locales (feat/welcome-images, fix/failles-securite-high,
-> feat/onboarding…) — décision explicite requise ; (2) prochain chantier NON bloqué — **conformité RGPD**
-> (le gros trou pour vendre, ~8 %) ou **design/polish**. Détail : entrée **2026-06-28** dans `historique.md`.
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/conformite-rgpd` est TERMINÉE** — socle de
+> conformité RGPD en **CONTENU seul** (4 pages publiques `/mentions-legales` · `/confidentialite` · `/cgu` ·
+> `/conformite` + DPA imprimable + notice salariés + footer + case CGU à l'inscription). **10 commits en
+> LOCAL, rien poussé.** Build vert, **lint 0**, **e2e 20/20**, revue finale = *ready to merge*. **4 branches
+> poussées ce jour** (capture-orb, audit-securite, failles-securite-high, welcome-images) → **plus aucun
+> travail uniquement en local**. Le **Supabase payant n'est TOUJOURS PAS prêt** → migrations `0013→0016`
+> **attendent**, ne pas s'y attaquer. **À voir avec Allan** : (1) **push + PR** de `feat/conformite-rgpd`
+> (décision explicite, comme les autres branches) ; (2) **GATE PRÉ-LANCEMENT (hors code, AVANT mise en
+> ligne)** — relecture **juriste** de CGU/confidentialité/DPA + confirmer durées de conservation (audio) +
+> `contact@scribeia.fr` opérationnel ; (3) prochain chantier non bloqué — **suppression d'organisation**
+> (branche backend dédiée, irréversible) ou design/polish. Détail : entrée **2026-06-28 (suite)** dans `historique.md`.
+
+**Session 2026-06-28 (suite) — push de 4 branches + socle conformité RGPD (subagent-driven).**
+(1) **Push** : les 4 branches locales (capture-orb, audit-securite, failles-securite-high, welcome-images)
+**sauvegardées sur GitHub** (backup, pas de PR — stack empilé sur la PR #8 non mergée, donc PR vers `main`
+reportées). (2) **`feat/conformite-rgpd`** (depuis welcome-images) : brainstorming → spec → plan → exécution
+**subagent-driven** (6 tâches, 1 implémenteur + 1 reviewer chacune, TDD e2e, ledger). Livré : route group
+`(legal)` + chrome (`LegalLayout`/`Footer`/`Prose`/`LastUpdated`), 4 pages légales publiques, **DPA imprimable**
+(`PrintButton`), **notice salariés** copiable, footer landing, **case CGU obligatoire** à l'inscription
+(client + **garde serveur avant tout appel Supabase**, helper `isTermsAccepted` testé). **Aucune table/migration.**
+Décisions de cadrage : contenu seul (suppression d'org reportée), micro-entreprise (swap SASU plus tard),
+6 sous-traitants UE, **pas de bannière cookies** (path cookieless), textes balisés `[À VALIDER PAR JURISTE]`.
+Revue finale whole-branch (opus) = *ready to merge*, 0 Critical/Important. **10 commits locaux, NON poussés.**
+
+_Session précédente :_
 
 **Session 2026-06-28 — `feat/welcome-images` : Open Graph + illustrations d'onboarding (clair/sombre).**
 Branche dédiée `feat/welcome-images` (depuis `fix/failles-securite-high`). Concern « images de bienvenue »

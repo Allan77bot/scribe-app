@@ -1,3 +1,57 @@
+## 2026-06-28 (suite) — Push de 4 branches + socle conformité RGPD (subagent-driven) ✅
+
+### Concern du jour (choisi par Allan)
+Deux préoccupations enchaînées : (1) **push + PR des branches locales** qui s'accumulaient ; puis
+(2) **conformité RGPD** (le gros trou pour vendre, ~8 %, non bloqué par le Supabase payant).
+
+### Partie A — Sauvegarde des branches locales
+Topologie cartographiée : **stack linéaire** empilé sur `feat/design-system` (PR #8, non mergée) →
+`onboarding (déjà poussé)` → `audit-securite` → `failles-securite-high` → `welcome-images`, + `capture-orb`
+en parallèle. Constat : ouvrir des PR vers `main` maintenant donnerait des PR « tout le produit » (~98 commits)
+tant que la PR #8 n'est pas mergée → **inutile**. Reco tranchée avec Allan : **sauvegarder d'abord, PR plus
+tard**. **4 branches poussées** sur GitHub (backup, repo privé, aucune PR) : `feat/capture-orb`,
+`chore/audit-securite`, `fix/failles-securite-high`, `feat/welcome-images`. **Fin du risque de perte**
+(plus aucun travail uniquement sur le disque). `fix/stabilite-prod` laissée (déjà contenue dans design-system).
+
+### Partie B — Socle conformité RGPD (CONTENU seul), branche `feat/conformite-rgpd`
+Méthode complète : **brainstorming → spec → plan → exécution subagent-driven** (1 implémenteur + 1 reviewer
+par tâche, ledger de progression, revue finale whole-branch).
+
+**Cadrage validé (5 décisions, AskUserQuestion)** : périmètre **contenu seul** (suppression d'org = branche
+backend séparée plus tard) ; entité **micro-entreprise Allan Morjon** (reco : passer SASU aux 1ers contrats
+B2B ; docs conçus pour swap d'identité) ; **vraies infos légales** fournies (SIREN 878 736 784, siège Congis,
+contact@scribeia.fr, TVA art. 293 B) ; **6 sous-traitants UE** confirmés ; **pas de bannière cookies**
+(path cookieless — un outil type Plausible/Vercel se branchera plus tard sans bannière ; GA4/heatmaps =
+branche dédiée le jour venu). Doc des 2 casquettes RGPD (sous-traitant pour les employés clients / responsable
+pour les prospects). Spec : `docs/specs/2026-06-28-conformite-rgpd-design.md` · Plan :
+`docs/superpowers/plans/2026-06-28-conformite-rgpd.md`.
+
+**Livré (10 commits locaux, NON poussés)** : route group `(legal)` + chrome partagé (`LegalLayout`, `Footer`,
+`Prose`, `LastUpdated`) ; **4 pages publiques** `/mentions-legales` · `/confidentialite` (2 casquettes,
+sous-traitants, durées, droits, cookies) · `/cgu` (**mention IA explicite** : « l'IA propose, l'humain valide »,
+art. 22 RGPD, pas d'entraînement) · `/conformite` (hub de confiance + **notice salariés** copiable, art. L.1222-4 /
+L.2312-38) ; **DPA imprimable** `/conformite/dpa` (art. 28 + `PrintButton`, impression sans chrome du site) ;
+**footer** sur la landing ; **case CGU obligatoire à l'inscription** (client `required` + **garde serveur avant
+tout appel Supabase**, helper pur `isTermsAccepted` testé). Aucune table, aucune migration (RLS inchangée).
+Tous les textes juridiques balisés `{/* [À VALIDER PAR JURISTE] */}`.
+
+**Exécution subagent-driven** : 6 tâches, chacune TDD (test e2e rouge → code → vert → commit) + revue de tâche
+(spec + qualité) ; toutes *Approved*. 1 arbitrage controller (un finding « text-2xl non-token » = faux positif :
+utilitaire Tailwind standard, pas une classe inventée). **Dette transversale rattrapée** : 5 erreurs lint
+`react/no-unescaped-entities` (Tasks 3/4 ne lançaient que `build`, pas `lint`) → fix dédié (apostrophes échappées).
+**Revue finale whole-branch (opus)** = *ready to merge*, 0 Critical/Important ; consistance inter-pages vérifiée
+(identité, sous-traitants, dates identiques) ; sécurité OK. Polish post-revue (lien notice au hub + impression DPA propre).
+
+**État final** : `npm run build` vert (5 routes légales), `npm run lint` **0 erreur**, **e2e 20/20**.
+
+### Reste / next (à trancher avec Allan)
+- **Push + PR** de `feat/conformite-rgpd` (décision explicite, comme les autres branches).
+- **GATE PRÉ-LANCEMENT (hors code, AVANT mise en ligne)** : relecture **juriste** de CGU/confidentialité/DPA ;
+  confirmer les **durées de conservation** (notamment l'audio) ; vérifier que **contact@scribeia.fr** reçoit.
+- Prochain chantier non bloqué : **suppression d'organisation** (branche backend, irréversible) ou design/polish.
+
+---
+
 ## 2026-06-28 — feat/welcome-images : Open Graph + illustrations d'onboarding ✅
 
 ### Concern
