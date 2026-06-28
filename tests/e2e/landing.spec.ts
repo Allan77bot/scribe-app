@@ -51,4 +51,30 @@ test.describe("Landing", () => {
       page.getByRole("link", { name: "Confidentialité" }).first(),
     ).toHaveAttribute("href", "/confidentialite");
   });
+
+  test("le CTA final invite à créer l'équipe", async ({ page }) => {
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", { name: "Essayez sur votre prochaine relève." }),
+    ).toBeVisible();
+    await expect(
+      page.locator("main").getByRole("link", { name: "Créer mon équipe" }).last(),
+    ).toHaveAttribute("href", "/signup");
+  });
+
+  test("le titre de la page mentionne la promesse", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveTitle(/Rien ne se perd/);
+  });
+
+  test("aucun débordement horizontal sur mobile (393px)", async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.goto("/");
+    const overflows = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
+    );
+    expect(overflows).toBe(false);
+  });
 });
