@@ -12,4 +12,21 @@ test.describe("Landing", () => {
       header.getByRole("link", { name: "Créer mon équipe" }),
     ).toHaveAttribute("href", "/signup");
   });
+
+  test("le hero affiche la promesse, les CTA et le mockup", async ({ page }) => {
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /Rien ne se perd entre les équipes/,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.locator("main").getByRole("link", { name: "Créer mon équipe" }).first(),
+    ).toHaveAttribute("href", "/signup");
+    await expect(
+      page.getByRole("link", { name: "Voir comment ça marche" }),
+    ).toHaveAttribute("href", "#comment-ca-marche");
+    await expect(page.getByText("Tâches du poste")).toBeVisible();
+  });
 });
