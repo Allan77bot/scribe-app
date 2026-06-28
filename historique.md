@@ -1,3 +1,44 @@
+## 2026-06-28 (suite 3) — feat/landing-animations : animations sobres de la landing ✅
+
+### Concern (suite de la landing)
+Allan : « anime la landing ». Point de cadrage important sur l'outil : **Claude Design / DesignSync** est un
+**atelier de design system** (composants réutilisables synchro avec un projet claude.ai, un composant à la fois)
+— **pas** le véhicule pour animer une page applicative (`page.tsx`). Donc animations **codées directement**.
+Allan a aussi rappelé un usage futur : Claude Design **a le design system de Scribe** → il peut générer une
+**VSL / vidéo démo produit** qualitative (chantier **marketing** séparé, noté pour plus tard).
+
+### Périmètre validé (option « anims sobres, codées »)
+1. **Révélation au scroll** des sections **sous le hero** (fondu + léger glissement vertical).
+2. **Mockup qui se remplit** : les 3 lignes de tâches en **cascade** quand l'écran entre en vue (la
+   « démonstration » du produit qu'Ogilvy privilégie).
+3. **Hover élévation** des cartes piliers, **seulement** sur appareils à vrai survol.
+
+### Mobile-first strict (rappel d'Allan)
+- Uniquement `opacity`/`transform` (GPU, pas de jank) ; **aucun `translateX`** → zéro débordement horizontal.
+- **Hero jamais animé** → time-to-value préservé (vérifié : h1 à opacité 1 dès le chargement).
+- **Garde-fous** : `@media (prefers-reduced-motion: no-preference)` porte l'état caché ; `@media (scripting: none)`
+  → contenu visible sans JS. En reduced-motion, rien n'est caché.
+
+### Implémentation (CSS + IntersectionObserver, zéro dépendance)
+- `src/components/landing/useInView.ts` (hook client, renvoie true si IO absent → jamais bloqué).
+- `src/components/landing/Reveal.tsx` (client, enveloppe une section ; children = Server Components préservés).
+- `AppMockup.tsx` → client (cascade des `.task-row` via `transitionDelay` inline par index).
+- `Pillars.tsx` (classe `.pillar-card`), `globals.css` (classes `.reveal`/`.mock-reveal`/`.pillar-card` + fallbacks),
+  `page.tsx` (wrappe HowItWorks / Pillars / TrustBar / FinalCta dans `Reveal` ; **pas** le hero).
+
+### Tests + preuve
+- 2 tests e2e ajoutés : (a) mouvement autorisé → le dernier `.reveal` atteint l'opacité pleine après scroll ;
+  (b) reduced-motion → `.reveal` reste à opacité 1 (contenu non bloqué). `page.emulateMedia` pour déterminisme.
+- Vérif comportementale **Playwright MCP** : `mockupRows [1,1,1]` (rempli), `heroH1 1` (net), `sectionsBelow
+  [0,0,0,0]` au chargement (cachées, révélées au scroll). `lint 0 · e2e 18/18 · build vert`. **Aucune table/migration.**
+
+### État / Reste
+- **1 commit local `ccaf265`** sur `feat/landing-animations` (descend de `feat/landing-vente`). **À pousser** (backup).
+- Empile désormais **8 branches** sur la PR #8 → **merger #8 devient vraiment le goulot**.
+- Supabase payant toujours en attente. Idées : **VSL marketing** (Claude Design), suppression d'org, autre polish.
+
+---
+
 ## 2026-06-28 (suite 2) — feat/landing-vente : page d'accueil refondue en landing de vente ✅
 
 ### Concern du jour (choisi par Allan)

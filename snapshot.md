@@ -4,23 +4,39 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-28 (feat/landing-vente — landing de vente complète, poussée backup)
+| **Dernière mise à jour :** 2026-06-28 (feat/landing-animations — animations sobres de la landing, local)
 
-> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/landing-vente` est TERMINÉE et POUSSÉE**
-> (backup origin, pas de PR). **Landing de vente** complète sur la page d'accueil `/` : nav + hero (titre
-> « Rien ne se perd entre les équipes » + **mockup écran Tâches reconstruit en markup**) + comment ça marche
-> (3 étapes) + 3 piliers + bandeau RGPD + CTA final + footer. Copy via **5 skills copywriting installés**
-> (copywriting/ogilvy/copy-editing/stop-slop/page-cro — source `github.com/boraoztunc/skills`). **9 commits**,
-> **lint 0 · e2e 14/14 · build vert · clair+sombre vérifiés** (un **bug de contraste CTA** attrapé en vérif
-> visuelle, pas par les tests). **Toutes les branches sont désormais sur GitHub.** Le **Supabase payant n'est
-> TOUJOURS PAS prêt** → migrations `0013→0016` **attendent**, ne pas s'y attaquer. **À voir avec Allan** :
-> (1) **merge de la PR #8** (design-system = tout le produit) = **LE goulot** — 7 branches empilées non
-> intégrées, merger #8 devient urgent ; (2) **GATE PRÉ-LANCEMENT (hors code)** — juriste CGU/confidentialité/
-> DPA + durées de conservation (audio) + `contact@scribeia.fr` opérationnel ; (3) prochain chantier non bloqué
-> — **suppression d'organisation** (backend, irréversible) ou autre design/polish. **Dette DS notée** : règle
-> globale `h1-h4{color:secondary}` **hors `@layer`** bat les utilitaires Tailwind v4 (piège de contraste sur
-> tout titre voulant une couleur ≠ secondary) → à corriger globalement en branche DS dédiée. Détail : entrée
-> **2026-06-28 (suite 2)** dans `historique.md`.
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/landing-animations`** TERMINÉE en local
+> (1 commit `ccaf265`, **à pousser**) — descend de `feat/landing-vente` (landing de vente, **poussée** backup).
+> **Animations sobres** de la landing : révélation au scroll des sections sous le hero, mockup écran Tâches qui
+> se remplit en cascade, hover élévation des piliers. **Mobile-first strict** (opacity/transform only, **hero
+> non animé**, garde-fous `prefers-reduced-motion` + sans-JS). `lint 0 · e2e 18/18 · build vert`, comportement
+> vérifié (Playwright MCP : mockup rempli, hero net, sections révélées au scroll). **Aucune table/migration.**
+> Le **Supabase payant n'est TOUJOURS PAS prêt** → migrations `0013→0016` **attendent**, ne pas s'y attaquer.
+> **À voir avec Allan** : (1) **pousser `feat/landing-animations`** (backup) ; (2) **merge de la PR #8**
+> (design-system = tout le produit) = **LE goulot** — **8 branches** empilées non intégrées, merger #8 devient
+> urgent ; (3) **GATE PRÉ-LANCEMENT (hors code)** — juriste CGU/confidentialité/DPA + durées audio +
+> `contact@scribeia.fr` ; (4) **VSL marketing** via Claude Design (il a le design system → vidéo démo produit
+> qualitative) ; (5) suppression d'org (backend) ou autre polish. **Dette DS** : règle globale
+> `h1-h4{color:secondary}` **hors `@layer`** bat les utilitaires Tailwind v4 (piège de contraste) → corriger
+> en branche DS dédiée. Détail : entrées **2026-06-28 (suite 2 et 3)** dans `historique.md`.
+
+**Session 2026-06-28 (suite 3) — `feat/landing-animations` : animations sobres de la landing.**
+Suite de `feat/landing-vente`. Allan : « anime la landing ». Cadrage : **Claude Design / DesignSync = atelier de
+design system** (composants réutilisables synchro avec claude.ai), **PAS** le véhicule pour animer une page app
+→ animations **codées** directement (CSS + IntersectionObserver, **zéro dépendance**). Périmètre validé : (1)
+**révélation au scroll** des sections sous le hero (fondu + glissement vertical, composant client `Reveal`) ;
+(2) **mockup qui se remplit** (3 lignes en cascade quand l'écran entre en vue — la « démonstration » Ogilvy) ;
+(3) **hover élévation** des cartes piliers (`@media hover:hover` → pas de hover collé au doigt). **Mobile-first
+strict** : uniquement opacity/transform (GPU), **aucun translateX** (zéro overflow), **hero jamais animé**
+(time-to-value). Garde-fous : `prefers-reduced-motion` + `@media scripting:none` → contenu visible d'emblée sans
+JS. Fichiers : `useInView.ts`, `Reveal.tsx` (clients), `AppMockup` → client (cascade), `Pillars` (classe hover),
+`globals.css` (+ classes), `page.tsx` (wrappe les 4 sections sous le hero). 2 tests e2e ajoutés. Vérif
+comportementale Playwright MCP : mockup `[1,1,1]`, h1 hero `1`, sections sous le hero `[0,0,0,0]` au chargement
+→ révélées au scroll. `lint 0 · e2e 18/18 · build vert`. **1 commit local `ccaf265`, à pousser.** Noté pour plus
+tard : **VSL marketing** via Claude Design (il a le DS de Scribe → vidéo démo produit qualitative, chantier séparé).
+
+_Session précédente :_
 
 **Session 2026-06-28 (suite 2) — `feat/landing-vente` : page d'accueil refondue en landing de vente.**
 Concern choisi par Allan (design/polish) → la **landing** (vitrine). Méthode complète : `design-ui` (audit
