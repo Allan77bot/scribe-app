@@ -62,5 +62,8 @@ cc_cleanup_plan.md
 cc_cleanup_prompt.txt
 skills-lock.json
 
+# Compagnon visuel du brainstorming (maquettes locales, serveur de présentation)
+.superpowers/
+
 # Système
 .DS_Store
