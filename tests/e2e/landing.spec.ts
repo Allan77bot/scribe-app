@@ -38,4 +38,17 @@ test.describe("Landing", () => {
     await expect(section.getByText("L'IA propose, vous validez")).toBeVisible();
     await expect(section.getByText("La relève reçoit tout")).toBeVisible();
   });
+
+  test("les piliers et la réassurance RGPD sont présents", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByText("Vous gardez la main")).toBeVisible();
+    await expect(page.getByText("La mémoire de l'équipe")).toBeVisible();
+    await expect(page.getByText("Zéro friction")).toBeVisible();
+    await expect(
+      page.getByText(/Vos données restent en Europe/),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Confidentialité" }).first(),
+    ).toHaveAttribute("href", "/confidentialite");
+  });
 });
