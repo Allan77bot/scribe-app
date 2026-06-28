@@ -1,3 +1,48 @@
+## 2026-06-28 (suite 2) — feat/landing-vente : page d'accueil refondue en landing de vente ✅
+
+### Concern du jour (choisi par Allan)
+Design/polish → la **landing** (`/`). Audit `design-ui` : la page n'était qu'une **porte d'auth** (logo + 1 phrase
+grise + 2 boutons), aucune valeur vendue. Objectif : en faire une **vitrine de vente** pour PME en relais 3×8.
+
+### Méthode (chaîne complète de skills)
+`design-ui` (audit ciblé ≤5 points) → `brainstorming` avec **compagnon visuel navigateur** (serveur HTML local,
+3 maquettes cliquables : structure **A+C** retenue — hero → comment ça marche → piliers → RGPD → CTA) → spec
+(`docs/specs/2026-06-28-landing-vente-design.md`) → plan (`docs/superpowers/plans/2026-06-28-landing-vente.md`)
+→ exécution **subagent-driven**.
+
+### Skills de copywriting installés (demande d'Allan)
+Allan a pointé `github.com/boraoztunc/skills` (~38 skills, markdown pur). Inspectés (zéro script exécutable),
+**5 installés** dans `~/.claude/skills/` : **copywriting, ogilvy, copy-editing, stop-slop, page-cro** —
+découverts à chaud (pas de redémarrage). Copy de la landing rédigé avec `copywriting`+`ogilvy`, relu `stop-slop`
++`copy-editing`. Règle d'or respectée : **aucun faux témoignage ni chiffre inventé** (pas de clients à citer).
+Titre validé par Allan : « **Rien ne se perd entre les équipes.** » Tag « équipes qui se relaient · 3×8/2×8 »
+(cas d'usage, pas secteur → ne ferme pas de portes). CTA sans mention CB (Stripe/pricing non tranchés).
+
+### Exécution subagent-driven (5 tâches TDD)
+Impl **haiku** (transcription, le code était dans le brief) / review de tâche **sonnet** / revue finale **opus**.
+Toutes les tâches *Approved* du 1er coup. Commits : `c18cca7` nav · `85f0318` hero+mockup · `1c415fb` comment ça
+marche · `6c43eec` piliers+RGPD · `7f25ca4` CTA final+meta. Composants : `LandingHeader`, `Hero`, **`AppMockup`**
+(écran Tâches **reconstruit en markup**, réutilise `StatusBadge`, `aria-hidden`), `HowItWorks`, `Pillars`,
+`TrustBar`, `FinalCta` ; `page.tsx` réécrit ; test e2e `landing.spec.ts`.
+
+### Revue finale + 2 fixes
+- Revue **opus** = *ready to merge*, 0 Critical. 2 corrections (`172bbfc`) : **hiérarchie de titres** (eyebrows
+  de section `<p>`→`<h2>`, étapes/piliers `<h2>`→`<h3>` ; déviation spec §5) + **cible tactile** « Se connecter »
+  (`min-h-11` = 44px) + 2 assertions de tests (1 seul h1 ; lien Conformité).
+- **Vérif visuelle clair+sombre (Playwright MCP, :3000)** → a attrapé un **bug que tests + revue de code avaient
+  manqué** : le titre `<h2>` du CTA prenait `color:secondary` via la règle globale `h1-h4{}` **hors `@layer`**
+  (qui **bat les utilitaires** en Tailwind v4) → illisible (marine/marine en clair, clair/clair en sombre).
+  Corrigé `text-inverse-on-surface!` (`d0e479c`). **Leçon DS** : tout titre voulant une couleur ≠ secondary tombe
+  dans ce piège → **dette** : mettre `h1-h4{}` dans `@layer base` (branche DS dédiée, blast radius 30+ routes).
+
+### État / Reste
+- `lint 0 · e2e 14/14 (mobile+desktop) · build vert (37 routes)`. **Aucune table/migration** (RLS inchangée).
+- **9 commits, branche `feat/landing-vente` POUSSÉE** sur origin (backup, **pas de PR** — décision Allan).
+- Empile sur la **PR #8** (design-system) : **7 branches** non intégrées → **merger #8 devient le vrai goulot**.
+- Supabase payant toujours en attente (`0013→0016`). Prochain chantier non bloqué : suppression d'org ou design/polish.
+
+---
+
 ## 2026-06-28 (suite) — Push de 4 branches + socle conformité RGPD (subagent-driven) ✅
 
 ### Concern du jour (choisi par Allan)

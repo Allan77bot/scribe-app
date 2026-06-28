@@ -4,19 +4,43 @@
 > (pas d'historique ici → voir `historique.md`). Conçu pour être copié/collé
 > sur Discord lors d'un point d'équipe.
 
-| **Dernière mise à jour :** 2026-06-28 (feat/conformite-rgpd — socle RGPD contenu + push de 4 branches)
+| **Dernière mise à jour :** 2026-06-28 (feat/landing-vente — landing de vente complète, poussée backup)
 
-> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/conformite-rgpd` est TERMINÉE** — socle de
-> conformité RGPD en **CONTENU seul** (4 pages publiques `/mentions-legales` · `/confidentialite` · `/cgu` ·
-> `/conformite` + DPA imprimable + notice salariés + footer + case CGU à l'inscription). **10 commits en
-> LOCAL, rien poussé.** Build vert, **lint 0**, **e2e 20/20**, revue finale = *ready to merge*. **4 branches
-> poussées ce jour** (capture-orb, audit-securite, failles-securite-high, welcome-images) → **plus aucun
-> travail uniquement en local**. Le **Supabase payant n'est TOUJOURS PAS prêt** → migrations `0013→0016`
-> **attendent**, ne pas s'y attaquer. **À voir avec Allan** : (1) **push + PR** de `feat/conformite-rgpd`
-> (décision explicite, comme les autres branches) ; (2) **GATE PRÉ-LANCEMENT (hors code, AVANT mise en
-> ligne)** — relecture **juriste** de CGU/confidentialité/DPA + confirmer durées de conservation (audio) +
-> `contact@scribeia.fr` opérationnel ; (3) prochain chantier non bloqué — **suppression d'organisation**
-> (branche backend dédiée, irréversible) ou design/polish. Détail : entrée **2026-06-28 (suite)** dans `historique.md`.
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/landing-vente` est TERMINÉE et POUSSÉE**
+> (backup origin, pas de PR). **Landing de vente** complète sur la page d'accueil `/` : nav + hero (titre
+> « Rien ne se perd entre les équipes » + **mockup écran Tâches reconstruit en markup**) + comment ça marche
+> (3 étapes) + 3 piliers + bandeau RGPD + CTA final + footer. Copy via **5 skills copywriting installés**
+> (copywriting/ogilvy/copy-editing/stop-slop/page-cro — source `github.com/boraoztunc/skills`). **9 commits**,
+> **lint 0 · e2e 14/14 · build vert · clair+sombre vérifiés** (un **bug de contraste CTA** attrapé en vérif
+> visuelle, pas par les tests). **Toutes les branches sont désormais sur GitHub.** Le **Supabase payant n'est
+> TOUJOURS PAS prêt** → migrations `0013→0016` **attendent**, ne pas s'y attaquer. **À voir avec Allan** :
+> (1) **merge de la PR #8** (design-system = tout le produit) = **LE goulot** — 7 branches empilées non
+> intégrées, merger #8 devient urgent ; (2) **GATE PRÉ-LANCEMENT (hors code)** — juriste CGU/confidentialité/
+> DPA + durées de conservation (audio) + `contact@scribeia.fr` opérationnel ; (3) prochain chantier non bloqué
+> — **suppression d'organisation** (backend, irréversible) ou autre design/polish. **Dette DS notée** : règle
+> globale `h1-h4{color:secondary}` **hors `@layer`** bat les utilitaires Tailwind v4 (piège de contraste sur
+> tout titre voulant une couleur ≠ secondary) → à corriger globalement en branche DS dédiée. Détail : entrée
+> **2026-06-28 (suite 2)** dans `historique.md`.
+
+**Session 2026-06-28 (suite 2) — `feat/landing-vente` : page d'accueil refondue en landing de vente.**
+Concern choisi par Allan (design/polish) → la **landing** (vitrine). Méthode complète : `design-ui` (audit
+ciblé : la page n'était qu'une porte d'auth) → `brainstorming` avec **compagnon visuel navigateur** (3 maquettes
+HTML cliquables : structure A+C choisie) → spec → plan → exécution **subagent-driven** (5 tâches TDD, impl
+**haiku** / review **sonnet** / revue finale **opus**). Allan a fait installer **5 skills de copywriting**
+depuis `github.com/boraoztunc/skills` (copywriting, ogilvy, copy-editing, stop-slop, page-cro) → copy travaillé
+avec, **zéro faux témoignage** (pas de clients à citer). Livré : nav + **hero** (titre « Rien ne se perd entre
+les équipes », sous-titre, 2 CTA, **mockup écran Tâches reconstruit en markup** réutilisant `StatusBadge`,
+légende) + **comment ça marche** (3 étapes) + **3 piliers** (« Pourquoi Scribe ») + **bandeau RGPD** (liens
+`/confidentialite` `/conformite`) + **CTA final** (bande inversée) + footer existant. 5 composants `src/components/
+landing/` + `page.tsx` + test e2e `landing.spec.ts`. **9 commits, branche POUSSÉE** (backup, pas de PR). Vérifs :
+`lint 0 · e2e 14/14 (mobile+desktop) · build vert (37 routes)`. **Vérif visuelle clair+sombre (Playwright MCP)**
+→ a rattrapé un **bug de contraste invisible aux tests** : le titre `<h2>` du CTA prenait `color:secondary` via
+la règle globale `h1-h4{}` (écrite **hors `@layer`** → bat les utilitaires en Tailwind v4) → illisible
+marine/marine en clair et clair/clair en sombre → corrigé `text-inverse-on-surface!`. Revue finale opus =
+*ready to merge* (hiérarchie de titres h1→h2→h3 + cible tactile « Se connecter » corrigées avant). **Aucune
+table/migration** (RLS inchangée). Empile sur la PR #8 (désormais **7 branches** non intégrées → urgence de merger #8).
+
+_Session précédente :_
 
 **Session 2026-06-28 (suite) — push de 4 branches + socle conformité RGPD (subagent-driven).**
 (1) **Push** : les 4 branches locales (capture-orb, audit-securite, failles-securite-high, welcome-images)
