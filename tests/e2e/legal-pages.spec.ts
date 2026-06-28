@@ -5,6 +5,7 @@ const PUBLIC_LEGAL = [
   { path: "/mentions-legales", marker: "Mentions légales" },
   { path: "/confidentialite", marker: "Politique de confidentialité" },
   { path: "/cgu", marker: "Conditions générales" },
+  { path: "/conformite", marker: "Conformité" },
 ];
 
 test.describe("Pages légales publiques", () => {
@@ -42,4 +43,14 @@ test("les CGU mentionnent explicitement le fonctionnement de l'IA", async ({ pag
 test("la landing montre le footer légal", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Mentions légales" })).toBeVisible();
+});
+
+test("le hub conformité lie tous les documents", async ({ page }) => {
+  await page.goto("/conformite");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("link", { name: "Mentions légales" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Politique de confidentialité" })).toBeVisible();
+  await expect(main.getByRole("link", { name: /conditions générales/i })).toBeVisible();
+  await expect(main.getByRole("link", { name: /accord de sous-traitance/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /information des salariés/i })).toBeVisible();
 });
