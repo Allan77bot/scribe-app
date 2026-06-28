@@ -29,4 +29,13 @@ test.describe("Landing", () => {
     ).toHaveAttribute("href", "#comment-ca-marche");
     await expect(page.getByText("Tâches du poste")).toBeVisible();
   });
+
+  test("la section comment ça marche détaille les 3 étapes", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator("#comment-ca-marche");
+    await expect(section).toBeVisible();
+    await expect(section.getByText("Dictez en fin de poste")).toBeVisible();
+    await expect(section.getByText("L'IA propose, vous validez")).toBeVisible();
+    await expect(section.getByText("La relève reçoit tout")).toBeVisible();
+  });
 });

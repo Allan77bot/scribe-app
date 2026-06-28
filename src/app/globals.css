@@ -227,6 +227,9 @@ html[data-theme="dark"] {
 
 /* Bascule douce du thème (respecte prefers-reduced-motion). */
 @media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     transition: background-color 200ms ease, color 200ms ease;
   }
