@@ -6,7 +6,10 @@ export function FinalCta() {
   return (
     <section className="mx-auto w-full max-w-5xl px-6 pb-16">
       <div className="rounded-card bg-inverse-surface px-6 py-12 text-center">
-        <h2 className="text-2xl font-extrabold tracking-tight text-inverse-on-surface md:text-3xl">
+        {/* text-inverse-on-surface! : la règle globale h1-h4{color:secondary} (hors @layer)
+            bat les utilitaires en Tailwind v4 → le ! force la couleur inversée, sinon le titre
+            est illisible (marine sur marine en clair, clair sur clair en sombre). */}
+        <h2 className="text-2xl font-extrabold tracking-tight text-inverse-on-surface! md:text-3xl">
           Essayez sur votre prochaine relève.
         </h2>
         <p className="mt-2 text-inverse-on-surface/80">
