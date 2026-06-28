@@ -28,6 +28,7 @@ test.describe("Landing", () => {
       page.getByRole("link", { name: "Voir comment ça marche" }),
     ).toHaveAttribute("href", "#comment-ca-marche");
     await expect(page.getByText("Tâches du poste")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   });
 
   test("la section comment ça marche détaille les 3 étapes", async ({ page }) => {
@@ -50,6 +51,9 @@ test.describe("Landing", () => {
     await expect(
       page.getByRole("link", { name: "Confidentialité" }).first(),
     ).toHaveAttribute("href", "/confidentialite");
+    await expect(
+      page.getByRole("link", { name: "Conformité" }).first(),
+    ).toHaveAttribute("href", "/conformite");
   });
 
   test("le CTA final invite à créer l'équipe", async ({ page }) => {

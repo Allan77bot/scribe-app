@@ -15,7 +15,7 @@ export function LandingHeader() {
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
           >
             Se connecter
           </Link>

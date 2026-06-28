@@ -21,7 +21,7 @@ export function Pillars() {
   return (
     <section className="bg-surface-dim">
       <div className="mx-auto w-full max-w-5xl px-6 py-12 md:py-16">
-        <p className="eyebrow">Pourquoi Scribe</p>
+        <h2 className="eyebrow">Pourquoi Scribe</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {PILLARS.map((p) => (
             <div
@@ -31,9 +31,9 @@ export function Pillars() {
               <span className="text-2xl" aria-hidden>
                 {p.icon}
               </span>
-              <h2 className="mt-3 text-base font-bold text-secondary">
+              <h3 className="mt-3 text-base font-bold text-secondary">
                 {p.title}
-              </h2>
+              </h3>
               <p className="mt-1 leading-relaxed text-on-surface-variant">
                 {p.desc}
               </p>
