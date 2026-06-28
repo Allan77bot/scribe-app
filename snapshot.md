@@ -6,20 +6,26 @@
 
 | **Dernière mise à jour :** 2026-06-28 (feat/landing-animations — animations sobres de la landing, local)
 
-> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)** : **`feat/landing-animations`** TERMINÉE en local
-> (1 commit `ccaf265`, **à pousser**) — descend de `feat/landing-vente` (landing de vente, **poussée** backup).
-> **Animations sobres** de la landing : révélation au scroll des sections sous le hero, mockup écran Tâches qui
-> se remplit en cascade, hover élévation des piliers. **Mobile-first strict** (opacity/transform only, **hero
-> non animé**, garde-fous `prefers-reduced-motion` + sans-JS). `lint 0 · e2e 18/18 · build vert`, comportement
-> vérifié (Playwright MCP : mockup rempli, hero net, sections révélées au scroll). **Aucune table/migration.**
-> Le **Supabase payant n'est TOUJOURS PAS prêt** → migrations `0013→0016` **attendent**, ne pas s'y attaquer.
-> **À voir avec Allan** : (1) **pousser `feat/landing-animations`** (backup) ; (2) **merge de la PR #8**
-> (design-system = tout le produit) = **LE goulot** — **8 branches** empilées non intégrées, merger #8 devient
-> urgent ; (3) **GATE PRÉ-LANCEMENT (hors code)** — juriste CGU/confidentialité/DPA + durées audio +
-> `contact@scribeia.fr` ; (4) **VSL marketing** via Claude Design (il a le design system → vidéo démo produit
-> qualitative) ; (5) suppression d'org (backend) ou autre polish. **Dette DS** : règle globale
-> `h1-h4{color:secondary}` **hors `@layer`** bat les utilitaires Tailwind v4 (piège de contraste) → corriger
-> en branche DS dédiée. Détail : entrées **2026-06-28 (suite 2 et 3)** dans `historique.md`.
+> ▶ **REPRISE — PROCHAINE SESSION (après `/clear`)**
+>
+> **➡️ CONCERN DU JOUR (DEMAIN, décidé par Allan) : CLAUDE DESIGN.** Cadrer au démarrage entre deux directions :
+> **(A) VSL / vidéo démo produit** (marketing — Claude Design **a le design system de Scribe** → vidéo fidèle à
+> la marque pour landing / LinkedIn / cold email ; chantier marketing, rejoint `feat/marketing-video`), ou
+> **(B) faire évoluer le design system** (transformer des composants en **briques réutilisables versionnées**
+> via le MCP **DesignSync** ↔ projet Claude Design sur claude.ai ; possible skill `/design-sync`). Outil :
+> DesignSync sync **un composant à la fois** (jamais un remplacement en bloc). Commencer par `list_projects`
+> pour retrouver le projet « Scribe IA Design System ».
+>
+> _État du produit :_ **`feat/landing-animations` TERMINÉE et POUSSÉE** (backup, pas de PR ; 2 commits, descend
+> de `feat/landing-vente` qui contient la landing de vente). Animations sobres (reveal au scroll, mockup en
+> cascade, hover piliers), mobile-first, `lint 0 · e2e 18/18 · build vert`. **Toutes les branches sont sur GitHub.**
+>
+> _En attente (blocages / goulots) :_ **(1) merge de la PR #8** (design-system = tout le produit) = **LE goulot**,
+> **8 branches** empilées non intégrées → urgent ; **(2) Supabase payant** pas prêt → migrations `0013→0016`
+> attendent (ne pas s'y attaquer) ; **(3) GATE PRÉ-LANCEMENT (hors code)** — juriste CGU/confidentialité/DPA +
+> durées de conservation (audio) + `contact@scribeia.fr` opérationnel ; **(4)** suppression d'org (backend).
+> **Dette DS** : règle globale `h1-h4{color:secondary}` **hors `@layer`** bat les utilitaires Tailwind v4 (piège
+> de contraste) → corriger en branche DS dédiée. Détail : entrées **2026-06-28 (suite 2 et 3)** dans `historique.md`.
 
 **Session 2026-06-28 (suite 3) — `feat/landing-animations` : animations sobres de la landing.**
 Suite de `feat/landing-vente`. Allan : « anime la landing ». Cadrage : **Claude Design / DesignSync = atelier de
