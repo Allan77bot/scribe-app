@@ -244,3 +244,55 @@ html[data-theme="dark"] {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Animations de la landing (sobres, mobile-first). On n'anime QUE opacity et
+   transform (GPU, pas de jank, jamais de translateX → aucun débordement). L'état
+   « caché » n'est appliqué que si l'utilisateur accepte le mouvement ET que JS
+   tourne (cf. @media scripting) → le contenu reste visible en reduced-motion et
+   sans JS. Le hero n'est jamais enveloppé (time-to-value préservé).
+   ────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Sections sous le hero : fondu + glissement vertical à l'entrée à l'écran. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 600ms ease, transform 600ms ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* Mockup : les lignes de tâche apparaissent en cascade quand il entre en vue
+     (la « démonstration » du produit). Le délai par ligne est posé en style inline. */
+  .mock-reveal .task-row {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 450ms ease, transform 450ms ease;
+  }
+  .mock-reveal.is-visible .task-row {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sans JS : on ne cache jamais le contenu. */
+@media (scripting: none) {
+  .reveal,
+  .mock-reveal .task-row {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Élévation au survol des cartes piliers — seulement sur appareils à vrai survol
+   (pas de hover « collé » au doigt sur mobile tactile). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pillar-card {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .pillar-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+}

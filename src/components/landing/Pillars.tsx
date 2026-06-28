@@ -26,7 +26,7 @@ export function Pillars() {
           {PILLARS.map((p) => (
             <div
               key={p.title}
-              className="rounded-lg border border-outline-variant bg-card p-5 shadow-card"
+              className="pillar-card rounded-lg border border-outline-variant bg-card p-5 shadow-card"
             >
               <span className="text-2xl" aria-hidden>
                 {p.icon}

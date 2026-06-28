@@ -5,6 +5,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pillars } from "@/components/landing/Pillars";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { FinalCta } from "@/components/landing/FinalCta";
+import { Reveal } from "@/components/landing/Reveal";
 import { Footer } from "@/components/Footer";
 
 // Surcharge le <title>/description pour l'accueil. L'openGraph/twitter restent
@@ -21,10 +22,18 @@ export default function Home() {
       <LandingHeader />
       <main className="flex-1">
         <Hero />
-        <HowItWorks />
-        <Pillars />
-        <TrustBar />
-        <FinalCta />
+        <Reveal>
+          <HowItWorks />
+        </Reveal>
+        <Reveal>
+          <Pillars />
+        </Reveal>
+        <Reveal>
+          <TrustBar />
+        </Reveal>
+        <Reveal>
+          <FinalCta />
+        </Reveal>
       </main>
       <Footer />
     </div>

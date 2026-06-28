@@ -81,4 +81,34 @@ test.describe("Landing", () => {
     );
     expect(overflows).toBe(false);
   });
+
+  test("mouvement autorisé : les sections sous le hero se révèlent au scroll", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    // Le dernier conteneur animé (CTA final) doit atteindre l'opacité pleine.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const els = document.querySelectorAll(".reveal");
+          const last = els[els.length - 1];
+          return last ? parseFloat(getComputedStyle(last).opacity) : 0;
+        }),
+      )
+      .toBeGreaterThan(0.9);
+  });
+
+  test("reduced-motion : le contenu animé reste visible (pas bloqué à opacité 0)", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const opacity = await page.evaluate(() => {
+      const el = document.querySelector(".reveal");
+      return el ? parseFloat(getComputedStyle(el).opacity) : 1;
+    });
+    expect(opacity).toBe(1);
+  });
 });
